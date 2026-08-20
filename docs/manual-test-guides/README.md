@@ -10,6 +10,7 @@ Each implementation step has a checklist here as **Markdown + PDF**.
 | 04 | [step-04-rbac.md](step-04-rbac.md) | [step-04-rbac.pdf](step-04-rbac.pdf) |
 | 05 | [step-05-audit.md](step-05-audit.md) | [step-05-audit.pdf](step-05-audit.pdf) |
 | 06 | [step-06-dynamic-fields-api.md](step-06-dynamic-fields-api.md) | [step-06-dynamic-fields-api.pdf](step-06-dynamic-fields-api.pdf) |
+| 07 | [step-07-dynamic-fields-ui.md](step-07-dynamic-fields-ui.md) | [step-07-dynamic-fields-ui.pdf](step-07-dynamic-fields-ui.pdf) |
 
 ## When adding or updating a step guide
 

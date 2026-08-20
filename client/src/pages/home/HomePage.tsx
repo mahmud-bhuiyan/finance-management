@@ -21,12 +21,12 @@ export const HomePage = () => {
           Finance Management System
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-          Step 05 Audit foundation is running
+          Step 07 Dynamic fields UI is running
         </h1>
         <p className="text-lg text-slate-600">
-          Create/update/delete actions are recorded with actor, entity, and
-          before/after values. Admins can review the audit trail on the server
-          and in the UI.
+          Company admins can configure custom fields and preview the reusable
+          dynamic form renderer. Field definitions are tenant-scoped and audited
+          on the server.
         </p>
 
         <UserSessionCard user={user} onLogout={() => void logout()} />
