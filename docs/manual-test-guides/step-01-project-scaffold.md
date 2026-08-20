@@ -5,6 +5,10 @@
 **Maps to:** Phase 1 — Foundation  
 **Do not start Step 02 until every required item passes.**
 
+**Artifacts:**  
+- Markdown: `docs/manual-test-guides/step-01-project-scaffold.md`  
+- PDF: `docs/manual-test-guides/step-01-project-scaffold.pdf`
+
 ---
 
 ## Prerequisites

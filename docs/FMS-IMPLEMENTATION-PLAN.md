@@ -66,8 +66,10 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 1. Use **Tailwind CSS** for styling (small shared tokens for colors/spacing).  
 2. Build **reusable components from the beginning** where it helps: `Button`, `Input`, `Select`, `Modal`/`Drawer`, `Table`, `EmptyState`, `LoadingState`, `ErrorState`, `ConfirmDialog`, toast helpers.  
 3. Extract shared components when the same UI is copied **2–3 times** — not a full design system on day 1.  
-4. Keep pages thin; put reusable UI in something like `components/ui/` and feature pieces in `components/<feature>/`.  
-5. Prefer composition over prop-heavy mega-components.
+4. **Page-based folders:** each route is `pages/<page>/` with its own `components/` and `hooks/` for page-only code. Keep `*Page.tsx` thin.  
+5. **Shared components are sorted by role** under `components/`: `ui/`, `feedback/`, `layout/`, `forms/` — so pieces are easy to find.  
+6. Shared hooks (e.g. `useAuth`) stay in `src/hooks/`; page-only hooks stay next to the page.  
+7. Prefer composition over prop-heavy mega-components.
 
 ### Backend (Express — organized & findable)
 
@@ -107,16 +109,24 @@ finance-management/          # or backend/ + frontend/
       schema.prisma
   frontend/
     src/
+      pages/
+        login/
+          LoginPage.tsx
+          components/        # page-only UI
+          hooks/             # page-only hooks
+        register/
+          …
+        home/
+          …
       components/
-        ui/                  # reusable primitives (Button, Input, …)
-        …                    # feature components as needed
-      pages/ or routes/
-      hooks/
+        ui/                  # Button, Input, Select, …
+        feedback/            # LoadingState, ErrorBanner, EmptyState, …
+        layout/              # AppShell, Sidebar, …
+        forms/               # shared form helpers (multi-page)
+      hooks/                 # shared only (e.g. useAuth)
       lib/                   # api client, helpers
-      styles/
   docs/
-    manual-test-guides/      # Step 01…N checklists (Markdown source)
-                             # optional PDF export per step for printing
+    manual-test-guides/      # Step 01…N checklists (Markdown + PDF)
 ```
 
 Domain grouping inside services/controllers is fine, e.g. `services/auth/`, `services/expenses/` — still easy to find.
