@@ -53,6 +53,7 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 04: [`docs/manual-test-guides/step-04-rbac.md`](docs/manual-test-guides/step-04-rbac.md) · [PDF](docs/manual-test-guides/step-04-rbac.pdf)
 - Step 05: [`docs/manual-test-guides/step-05-audit.md`](docs/manual-test-guides/step-05-audit.md) · [PDF](docs/manual-test-guides/step-05-audit.pdf)
 - Step 06: [`docs/manual-test-guides/step-06-dynamic-fields-api.md`](docs/manual-test-guides/step-06-dynamic-fields-api.md) · [PDF](docs/manual-test-guides/step-06-dynamic-fields-api.pdf)
+- Step 07: [`docs/manual-test-guides/step-07-dynamic-fields-ui.md`](docs/manual-test-guides/step-07-dynamic-fields-ui.md) · [PDF](docs/manual-test-guides/step-07-dynamic-fields-ui.pdf)
 
 ## Postman (API)
 
