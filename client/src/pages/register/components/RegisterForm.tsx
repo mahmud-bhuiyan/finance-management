@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
-import { Button } from "../../../components/ui/Button";
-import { Input } from "../../../components/ui/Input";
+import { AuthButton } from "../../../components/forms/AuthButton";
+import { AuthInput } from "../../../components/forms/AuthInput";
 import { ErrorBanner } from "../../../components/feedback/ErrorBanner";
 
 type RegisterFormProps = {
@@ -27,30 +27,30 @@ export const RegisterForm = ({
   onSubmit,
 }: RegisterFormProps) => {
   return (
-    <form
-      onSubmit={onSubmit}
-      className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-    >
-      <Input
-        label="Name (optional)"
+    <form onSubmit={onSubmit} className="space-y-5">
+      <AuthInput
+        label="Name"
         type="text"
+        icon="user"
         name="name"
         autoComplete="name"
         value={name}
         onChange={(e) => onNameChange(e.target.value)}
       />
-      <Input
-        label="Email"
+      <AuthInput
+        label="Email Address"
         type="email"
+        icon="email"
         name="email"
         autoComplete="email"
         required
         value={email}
         onChange={(e) => onEmailChange(e.target.value)}
       />
-      <Input
+      <AuthInput
         label="Password"
         type="password"
+        icon="password"
         name="password"
         autoComplete="new-password"
         required
@@ -59,9 +59,11 @@ export const RegisterForm = ({
         onChange={(e) => onPasswordChange(e.target.value)}
       />
       {error && <ErrorBanner message={error} />}
-      <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? "Creating…" : "Create account"}
-      </Button>
+      <div className="pt-1">
+        <AuthButton type="submit" disabled={submitting}>
+          {submitting ? "Signing up…" : "Sign up"}
+        </AuthButton>
+      </div>
     </form>
   );
 };

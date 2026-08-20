@@ -94,8 +94,8 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 Keep it flat and obvious — not a heavy monorepo unless we need one later.
 
 ```text
-finance-management/          # or backend/ + frontend/
-  backend/
+finance-management/          # or server/ + client/
+  server/
     src/
       routes/                # wire HTTP paths → controllers
       controllers/           # parse req, call services, send res
@@ -107,7 +107,7 @@ finance-management/          # or backend/ + frontend/
       server.ts
     prisma/
       schema.prisma
-  frontend/
+  client/
     src/
       pages/
         login/
@@ -185,7 +185,7 @@ For every step, maintain a checklist under:
 
 | Step | Name | Delivers | Maps to |
 |------|------|----------|---------|
-| **01** | Project scaffold | `backend/` + `frontend/`, Tailwind, Express hello, Prisma + Postgres connect | Phase 1 |
+| **01** | Project scaffold | `server/` + `client/`, Tailwind, Express hello, Prisma + Postgres connect | Phase 1 |
 | **02** | Auth | Register/login, password hashing, session/JWT | Phase 1 |
 | **03** | Tenants + Super Admin | Create/manage companies & company admins | Phase 1 |
 | **04** | RBAC | Role middleware; finance vs normal vs super admin | Phase 1 |
@@ -262,7 +262,7 @@ For every major step, record briefly:
 ## 13. Next step (after you approve)
 
 1. Confirm this plan (stack + coding rules + steps).  
-2. Scaffold PERN folders (`backend/`, `frontend/`, `docs/manual-test-guides/`).  
+2. Scaffold PERN folders (`server/`, `client/`, `docs/manual-test-guides/`).  
 3. Create **Step 01** manual test guide, implement Step 01, test manually.  
 4. Continue step-by-step; keep Notion Completion % updated.  
 
@@ -281,4 +281,5 @@ For every major step, record briefly:
 | Backend shape | routes / controllers / services / middleware / validators |
 | Over-engineering | Avoid — practical PERN |
 | Testing | Manual test guide per step in `docs/` (MD + optional PDF) |
+| App folders | `server/` (Express API) + `client/` (React) |
 | Notion | Phases + Tasks; sort/group by phase |

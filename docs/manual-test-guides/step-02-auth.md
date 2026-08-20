@@ -15,27 +15,27 @@
 
 - [ ] Step 01 scaffold already passing
 - [ ] PostgreSQL running; `fms_dev` exists
-- [ ] `backend/.env` includes `DATABASE_URL` and `JWT_SECRET` (min 32 chars; see `.env.example`)
+- [ ] `server/.env` includes `DATABASE_URL` and `JWT_SECRET` (min 32 chars; see `.env.example`)
 - [ ] Migration applied: `npx prisma migrate dev` (includes `step02_auth`)
 
 ---
 
 ## Setup commands
 
-Backend:
+Server:
 
 ```bash
-cd finance-management/backend
+cd finance-management/server
 npm install
 npx prisma generate
 npx prisma migrate dev
 npm run dev
 ```
 
-Frontend (new terminal):
+Client (new terminal):
 
 ```bash
-cd finance-management/frontend
+cd finance-management/client
 npm install
 npm run dev
 ```

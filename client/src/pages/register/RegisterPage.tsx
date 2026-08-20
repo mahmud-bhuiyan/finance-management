@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { AuthScreen, UserPlusIcon } from "../../components/layout/AuthScreen";
 import { RegisterForm } from "./components/RegisterForm";
 import { useRegisterForm } from "./hooks/useRegisterForm";
 
@@ -6,12 +7,19 @@ export const RegisterPage = () => {
   const form = useRegisterForm();
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-      <h1 className="mb-2 text-3xl font-semibold text-slate-950">Create account</h1>
-      <p className="mb-8 text-slate-600">
-        Register with email and a password (min 8 characters).
-      </p>
-
+    <AuthScreen
+      icon={<UserPlusIcon />}
+      title="Create account"
+      subtitle="Sign up to access your developer notes."
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link className="font-bold underline" to="/login">
+            Log in
+          </Link>
+        </>
+      }
+    >
       <RegisterForm
         name={form.name}
         email={form.email}
@@ -23,13 +31,6 @@ export const RegisterPage = () => {
         onPasswordChange={form.setPassword}
         onSubmit={form.onSubmit}
       />
-
-      <p className="mt-4 text-sm text-slate-600">
-        Already have an account?{" "}
-        <Link className="font-medium text-teal-700 hover:underline" to="/login">
-          Sign in
-        </Link>
-      </p>
-    </div>
+    </AuthScreen>
   );
 };

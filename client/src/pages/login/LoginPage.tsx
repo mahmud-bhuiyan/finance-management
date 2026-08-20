@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { AuthScreen, LockIcon } from "../../components/layout/AuthScreen";
 import { LoginForm } from "./components/LoginForm";
 import { useLoginForm } from "./hooks/useLoginForm";
 
@@ -6,10 +7,19 @@ export const LoginPage = () => {
   const form = useLoginForm();
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-      <h1 className="mb-2 text-3xl font-semibold text-slate-950">Sign in</h1>
-      <p className="mb-8 text-slate-600">Step 02 auth — use your FMS account.</p>
-
+    <AuthScreen
+      icon={<LockIcon />}
+      title="Welcome back"
+      subtitle="Log in to access your developer notes."
+      footer={
+        <>
+          Don’t have an account?{" "}
+          <Link className="font-bold underline" to="/register">
+            Sign up free
+          </Link>
+        </>
+      }
+    >
       <LoginForm
         email={form.email}
         password={form.password}
@@ -19,13 +29,6 @@ export const LoginPage = () => {
         onPasswordChange={form.setPassword}
         onSubmit={form.onSubmit}
       />
-
-      <p className="mt-4 text-sm text-slate-600">
-        No account?{" "}
-        <Link className="font-medium text-teal-700 hover:underline" to="/register">
-          Register
-        </Link>
-      </p>
-    </div>
+    </AuthScreen>
   );
 };

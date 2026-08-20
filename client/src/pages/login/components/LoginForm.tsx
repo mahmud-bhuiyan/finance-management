@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
-import { Button } from "../../../components/ui/Button";
-import { Input } from "../../../components/ui/Input";
+import { AuthButton } from "../../../components/forms/AuthButton";
+import { AuthInput } from "../../../components/forms/AuthInput";
 import { ErrorBanner } from "../../../components/feedback/ErrorBanner";
 
 type LoginFormProps = {
@@ -23,22 +23,21 @@ export const LoginForm = ({
   onSubmit,
 }: LoginFormProps) => {
   return (
-    <form
-      onSubmit={onSubmit}
-      className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-    >
-      <Input
-        label="Email"
+    <form onSubmit={onSubmit} className="space-y-5">
+      <AuthInput
+        label="Email Address"
         type="email"
+        icon="email"
         name="email"
         autoComplete="email"
         required
         value={email}
         onChange={(e) => onEmailChange(e.target.value)}
       />
-      <Input
+      <AuthInput
         label="Password"
         type="password"
+        icon="password"
         name="password"
         autoComplete="current-password"
         required
@@ -46,9 +45,11 @@ export const LoginForm = ({
         onChange={(e) => onPasswordChange(e.target.value)}
       />
       {error && <ErrorBanner message={error} />}
-      <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? "Signing in…" : "Sign in"}
-      </Button>
+      <div className="pt-1">
+        <AuthButton type="submit" disabled={submitting}>
+          {submitting ? "Logging in…" : "Log in"}
+        </AuthButton>
+      </div>
     </form>
   );
 };

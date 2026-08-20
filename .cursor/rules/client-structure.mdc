@@ -1,14 +1,14 @@
 ---
-description: Frontend page folders and sorted shared components
-globs: frontend/src/**/*.{ts,tsx}
+description: Client page folders and sorted shared components
+globs: client/src/**/*.{ts,tsx}
 alwaysApply: false
 ---
 
-# Frontend structure
+# Client structure
 
 ## Pages are folders
 
-Each route lives under `frontend/src/pages/<page-name>/`:
+Each route lives under `client/src/pages/<page-name>/`:
 
 ```text
 pages/

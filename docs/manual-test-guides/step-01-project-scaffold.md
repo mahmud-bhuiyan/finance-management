@@ -16,7 +16,7 @@
 - [ ] Node.js 20+ installed (`node -v`)
 - [ ] PostgreSQL running locally
 - [ ] Database created (example): `fms_dev`
-- [ ] `backend/.env` has a valid `DATABASE_URL` (copy from `.env.example` if needed)
+- [ ] `server/.env` has a valid `DATABASE_URL` (copy from `.env.example` if needed)
 
 Example `DATABASE_URL`:
 
@@ -28,7 +28,7 @@ postgresql://USER:PASSWORD@localhost:5432/fms_dev?schema=public
 
 ## Setup commands
 
-From `finance-management/backend`:
+From `finance-management/server`:
 
 ```bash
 npm install
@@ -37,7 +37,7 @@ npx prisma migrate dev --name step01_health
 npm run dev
 ```
 
-From `finance-management/frontend` (new terminal):
+From `finance-management/client` (new terminal):
 
 ```bash
 npm install
@@ -48,13 +48,13 @@ npm run dev
 
 ## Checklist
 
-### A. Backend boots
+### A. Server boots
 
 | # | Test | Expected | Pass? |
 |---|------|----------|-------|
-| A1 | Run `npm run dev` in `backend/` | Console shows `FMS API listening on http://localhost:4000` | [ ] |
+| A1 | Run `npm run dev` in `server/` | Console shows `FMS API listening on http://localhost:4000` | [ ] |
 | A2 | Open `http://localhost:4000/` | JSON with `ok: true` and message about FMS API | [ ] |
-| A3 | Folder check | You can find `routes/`, `controllers/`, `services/`, `middleware/`, `validators/`, `config/` under `backend/src/` | [ ] |
+| A3 | Folder check | You can find `routes/`, `controllers/`, `services/`, `middleware/`, `validators/`, `config/` under `server/src/` | [ ] |
 
 ### B. Database connectivity
 
@@ -65,15 +65,15 @@ npm run dev
 | B3 | Stop Postgres (or break `DATABASE_URL`) and hit `/api/health` again | HTTP 503 (or ok false), `database.connected: false` with an error message | [ ] |
 | B4 | Restore Postgres / correct URL | Health returns connected again | [ ] |
 
-### C. Frontend + Tailwind
+### C. Client + Tailwind
 
 | # | Test | Expected | Pass? |
 |---|------|----------|-------|
-| C1 | Run `npm run dev` in `frontend/` | App at `http://localhost:5173` | [ ] |
+| C1 | Run `npm run dev` in `client/` | App at `http://localhost:5173` | [ ] |
 | C2 | Page loads | Heading “Step 01 scaffold is running” and teal accent styling (Tailwind) | [ ] |
 | C3 | With API running | Status section shows API OK and DB connected | [ ] |
 | C4 | Stop API, refresh page | UI shows an error about failing to reach API | [ ] |
-| C5 | Reusable UI folder | `frontend/src/components/ui/Button.tsx` exists | [ ] |
+| C5 | Reusable UI folder | `client/src/components/ui/Button.tsx` exists | [ ] |
 
 ### D. Coding rules smoke check
 

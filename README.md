@@ -13,12 +13,12 @@ See plan: [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md)
 
 ### 1. Database
 
-Create a Postgres database named `fms_dev` (or update `backend/.env`).
+Create a Postgres database named `fms_dev` (or update `server/.env`).
 
-### 2. Backend
+### 2. Server
 
 ```bash
-cd backend
+cd server
 cp .env.example .env   # if needed; edit DATABASE_URL
 npm install
 npx prisma generate
@@ -29,10 +29,10 @@ npm run dev
 API: http://localhost:4000  
 Health: http://localhost:4000/api/health
 
-### 3. Frontend
+### 3. Client
 
 ```bash
-cd frontend
+cd client
 npm install
 npm run dev
 ```
@@ -46,14 +46,14 @@ App: http://localhost:5173
 
 ## Auth env (Step 02)
 
-In `backend/.env` set `JWT_SECRET` (min 32 characters). Copy keys from `backend/.env.example` if needed.
+In `server/.env` set `JWT_SECRET` (min 32 characters). Copy keys from `server/.env.example` if needed.
 
 ## Project layout
 
 ```text
 finance-management/
-  backend/src/{routes,controllers,services,middleware,validators,config,utils}
-  frontend/src/
+  server/src/{routes,controllers,services,middleware,validators,config,utils}
+  client/src/
     pages/<page>/{Page.tsx,components/,hooks/}   # page-owned UI + hooks
     components/{ui,feedback,layout,forms}/       # shared, sorted by role
     hooks/                                       # shared hooks only
@@ -61,4 +61,4 @@ finance-management/
   docs/manual-test-guides/                       # MD + PDF per step
 ```
 
-See coding rules in [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md) §3–4 and `.cursor/rules/frontend-structure.mdc`.
+See coding rules in [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md) §3–4 and `.cursor/rules/client-structure.mdc`.
