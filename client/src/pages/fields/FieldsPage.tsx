@@ -33,7 +33,7 @@ export const FieldsPage = () => {
     return <Navigate to="/" replace />;
   }
 
-  const runAction = async (id: string, action: () => Promise<void>) => {
+  const runAction = async (id: string, action: () => Promise<unknown>) => {
     setBusyId(id);
     fieldsApi.setError(null);
     try {
