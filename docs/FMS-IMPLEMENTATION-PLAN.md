@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **Planning only** — do not scaffold the application until this plan is approved.  
+> Status: **In progress** — Step **01** done, Step **02** done, Step **03** (Tenants + Super Admin) in progress.  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -23,8 +23,8 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 
 | Layer | Choice |
 |--------|--------|
-| Backend | **Node.js + Express** (TypeScript) |
-| Frontend | **React + Vite** |
+| Server | **Node.js + Express** (TypeScript) — folder `server/` |
+| Client | **React + Vite** — folder `client/` |
 | CSS | **Tailwind CSS** |
 | Database | **PostgreSQL** |
 | ORM | **Prisma** |
@@ -37,7 +37,7 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 
 | When | What |
 |------|------|
-| More clients / team growth / Express hard to maintain | Migrate backend to **NestJS** |
+| More clients / team growth / Express hard to maintain | Migrate **server** to **NestJS** |
 | Keep forever | Same **PostgreSQL**, **Prisma**, **React + Tailwind** |
 
 **Migration idea:** Express routes → Nest controllers; middleware → guards; services mostly move as-is.
@@ -57,11 +57,13 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 1. **Don’t over-engineer** — solve the current step; no speculative abstractions.  
 2. Prefer **simple, readable** code over clever patterns.  
 3. Prefer **arrow functions** for helpers, handlers, hooks, and React components (consistent style).  
-4. **TypeScript** on API and web.  
+4. **TypeScript** on server and client.  
 5. Validate all API inputs with **Zod**.  
-6. After every implementation step: **manual test** using the step guide in `docs/` before moving on.
+6. After every implementation step: **manual test** using the step guide in `docs/` before moving on.  
+7. Repo folders are **`server/`** and **`client/`** — never `backend/` or `frontend/`.  
+8. HTTP APIs are versioned under **`/api/v1/`** (see API versioning below).
 
-### Frontend (React + Tailwind)
+### Client (React + Tailwind)
 
 1. Use **Tailwind CSS** for styling (small shared tokens for colors/spacing).  
 2. Build **reusable components from the beginning** where it helps: `Button`, `Input`, `Select`, `Modal`/`Drawer`, `Table`, `EmptyState`, `LoadingState`, `ErrorState`, `ConfirmDialog`, toast helpers.  
@@ -71,30 +73,37 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 6. Shared hooks (e.g. `useAuth`) stay in `src/hooks/`; page-only hooks stay next to the page.  
 7. Prefer composition over prop-heavy mega-components.
 
-### Backend (Express — organized & findable)
+### Server (Express — organized & findable)
 
 1. **Fat services, thin controllers** — business logic in services, not route files.  
 2. Clear folders so middleware / controllers / services are easy to find and manage (see §4).  
 3. Every business query respects **`tenant_id`**.  
-4. Auth + RBAC checks on the **backend** (never frontend-only).  
+4. Auth + RBAC checks on the **server** (never client-only).  
 5. Soft-delete financial records by default; write audit entries for create/update/delete.  
 6. Money: use `DECIMAL`/`Numeric` or integer cents — never JS floats for amounts.
+
+### API versioning
+
+1. Mount all HTTP routes under **`/api/v1/`** (`server/src/config/api.ts` → `API_PREFIX`).  
+2. Client calls go through `client/src/lib/api.ts`. Pass paths like `/auth/login`, not `/api/auth/login`. Local: empty `client/.env` `VITE_API_URL` + Vite proxy. Production: `VITE_API_URL` = API origin. Server secrets live in `server/.env.local`.  
+3. When a breaking change is needed, add **`/api/v2`** and keep **`/api/v1`** working.  
+4. Do not add unversioned `/api/...` routes.
 
 ### Express → Nest (when we migrate later)
 
 1. Domain modules stay the same (`auth`, `tenants`, `fields`, …).  
 2. Prisma stays the data layer.  
 3. Middleware helpers → Nest guards; Zod validators → pipes.  
-4. Keep API contracts stable so React does not need a rewrite.
+4. Keep API contracts stable so the client does not need a rewrite.
 
 ---
 
 ## 4. Suggested folder layout (simple PERN)
 
-Keep it flat and obvious — not a heavy monorepo unless we need one later.
+Keep it flat and obvious — not a heavy monorepo unless we need one later. Always use **`server/`** + **`client/`**.
 
 ```text
-finance-management/          # or server/ + client/
+finance-management/
   server/
     src/
       routes/                # wire HTTP paths → controllers
@@ -142,7 +151,7 @@ Domain grouping inside services/controllers is fine, e.g. `services/auth/`, `ser
 - Shared `financial_transactions` with `type = expense | income` from day one  
 - Soft delete + audit (who, what, old/new, timestamp)  
 - Month/year from **transaction date** — no per-month tables  
-- Never rely only on frontend permissions  
+- Never rely only on client permissions  
 
 ---
 
@@ -208,6 +217,8 @@ For every step, maintain a checklist under:
 4. Only then mark related Notion tasks **Done** and start the next step.
 
 Step 01 guide: `finance-management/docs/manual-test-guides/step-01-project-scaffold.md`  
+Step 02 guide: `finance-management/docs/manual-test-guides/step-02-auth.md`  
+Step 03 guide: `finance-management/docs/manual-test-guides/step-03-tenants.md`  
 Create each next guide when that step starts.
 
 ---
@@ -243,7 +254,7 @@ For every major step, record briefly:
 
 - What changed and why  
 - Files added/modified  
-- DB / API / frontend changes  
+- DB / API / client changes  
 - Security considerations  
 - Manual test guide result (pass/fail)  
 
@@ -251,7 +262,7 @@ For every major step, record briefly:
 
 ## 12. What we will **not** do yet
 
-- Scaffold the app until this plan is confirmed  
+- Skip the per-step manual test guide  
 - NestJS in Phase 1  
 - Build all modules at once  
 - Mongo as primary ledger  
@@ -259,12 +270,11 @@ For every major step, record briefly:
 
 ---
 
-## 13. Next step (after you approve)
+## 13. Current next step
 
-1. Confirm this plan (stack + coding rules + steps).  
-2. Scaffold PERN folders (`server/`, `client/`, `docs/manual-test-guides/`).  
-3. Create **Step 01** manual test guide, implement Step 01, test manually.  
-4. Continue step-by-step; keep Notion Completion % updated.  
+1. Finish **Step 03 — Tenants + Super Admin** and pass `docs/manual-test-guides/step-03-tenants.md`.  
+2. Mark related Notion tasks Done (FMS-4, Step 03).  
+3. Continue with **Step 04 — RBAC**.  
 
 ---
 
@@ -273,13 +283,14 @@ For every major step, record briefly:
 | Decision | Choice |
 |----------|--------|
 | Primary DB | PostgreSQL |
-| Start backend | Express (TypeScript) |
-| Frontend | React + Vite + **Tailwind CSS** |
+| Start server | Express (TypeScript) in `server/` |
+| Client | React + Vite + **Tailwind CSS** in `client/` |
 | NestJS | Later, optional |
 | MERN/Mongo | Rejected as primary |
 | Style | Arrow functions; reusable UI primitives early |
-| Backend shape | routes / controllers / services / middleware / validators |
+| Server shape | routes / controllers / services / middleware / validators |
+| API prefix | `/api/v1/` (keep v1 when adding v2) |
 | Over-engineering | Avoid — practical PERN |
 | Testing | Manual test guide per step in `docs/` (MD + optional PDF) |
-| App folders | `server/` (Express API) + `client/` (React) |
+| App folders | `server/` (Express API) + `client/` (React) — not `backend/` / `frontend/` |
 | Notion | Phases + Tasks; sort/group by phase |

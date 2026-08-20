@@ -21,10 +21,11 @@ export const HomePage = () => {
           Finance Management System
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-          Step 02 auth is running
+          Step 03 tenants are running
         </h1>
         <p className="text-lg text-slate-600">
-          You are signed in. Session uses an httpOnly JWT cookie.
+          Super Admin can create companies and company admins. Other roles stay
+          signed in with the httpOnly JWT cookie.
         </p>
 
         <UserSessionCard user={user} onLogout={() => void logout()} />

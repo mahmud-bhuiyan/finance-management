@@ -1,6 +1,6 @@
 # Step 02 — Auth (manual test guide)
 
-**Goal:** Confirm register/login, password hashing, httpOnly JWT cookie session, and `/api/auth/me`.
+**Goal:** Confirm register/login, password hashing, httpOnly JWT cookie session, and `/api/v1/auth/me`.
 
 **Maps to:** Phase 1 — Foundation  
 **Do not start Step 03 until every required item passes.**
@@ -15,8 +15,8 @@
 
 - [ ] Step 01 scaffold already passing
 - [ ] PostgreSQL running; `fms_dev` exists
-- [ ] `server/.env` includes `DATABASE_URL` and `JWT_SECRET` (min 32 chars; see `.env.example`)
-- [ ] Migration applied: `npx prisma migrate dev` (includes `step02_auth`)
+- [ ] `server/.env.local` includes `DATABASE_URL` and `JWT_SECRET` (min 32 chars; see `.env.local.example`)
+- [ ] Migration applied: `npm run prisma:migrate` (includes `step02_auth`)
 
 ---
 
@@ -28,7 +28,7 @@ Server:
 cd finance-management/server
 npm install
 npx prisma generate
-npx prisma migrate dev
+npm run prisma:migrate
 npm run dev
 ```
 
@@ -36,6 +36,7 @@ Client (new terminal):
 
 ```bash
 cd finance-management/client
+cp .env.example .env   # if needed; leave VITE_API_URL empty
 npm install
 npm run dev
 ```
@@ -48,7 +49,7 @@ npm run dev
 
 | # | Test | Expected | Pass? |
 |---|------|----------|-------|
-| A1 | POST `/api/auth/register` with valid email, password (≥8), optional name | HTTP 201, `ok: true`, user without password; `Set-Cookie: fms_token=…` (httpOnly) | [ ] |
+| A1 | POST `/api/v1/auth/register` with valid email, password (≥8), optional name | HTTP 201, `ok: true`, user without password; `Set-Cookie: fms_token=…` (httpOnly) | [ ] |
 | A2 | Open http://localhost:5173/register and create an account | Redirects to home; shows email/role | [ ] |
 | A3 | Register again with the same email | HTTP 409 / UI error “Email is already registered” | [ ] |
 | A4 | Register with password shorter than 8 chars | HTTP 400 validation error | [ ] |
@@ -56,7 +57,7 @@ npm run dev
 Example (PowerShell-friendly curl):
 
 ```bash
-curl -i -X POST http://localhost:4000/api/auth/register \
+curl -i -X POST http://localhost:4000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"demo@example.com\",\"password\":\"password123\",\"name\":\"Demo\"}"
 ```
@@ -65,11 +66,11 @@ curl -i -X POST http://localhost:4000/api/auth/register \
 
 | # | Test | Expected | Pass? |
 |---|------|----------|-------|
-| B1 | POST `/api/auth/login` with correct credentials | HTTP 200, user payload, cookie set | [ ] |
-| B2 | GET `/api/auth/me` **with** cookie (browser session or `-b` cookie jar) | HTTP 200, same user | [ ] |
-| B3 | GET `/api/auth/me` **without** cookie | HTTP 401 | [ ] |
+| B1 | POST `/api/v1/auth/login` with correct credentials | HTTP 200, user payload, cookie set | [ ] |
+| B2 | GET `/api/v1/auth/me` **with** cookie (browser session or `-b` cookie jar) | HTTP 200, same user | [ ] |
+| B3 | GET `/api/v1/auth/me` **without** cookie | HTTP 401 | [ ] |
 | B4 | Login with wrong password | HTTP 401 “Invalid email or password” | [ ] |
-| B5 | POST `/api/auth/logout` then GET `/api/auth/me` | Cookie cleared; me returns 401 | [ ] |
+| B5 | POST `/api/v1/auth/logout` then GET `/api/v1/auth/me` | Cookie cleared; me returns 401 | [ ] |
 | B6 | UI: sign in at `/login`, then Sign out on home | Session cleared; redirected to login | [ ] |
 
 ### C. Security smoke
@@ -86,7 +87,7 @@ curl -i -X POST http://localhost:4000/api/auth/register \
 |---|------|----------|-------|
 | D1 | Controllers call services | `authController` → `authService` (no Prisma in routes) | [ ] |
 | D2 | Zod validates body | Invalid payloads fail in validator / error handler | [ ] |
-| D3 | `requireAuth` middleware | Protects `/api/auth/me` | [ ] |
+| D3 | `requireAuth` middleware | Protects `/api/v1/auth/me` | [ ] |
 
 ---
 

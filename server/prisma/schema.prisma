@@ -22,15 +22,36 @@ enum UserRole {
   NORMAL_USER
 }
 
-/// Auth user (Step 02). Tenant linkage comes in Step 03.
-model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  name         String?
-  role         UserRole @default(NORMAL_USER)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+}
 
+/// Company / tenant (Step 03). Super Admin has no tenant.
+model Tenant {
+  id        String       @id @default(cuid())
+  name      String
+  slug      String       @unique
+  status    TenantStatus @default(ACTIVE)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  users     User[]
+
+  @@map("tenants")
+}
+
+/// Auth user. Super Admin: tenantId is null. Company users belong to one tenant.
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String?
+  role         UserRole  @default(NORMAL_USER)
+  tenantId     String?   @map("tenant_id")
+  tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([tenantId])
   @@map("users")
 }

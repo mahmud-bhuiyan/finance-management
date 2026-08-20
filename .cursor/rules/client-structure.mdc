@@ -6,6 +6,8 @@ alwaysApply: false
 
 # Client structure
 
+Work in **`client/`**, not `frontend/`. Call the API through `src/lib/api.ts`. Pass paths like `/auth/me`, not `/api/auth/me`. Client env is **`client/.env` only** (`VITE_API_URL` empty in local dev, API origin in production).
+
 ## Pages are folders
 
 Each route lives under `client/src/pages/<page-name>/`:

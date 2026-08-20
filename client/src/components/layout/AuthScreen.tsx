@@ -6,7 +6,13 @@ type AuthScreenProps = {
   subtitle: string;
   children: ReactNode;
   footer: ReactNode;
+  tone?: "yellow" | "pink";
 };
+
+const toneClasses = {
+  yellow: "bg-[#ffd644]",
+  pink: "bg-[#ff5f7e]",
+} as const;
 
 export const AuthScreen = ({
   icon,
@@ -14,12 +20,15 @@ export const AuthScreen = ({
   subtitle,
   children,
   footer,
+  tone = "yellow",
 }: AuthScreenProps) => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#ededed] px-4 py-12 font-[Inter,system-ui,sans-serif]">
       <div className="w-full max-w-105 border-2 border-black bg-white p-8 shadow-[6px_6px_0_0_#000] sm:p-10">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-5 flex h-12 w-12 items-center justify-center border-2 border-black bg-[#ffd644] text-black shadow-[3px_3px_0_0_#000]">
+          <div
+            className={`mb-5 flex h-12 w-12 items-center justify-center border-2 border-black ${toneClasses[tone]} text-black shadow-[3px_3px_0_0_#000]`}
+          >
             {icon}
           </div>
           <h1 className="text-[1.65rem] leading-none font-extrabold tracking-tight text-black uppercase">

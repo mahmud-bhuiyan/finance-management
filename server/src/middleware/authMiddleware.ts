@@ -11,6 +11,7 @@ declare global {
         id: string;
         email: string;
         role: UserRole;
+        tenantId: string | null;
       };
     }
   }
@@ -42,6 +43,7 @@ export const requireAuth: RequestHandler = (req, _res, next) => {
       id: payload.sub,
       email: payload.email,
       role: payload.role,
+      tenantId: payload.tenantId ?? null,
     };
     next();
   } catch {
@@ -66,6 +68,7 @@ export const optionalAuth = (
       id: payload.sub,
       email: payload.email,
       role: payload.role,
+      tenantId: payload.tenantId ?? null,
     };
   } catch {
     // ignore invalid optional tokens

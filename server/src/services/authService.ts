@@ -1,22 +1,42 @@
+import type { Tenant, User } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
 import { signAccessToken } from "../utils/jwt.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
 import type { LoginInput, RegisterInput } from "../validators/authValidators.js";
 
-const toPublicUser = (user: {
-  id: string;
-  email: string;
-  name: string | null;
-  role: string;
-  createdAt: Date;
-}) => ({
+type UserWithTenant = User & { tenant: Tenant | null };
+
+const toPublicTenant = (tenant: Tenant | null) =>
+  tenant
+    ? {
+        id: tenant.id,
+        name: tenant.name,
+        slug: tenant.slug,
+        status: tenant.status,
+      }
+    : null;
+
+export const toPublicUser = (user: UserWithTenant) => ({
   id: user.id,
   email: user.email,
   name: user.name,
   role: user.role,
+  tenantId: user.tenantId,
+  tenant: toPublicTenant(user.tenant),
   createdAt: user.createdAt.toISOString(),
 });
+
+const issueSession = (user: UserWithTenant) => {
+  const accessToken = signAccessToken({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+    tenantId: user.tenantId,
+  });
+
+  return { user: toPublicUser(user), accessToken };
+};
 
 export const registerUser = async (input: RegisterInput) => {
   const email = input.email.toLowerCase();
@@ -33,20 +53,18 @@ export const registerUser = async (input: RegisterInput) => {
       passwordHash,
       name: input.name ?? null,
     },
+    include: { tenant: true },
   });
 
-  const accessToken = signAccessToken({
-    sub: user.id,
-    email: user.email,
-    role: user.role,
-  });
-
-  return { user: toPublicUser(user), accessToken };
+  return issueSession(user);
 };
 
 export const loginUser = async (input: LoginInput) => {
   const email = input.email.toLowerCase();
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { tenant: true },
+  });
 
   if (!user) {
     throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
@@ -57,17 +75,18 @@ export const loginUser = async (input: LoginInput) => {
     throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
   }
 
-  const accessToken = signAccessToken({
-    sub: user.id,
-    email: user.email,
-    role: user.role,
-  });
+  if (user.tenant?.status === "INACTIVE") {
+    throw new AppError("This company is inactive", 403, "TENANT_INACTIVE");
+  }
 
-  return { user: toPublicUser(user), accessToken };
+  return issueSession(user);
 };
 
 export const getUserById = async (id: string) => {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({
+    where: { id },
+    include: { tenant: true },
+  });
   if (!user) {
     throw new AppError("User not found", 404, "USER_NOT_FOUND");
   }

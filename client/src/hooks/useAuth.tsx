@@ -13,6 +13,13 @@ export type AuthUser = {
   email: string;
   name: string | null;
   role: string;
+  tenantId: string | null;
+  tenant: {
+    id: string;
+    name: string;
+    slug: string;
+    status: string;
+  } | null;
   createdAt: string;
 };
 
@@ -37,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refresh = useCallback(async () => {
     try {
-      const data = await apiFetch<{ ok: boolean; user: AuthUser }>("/api/auth/me");
+      const data = await apiFetch<{ ok: boolean; user: AuthUser }>("/auth/me");
       setUser(data.user);
     } catch {
       setUser(null);
@@ -53,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     const data = await apiFetch<{ ok: boolean; user: AuthUser }>(
-      "/api/auth/login",
+      "/auth/login",
       {
         method: "POST",
         body: JSON.stringify({ email, password }),
@@ -68,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     name?: string;
   }) => {
     const data = await apiFetch<{ ok: boolean; user: AuthUser }>(
-      "/api/auth/register",
+      "/auth/register",
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -78,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await apiFetch("/api/auth/logout", { method: "POST" });
+    await apiFetch("/auth/logout", { method: "POST" });
     setUser(null);
   };
 

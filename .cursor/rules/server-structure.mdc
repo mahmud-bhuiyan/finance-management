@@ -1,0 +1,23 @@
+---
+description: Express server folders and /api/v1 mount
+globs: server/**/*.{ts,js}
+alwaysApply: false
+---
+
+# Server structure
+
+Work in **`server/`**, not `backend/`.
+
+```text
+server/src/
+  routes/         # HTTP paths → controllers
+  controllers/    # parse req, call services, send res
+  services/       # business logic
+  middleware/     # auth, tenant, roles, errors
+  validators/     # Zod schemas
+  config/         # env, prisma, API_PREFIX
+```
+
+- Fat services, thin controllers. No Prisma in route files.
+- Mount routers on `API_PREFIX` (`/api/v1`). Example: `/api/v1/auth/login`.
+- Auth and RBAC run on the server, never only on the client.
