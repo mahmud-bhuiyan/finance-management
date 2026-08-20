@@ -1,5 +1,6 @@
 import type { Tenant, User, UserRole } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
+import { writeAuditLog } from "./auditService.js";
 import { AppError } from "../utils/AppError.js";
 import { hashPassword } from "../utils/password.js";
 import { slugify } from "../utils/slug.js";
@@ -59,7 +60,10 @@ export const listTenants = async () => {
   return tenants.map(toPublicTenant);
 };
 
-export const createTenant = async (input: CreateTenantInput) => {
+export const createTenant = async (
+  input: CreateTenantInput,
+  actorId: string,
+) => {
   const slug = await uniqueSlug(input.slug ?? slugify(input.name));
 
   const tenant = await prisma.tenant.create({
@@ -70,10 +74,25 @@ export const createTenant = async (input: CreateTenantInput) => {
     include: tenantWithAdmins,
   });
 
-  return toPublicTenant(tenant);
+  const publicTenant = toPublicTenant(tenant);
+
+  await writeAuditLog({
+    actor: { id: actorId, tenantId: null },
+    action: "CREATE",
+    entityType: "Tenant",
+    entityId: tenant.id,
+    tenantId: tenant.id,
+    newValues: publicTenant,
+  });
+
+  return publicTenant;
 };
 
-export const updateTenant = async (id: string, input: UpdateTenantInput) => {
+export const updateTenant = async (
+  id: string,
+  input: UpdateTenantInput,
+  actorId: string,
+) => {
   const existing = await prisma.tenant.findUnique({ where: { id } });
   if (!existing) {
     throw new AppError("Company not found", 404, "TENANT_NOT_FOUND");
@@ -88,12 +107,25 @@ export const updateTenant = async (id: string, input: UpdateTenantInput) => {
     include: tenantWithAdmins,
   });
 
-  return toPublicTenant(tenant);
+  const publicTenant = toPublicTenant(tenant);
+
+  await writeAuditLog({
+    actor: { id: actorId, tenantId: null },
+    action: "UPDATE",
+    entityType: "Tenant",
+    entityId: tenant.id,
+    tenantId: tenant.id,
+    oldValues: toPublicTenant(existing),
+    newValues: publicTenant,
+  });
+
+  return publicTenant;
 };
 
 export const createCompanyAdmin = async (
   tenantId: string,
   input: CreateCompanyAdminInput,
+  actorId: string,
 ) => {
   const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
   if (!tenant) {
@@ -116,5 +148,16 @@ export const createCompanyAdmin = async (
     },
   });
 
-  return toPublicAdmin(user);
+  const publicAdmin = toPublicAdmin(user);
+
+  await writeAuditLog({
+    actor: { id: actorId, tenantId: null },
+    action: "CREATE",
+    entityType: "User",
+    entityId: user.id,
+    tenantId: tenant.id,
+    newValues: publicAdmin,
+  });
+
+  return publicAdmin;
 };

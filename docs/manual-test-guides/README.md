@@ -8,6 +8,7 @@ Each implementation step has a checklist here as **Markdown + PDF**.
 | 02 | [step-02-auth.md](step-02-auth.md) | [step-02-auth.pdf](step-02-auth.pdf) |
 | 03 | [step-03-tenants.md](step-03-tenants.md) | [step-03-tenants.pdf](step-03-tenants.pdf) |
 | 04 | [step-04-rbac.md](step-04-rbac.md) | [step-04-rbac.pdf](step-04-rbac.pdf) |
+| 05 | [step-05-audit.md](step-05-audit.md) | [step-05-audit.pdf](step-05-audit.pdf) |
 
 ## When adding or updating a step guide
 
