@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–04** done, Step **05** (Audit foundation) in progress.  
+> Status: **In progress** — Steps **01–05** done, Step **06** (Dynamic fields API) in progress.  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -238,6 +238,7 @@ Step 02 guide: `finance-management/docs/manual-test-guides/step-02-auth.md`
 Step 03 guide: `finance-management/docs/manual-test-guides/step-03-tenants.md`  
 Step 04 guide: `finance-management/docs/manual-test-guides/step-04-rbac.md`  
 Step 05 guide: `finance-management/docs/manual-test-guides/step-05-audit.md`  
+Step 06 guide: `finance-management/docs/manual-test-guides/step-06-dynamic-fields-api.md`  
 Create each next guide when that step starts.
 
 ---
@@ -291,16 +292,15 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Finish **Step 05 — Audit foundation** and pass `docs/manual-test-guides/step-05-audit.md`.  
-2. Mark related Notion tasks Done (audit logging foundation).  
-3. Continue with **Step 06 — Dynamic fields API**.  
+1. Finish **Step 06 — Dynamic fields API** and pass `docs/manual-test-guides/step-06-dynamic-fields-api.md`.  
+2. Mark related Notion tasks Done (dynamic field definitions CRUD).  
+3. Continue with **Step 07 — Dynamic fields UI**.  
 
-### Remaining steps (05–14)
+### Remaining steps (06–14)
 
 | Step | Name | Status |
 |------|------|--------|
-| **05** | Audit foundation | **In progress** |
-| **06** | Dynamic fields API | Not started |
+| **06** | Dynamic fields API | **In progress** |
 | **07** | Dynamic fields UI | Not started |
 | **08** | Expense core | Not started |
 | **09** | Expense support data | Not started |

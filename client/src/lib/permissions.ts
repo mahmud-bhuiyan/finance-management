@@ -4,6 +4,7 @@ export const PERMISSIONS = {
   REPORTS_READ: "reports:read",
   USERS_MANAGE: "users:manage",
   AUDIT_READ: "audit:read",
+  FIELDS_MANAGE: "fields:manage",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -15,6 +16,7 @@ const ROLE_PERMISSIONS: Record<string, readonly Permission[]> = {
     PERMISSIONS.REPORTS_READ,
     PERMISSIONS.USERS_MANAGE,
     PERMISSIONS.AUDIT_READ,
+    PERMISSIONS.FIELDS_MANAGE,
   ],
   NORMAL_USER: [PERMISSIONS.REPORTS_READ],
 };

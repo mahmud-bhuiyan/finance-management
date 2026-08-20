@@ -49,6 +49,10 @@
     {
       "key": "tenantName",
       "value": "Acme Ltd"
+    },
+    {
+      "key": "fieldId",
+      "value": ""
     }
   ],
   "item": [
@@ -664,6 +668,187 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/audit/logs",
+            "description": "Negative check: login as self-registered normal user first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fields",
+      "description": "Dynamic field definition CRUD (Step 06). Requires company membership + `fields:manage` (company admin). Run **Auth → Login (company admin)** first.",
+      "item": [
+        {
+          "name": "List field definitions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns fields array', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.fields).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/fields?target=EXPENSE",
+            "description": "Lists expense field definitions for the signed-in company admin's tenant."
+          },
+          "response": []
+        },
+        {
+          "name": "Create text field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns field', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.field.fieldType).to.eql('TEXT');",
+                  "});",
+                  "if (json.field && json.field.id) {",
+                  "  pm.collectionVariables.set('fieldId', json.field.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"target\": \"EXPENSE\",\n  \"label\": \"Project Code\",\n  \"fieldType\": \"TEXT\",\n  \"required\": true\n}"
+            },
+            "url": "{{baseUrl}}/fields",
+            "description": "Creates a required text field. Saves `fieldId` for follow-up requests."
+          },
+          "response": []
+        },
+        {
+          "name": "Create dropdown field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"target\": \"EXPENSE\",\n  \"key\": \"status\",\n  \"label\": \"Status\",\n  \"fieldType\": \"DROPDOWN\",\n  \"options\": {\n    \"choices\": [\"Draft\", \"Approved\"]\n  }\n}"
+            },
+            "url": "{{baseUrl}}/fields",
+            "description": "Creates a dropdown field with choices."
+          },
+          "response": []
+        },
+        {
+          "name": "Get field by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/fields/{{fieldId}}",
+            "description": "Fetch a single field definition. Run **Create text field** first to set `fieldId`."
+          },
+          "response": []
+        },
+        {
+          "name": "Update field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Project code\",\n  \"sortOrder\": 10,\n  \"visibleToNormalUser\": true\n}"
+            },
+            "url": "{{baseUrl}}/fields/{{fieldId}}",
+            "description": "Updates label, sort order, and visibility."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/fields/{{fieldId}}",
+            "description": "Permanently deletes a field definition."
+          },
+          "response": []
+        },
+        {
+          "name": "List fields (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/fields",
             "description": "Negative check: login as self-registered normal user first."
           },
           "response": []
