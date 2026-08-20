@@ -51,6 +51,14 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 02: [`docs/manual-test-guides/step-02-auth.md`](docs/manual-test-guides/step-02-auth.md) · [PDF](docs/manual-test-guides/step-02-auth.pdf)
 - Step 03: [`docs/manual-test-guides/step-03-tenants.md`](docs/manual-test-guides/step-03-tenants.md) · [PDF](docs/manual-test-guides/step-03-tenants.pdf)
 
+## Postman (API)
+
+- Cloud: **FMS API (v1)** in Postman (IDs in [`docs/postman/SYNC.md`](docs/postman/SYNC.md))
+- Git: [`docs/postman/FMS-API.postman_collection.json`](docs/postman/FMS-API.postman_collection.json) (import if needed)
+- How-to: [`docs/postman/README.md`](docs/postman/README.md)
+
+Start the server first (`cd server && npm run dev`). When APIs change, update the JSON **and** the cloud collection (if Postman MCP is connected), and leave a short collection comment.
+
 ## Auth env (Step 02)
 
 In `server/.env.local` set `JWT_SECRET` (min 32 characters). Copy keys from `server/.env.local.example` if needed.
@@ -76,6 +84,7 @@ finance-management/
     hooks/                                       # shared hooks only
     lib/
   docs/manual-test-guides/                       # MD + PDF per step
+  docs/postman/                                  # Importable Postman collection
 ```
 
 See coding rules in [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md) §3–4 and `.cursor/rules/` (`project-conventions`, `server-structure`, `client-structure`).

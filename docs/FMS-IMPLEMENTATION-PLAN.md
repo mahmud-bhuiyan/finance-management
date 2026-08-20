@@ -61,7 +61,8 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 5. Validate all API inputs with **Zod**.  
 6. After every implementation step: **manual test** using the step guide in `docs/` before moving on.  
 7. Repo folders are **`server/`** and **`client/`** — never `backend/` or `frontend/`.  
-8. HTTP APIs are versioned under **`/api/v1/`** (see API versioning below).
+8. HTTP APIs are versioned under **`/api/v1/`** (see API versioning below).  
+9. Keep **one** Postman collection (git `docs/postman/FMS-API.postman_collection.json` + cloud UID in `docs/postman/SYNC.md`) in sync with every new or changed API route (see Postman below).
 
 ### Client (React + Tailwind)
 
@@ -88,6 +89,17 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 2. Client calls go through `client/src/lib/api.ts`. Pass paths like `/auth/login`, not `/api/auth/login`. Local: empty `client/.env` `VITE_API_URL` + Vite proxy. Production: `VITE_API_URL` = API origin. Server secrets live in `server/.env.local`.  
 3. When a breaking change is needed, add **`/api/v2`** and keep **`/api/v1`** working.  
 4. Do not add unversioned `/api/...` routes.
+
+### Postman (API smoke testing)
+
+1. **Single collection (git + cloud):** `docs/postman/FMS-API.postman_collection.json` — do not create parallel collections per step.  
+2. **Cloud sync:** collection UID and workspace live in `docs/postman/SYNC.md`. Cloud name: **FMS API (v1)**.  
+3. **Update with the API:** when a step adds or changes routes under `/api/v1`, update the JSON in that same change (method, path, sample JSON, short description, useful tests).  
+4. **If Postman MCP is connected:** push the same update to the cloud UID (`putCollection` / request APIs) and add a short **collection comment** describing the change so git and Postman stay in sync.  
+5. **If MCP is offline:** still update the JSON; sync cloud later and note it.  
+6. **Variables:** keep `baseUrl` = `http://localhost:4000/api/v1`; reuse collection vars for emails/passwords/`tenantId`.  
+7. **Auth:** session is the httpOnly cookie `fms_token` (Postman cookie jar). Login/register set it; protected requests rely on it.  
+8. How to import / open: see `docs/postman/README.md`.
 
 ### Express → Nest (when we migrate later)
 
@@ -136,6 +148,7 @@ finance-management/
       lib/                   # api client, helpers
   docs/
     manual-test-guides/      # Step 01…N checklists (Markdown + PDF)
+    postman/                 # FMS API (v1) — git JSON + cloud sync (see SYNC.md)
 ```
 
 Domain grouping inside services/controllers is fine, e.g. `services/auth/`, `services/expenses/` — still easy to find.
@@ -214,7 +227,8 @@ For every step, maintain a checklist under:
 1. Implement the step.  
 2. Open the matching guide in `docs/manual-test-guides/`.  
 3. Run every checklist item (happy path + at least one auth/tenant negative case where relevant).  
-4. Only then mark related Notion tasks **Done** and start the next step.
+4. If the step added or changed HTTP APIs, update `docs/postman/FMS-API.postman_collection.json`; if Postman MCP is connected, sync the cloud collection and leave a short collection comment (see `docs/postman/SYNC.md`). Spot-check those requests in Postman.  
+5. Only then mark related Notion tasks **Done** and start the next step.
 
 Step 01 guide: `finance-management/docs/manual-test-guides/step-01-project-scaffold.md`  
 Step 02 guide: `finance-management/docs/manual-test-guides/step-02-auth.md`  
@@ -291,6 +305,6 @@ For every major step, record briefly:
 | Server shape | routes / controllers / services / middleware / validators |
 | API prefix | `/api/v1/` (keep v1 when adding v2) |
 | Over-engineering | Avoid — practical PERN |
-| Testing | Manual test guide per step in `docs/` (MD + optional PDF) |
+| Testing | Manual test guide per step in `docs/` (MD + optional PDF); one Postman collection in git + cloud (`docs/postman/`, see `SYNC.md`) |
 | App folders | `server/` (Express API) + `client/` (React) — not `backend/` / `frontend/` |
 | Notion | Phases + Tasks; sort/group by phase |

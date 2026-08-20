@@ -1,0 +1,491 @@
+{
+  "info": {
+    "_postman_id": "5914500b-3ae9-4fe4-9371-f1b01cc92ff0",
+    "name": "FMS API (v1)",
+    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api/v1"
+    },
+    {
+      "key": "tenantId",
+      "value": ""
+    },
+    {
+      "key": "superAdminEmail",
+      "value": "superadmin@fms.local"
+    },
+    {
+      "key": "superAdminPassword",
+      "value": "password123"
+    },
+    {
+      "key": "userEmail",
+      "value": "demo@example.com"
+    },
+    {
+      "key": "userPassword",
+      "value": "password123"
+    },
+    {
+      "key": "userName",
+      "value": "Demo User"
+    },
+    {
+      "key": "companyAdminEmail",
+      "value": "admin@acme.example"
+    },
+    {
+      "key": "companyAdminPassword",
+      "value": "password123"
+    },
+    {
+      "key": "companyAdminName",
+      "value": "Acme Admin"
+    },
+    {
+      "key": "tenantName",
+      "value": "Acme Ltd"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Expects HTTP 200 and `database.connected: true` when Postgres is up."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns user without password', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.user).to.be.an('object');",
+                  "  pm.expect(json.user).to.not.have.property('password');",
+                  "  pm.expect(json.user).to.not.have.property('passwordHash');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\",\n  \"name\": \"{{userName}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register",
+            "description": "Creates a normal user and sets `fms_token` cookie. Change `userEmail` if the address is already registered."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns user', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.user.email).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Logs in as the demo user (`userEmail` / `userPassword`). Sets `fms_token` cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Super Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Role is SUPER_ADMIN', function () {",
+                  "  pm.expect(json.user.role).to.eql('SUPER_ADMIN');",
+                  "  pm.expect(json.user.tenantId).to.eql(null);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Logs in as the bootstrap Super Admin. Required before Tenants requests. Defaults match `server/.env.local.example`."
+          },
+          "response": []
+        },
+        {
+          "name": "Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns authenticated user', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.user.id).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Requires `fms_token` cookie from Login / Register / Login (Super Admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/logout",
+            "description": "Clears the `fms_token` cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Me (unauthenticated — expect 401)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jar = pm.cookies.jar();",
+                  "jar.clear(pm.collectionVariables.get('baseUrl').replace(/\\/api\\/v1$/, ''), function () {});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Negative check: no session cookie → 401. Clears cookies for the API host first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tenants (Super Admin)",
+      "description": "All routes require Super Admin session. Run **Auth → Login (Super Admin)** first.",
+      "item": [
+        {
+          "name": "List tenants",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns tenants array', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.tenants).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tenants",
+            "description": "Lists all companies."
+          },
+          "response": []
+        },
+        {
+          "name": "Create tenant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns tenant with slug', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.tenant.id).to.be.a('string');",
+                  "  pm.expect(json.tenant.slug).to.be.a('string');",
+                  "});",
+                  "if (json.tenant && json.tenant.id) {",
+                  "  pm.collectionVariables.set('tenantId', json.tenant.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tenantName}}\"\n}"
+            },
+            "url": "{{baseUrl}}/tenants",
+            "description": "Creates a company. Saves `tenantId` collection variable from the response. Optional body field: `slug`."
+          },
+          "response": []
+        },
+        {
+          "name": "Create company admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Admin is COMPANY_ADMIN for tenant', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.admin.role).to.eql('COMPANY_ADMIN');",
+                  "  pm.expect(json.admin.tenantId).to.eql(pm.collectionVariables.get('tenantId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{companyAdminEmail}}\",\n  \"password\": \"{{companyAdminPassword}}\",\n  \"name\": \"{{companyAdminName}}\"\n}"
+            },
+            "url": "{{baseUrl}}/tenants/{{tenantId}}/admins",
+            "description": "Creates a company admin for `{{tenantId}}`. Run Create tenant first (or set `tenantId` manually)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update tenant (set INACTIVE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Status is INACTIVE', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.tenant.status).to.eql('INACTIVE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/tenants/{{tenantId}}",
+            "description": "Deactivates the company. Company-admin login should then fail with TENANT_INACTIVE."
+          },
+          "response": []
+        },
+        {
+          "name": "Update tenant (set ACTIVE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Status is ACTIVE', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.tenant.status).to.eql('ACTIVE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/tenants/{{tenantId}}",
+            "description": "Reactivates the company."
+          },
+          "response": []
+        },
+        {
+          "name": "List tenants (unauthenticated — expect 401)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jar = pm.cookies.jar();",
+                  "jar.clear(pm.collectionVariables.get('baseUrl').replace(/\\/api\\/v1$/, ''), function () {});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tenants",
+            "description": "Negative check without session. Re-run Login (Super Admin) afterward."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

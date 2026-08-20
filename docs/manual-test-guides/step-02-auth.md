@@ -7,7 +7,8 @@
 
 **Artifacts:**  
 - Markdown: `docs/manual-test-guides/step-02-auth.md`  
-- PDF: `docs/manual-test-guides/step-02-auth.pdf`
+- PDF: `docs/manual-test-guides/step-02-auth.pdf`  
+- Postman: `docs/postman/FMS-API.postman_collection.json` (Auth folder)
 
 ---
 

@@ -7,7 +7,8 @@
 
 **Artifacts:**  
 - Markdown: `docs/manual-test-guides/step-03-tenants.md`  
-- PDF: `docs/manual-test-guides/step-03-tenants.pdf`
+- PDF: `docs/manual-test-guides/step-03-tenants.pdf`  
+- Postman: `docs/postman/FMS-API.postman_collection.json` (Auth + Tenants folders)
 
 ---
 
