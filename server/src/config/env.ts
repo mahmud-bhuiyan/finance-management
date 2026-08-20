@@ -1,10 +1,14 @@
 import { z } from "zod";
+import "./loadEnv.js";
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: z.string().min(1),
-  CLIENT_URL: z.string().default("http://localhost:5173"),
+  CLIENT_URL: z
+    .string()
+    .default("http://localhost:5173")
+    .transform((value) => value.replace(/\/+$/, "")),
   JWT_SECRET: z
     .string()
     .min(32, "JWT_SECRET must be at least 32 characters"),
@@ -16,4 +20,14 @@ const envSchema = z.object({
   SUPER_ADMIN_NAME: z.string().optional(),
 });
 
-export const env = envSchema.parse(process.env);
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  const fields = parsed.error.flatten().fieldErrors;
+  console.error("Invalid server environment:", fields);
+  throw new Error(
+    "Server env is incomplete. Set DATABASE_URL, JWT_SECRET (min 32 chars), and CLIENT_URL (the deployed client origin).",
+  );
+}
+
+export const env = parsed.data;

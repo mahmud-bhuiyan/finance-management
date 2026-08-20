@@ -15,7 +15,7 @@ const fieldKeyFromLabel = (label: string) => {
   return /^[a-z]/.test(base) ? base : `field_${base}`;
 };
 
-const toPublicField = (field: FieldDefinition) => ({
+export const toPublicField = (field: FieldDefinition) => ({
   id: field.id,
   tenantId: field.tenantId,
   target: field.target,

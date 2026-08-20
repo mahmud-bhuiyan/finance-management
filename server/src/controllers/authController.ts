@@ -10,7 +10,8 @@ import {
   registerSchema,
 } from "../validators/authValidators.js";
 
-const isProduction = env.NODE_ENV === "production";
+const isProduction =
+  env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
 
 const cookieOptions = (): CookieOptions => ({
   httpOnly: true,

@@ -11,6 +11,7 @@ Each implementation step has a checklist here as **Markdown + PDF**.
 | 05 | [step-05-audit.md](step-05-audit.md) | [step-05-audit.pdf](step-05-audit.pdf) |
 | 06 | [step-06-dynamic-fields-api.md](step-06-dynamic-fields-api.md) | [step-06-dynamic-fields-api.pdf](step-06-dynamic-fields-api.pdf) |
 | 07 | [step-07-dynamic-fields-ui.md](step-07-dynamic-fields-ui.md) | [step-07-dynamic-fields-ui.pdf](step-07-dynamic-fields-ui.pdf) |
+| 08 | [step-08-expense-core.md](step-08-expense-core.md) | [step-08-expense-core.pdf](step-08-expense-core.pdf) |
 
 ## When adding or updating a step guide
 
