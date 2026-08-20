@@ -5,16 +5,18 @@ export const PERMISSIONS = {
   FINANCE_WRITE: "finance:write",
   REPORTS_READ: "reports:read",
   USERS_MANAGE: "users:manage",
+  AUDIT_READ: "audit:read",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
 const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
-  SUPER_ADMIN: [PERMISSIONS.TENANTS_MANAGE],
+  SUPER_ADMIN: [PERMISSIONS.TENANTS_MANAGE, PERMISSIONS.AUDIT_READ],
   COMPANY_ADMIN: [
     PERMISSIONS.FINANCE_WRITE,
     PERMISSIONS.REPORTS_READ,
     PERMISSIONS.USERS_MANAGE,
+    PERMISSIONS.AUDIT_READ,
   ],
   NORMAL_USER: [PERMISSIONS.REPORTS_READ],
 };

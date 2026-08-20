@@ -612,6 +612,63 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Audit",
+      "description": "Audit trail listing. Requires `audit:read` (Super Admin or Company Admin). Run the matching **Auth → Login** first.",
+      "item": [
+        {
+          "name": "List audit logs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns logs array', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.logs).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/audit/logs?limit=50",
+            "description": "Lists audit entries visible to the signed-in admin. Super Admin sees platform-wide logs; company admin sees tenant-scoped logs only."
+          },
+          "response": []
+        },
+        {
+          "name": "List audit logs (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/audit/logs",
+            "description": "Negative check: login as self-registered normal user first."
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

@@ -1,5 +1,6 @@
 import type { Tenant, User } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
+import { writeAuditLog } from "./auditService.js";
 import { AppError } from "../utils/AppError.js";
 import { signAccessToken } from "../utils/jwt.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
@@ -54,6 +55,15 @@ export const registerUser = async (input: RegisterInput) => {
       name: input.name ?? null,
     },
     include: { tenant: true },
+  });
+
+  await writeAuditLog({
+    actor: { id: user.id, tenantId: user.tenantId },
+    action: "CREATE",
+    entityType: "User",
+    entityId: user.id,
+    tenantId: user.tenantId,
+    newValues: toPublicUser(user),
   });
 
   return issueSession(user);

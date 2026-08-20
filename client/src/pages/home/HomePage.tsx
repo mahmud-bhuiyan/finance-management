@@ -21,11 +21,12 @@ export const HomePage = () => {
           Finance Management System
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-          Step 04 RBAC is running
+          Step 05 Audit foundation is running
         </h1>
         <p className="text-lg text-slate-600">
-          Roles map to permissions on the server. Super Admin manages companies;
-          company admins can write finance data; normal users are read-only.
+          Create/update/delete actions are recorded with actor, entity, and
+          before/after values. Admins can review the audit trail on the server
+          and in the UI.
         </p>
 
         <UserSessionCard user={user} onLogout={() => void logout()} />

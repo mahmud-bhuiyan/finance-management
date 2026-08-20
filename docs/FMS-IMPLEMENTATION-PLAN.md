@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–03** done, Step **04** (RBAC) in progress.  
+> Status: **In progress** — Steps **01–04** done, Step **05** (Audit foundation) in progress.  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -237,6 +237,7 @@ Step 01 guide: `finance-management/docs/manual-test-guides/step-01-project-scaff
 Step 02 guide: `finance-management/docs/manual-test-guides/step-02-auth.md`  
 Step 03 guide: `finance-management/docs/manual-test-guides/step-03-tenants.md`  
 Step 04 guide: `finance-management/docs/manual-test-guides/step-04-rbac.md`  
+Step 05 guide: `finance-management/docs/manual-test-guides/step-05-audit.md`  
 Create each next guide when that step starts.
 
 ---
@@ -290,9 +291,24 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Finish **Step 04 — RBAC** and pass `docs/manual-test-guides/step-04-rbac.md`.  
-2. Mark related Notion tasks Done (Implement RBAC, tenant permission checks).  
-3. Continue with **Step 05 — Audit foundation**.  
+1. Finish **Step 05 — Audit foundation** and pass `docs/manual-test-guides/step-05-audit.md`.  
+2. Mark related Notion tasks Done (audit logging foundation).  
+3. Continue with **Step 06 — Dynamic fields API**.  
+
+### Remaining steps (05–14)
+
+| Step | Name | Status |
+|------|------|--------|
+| **05** | Audit foundation | **In progress** |
+| **06** | Dynamic fields API | Not started |
+| **07** | Dynamic fields UI | Not started |
+| **08** | Expense core | Not started |
+| **09** | Expense support data | Not started |
+| **10** | Attachments + list UX | Not started |
+| **11** | Thin dashboard | Not started |
+| **12** | Full dashboard | Not started |
+| **13** | Reporting | Not started |
+| **14** | Income module | Not started |
 
 ---
 
