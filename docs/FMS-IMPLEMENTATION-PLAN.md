@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–06** done, Step **07** (Dynamic fields UI) in progress.  
+> Status: **In progress** — Steps **01–07** done, Step **08** (Expense core) in progress.  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -240,6 +240,7 @@ Step 04 guide: `finance-management/docs/manual-test-guides/step-04-rbac.md`
 Step 05 guide: `finance-management/docs/manual-test-guides/step-05-audit.md`  
 Step 06 guide: `finance-management/docs/manual-test-guides/step-06-dynamic-fields-api.md`  
 Step 07 guide: `finance-management/docs/manual-test-guides/step-07-dynamic-fields-ui.md`  
+Step 08 guide: `finance-management/docs/manual-test-guides/step-08-expense-core.md`  
 Create each next guide when that step starts.
 
 ---
@@ -293,16 +294,15 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Finish **Step 07 — Dynamic fields UI** and pass `docs/manual-test-guides/step-07-dynamic-fields-ui.md`.  
-2. Mark related Notion tasks Done (field builder + dynamic form renderers).  
-3. Continue with **Step 08 — Expense core**.  
+1. Finish **Step 08 — Expense core** and pass `docs/manual-test-guides/step-08-expense-core.md`.  
+2. Mark related Notion tasks Done (`financial_transactions`, expense CRUD, audit, finance write vs read-only).  
+3. Continue with **Step 09 — Expense support data** (categories, departments, vendors).  
 
-### Remaining steps (07–14)
+### Remaining steps (08–14)
 
 | Step | Name | Status |
 |------|------|--------|
-| **07** | Dynamic fields UI | **In progress** |
-| **08** | Expense core | Not started |
+| **08** | Expense core | **In progress** |
 | **09** | Expense support data | Not started |
 | **10** | Attachments + list UX | Not started |
 | **11** | Thin dashboard | Not started |

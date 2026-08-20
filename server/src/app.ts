@@ -5,6 +5,7 @@ import { API_PREFIX, API_VERSION } from "./config/api.js";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/index.js";
+import { ensureSuperAdmin } from "./services/bootstrapService.js";
 
 export const createApp = () => {
   const app = express();
@@ -32,3 +33,11 @@ export const createApp = () => {
 
   return app;
 };
+
+const app = createApp();
+
+void ensureSuperAdmin().catch((error) => {
+  console.error("Super Admin bootstrap failed:", error);
+});
+
+export default app;

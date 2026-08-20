@@ -21,12 +21,11 @@ export const HomePage = () => {
           Finance Management System
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-          Step 07 Dynamic fields UI is running
+          Step 08 Expense core is running
         </h1>
         <p className="text-lg text-slate-600">
-          Company admins can configure custom fields and preview the reusable
-          dynamic form renderer. Field definitions are tenant-scoped and audited
-          on the server.
+          Company admins can record expenses with date, amount, and custom
+          fields. Normal users can view the same month’s list as read-only.
         </p>
 
         <UserSessionCard user={user} onLogout={() => void logout()} />

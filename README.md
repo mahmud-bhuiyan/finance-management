@@ -54,6 +54,7 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 05: [`docs/manual-test-guides/step-05-audit.md`](docs/manual-test-guides/step-05-audit.md) · [PDF](docs/manual-test-guides/step-05-audit.pdf)
 - Step 06: [`docs/manual-test-guides/step-06-dynamic-fields-api.md`](docs/manual-test-guides/step-06-dynamic-fields-api.md) · [PDF](docs/manual-test-guides/step-06-dynamic-fields-api.pdf)
 - Step 07: [`docs/manual-test-guides/step-07-dynamic-fields-ui.md`](docs/manual-test-guides/step-07-dynamic-fields-ui.md) · [PDF](docs/manual-test-guides/step-07-dynamic-fields-ui.pdf)
+- Step 08: [`docs/manual-test-guides/step-08-expense-core.md`](docs/manual-test-guides/step-08-expense-core.md) · [PDF](docs/manual-test-guides/step-08-expense-core.pdf)
 
 ## Postman (API)
 

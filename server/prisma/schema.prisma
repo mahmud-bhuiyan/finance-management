@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -49,6 +50,11 @@ enum FieldType {
   FILE
 }
 
+enum TransactionType {
+  EXPENSE
+  INCOME
+}
+
 /// Company / tenant (Step 03). Super Admin has no tenant.
 model Tenant {
   id        String       @id @default(cuid())
@@ -57,9 +63,10 @@ model Tenant {
   status    TenantStatus @default(ACTIVE)
   createdAt DateTime     @default(now()) @map("created_at")
   updatedAt DateTime     @updatedAt @map("updated_at")
-  users            User[]
-  auditLogs        AuditLog[]
-  fieldDefinitions FieldDefinition[]
+  users                   User[]
+  auditLogs               AuditLog[]
+  fieldDefinitions        FieldDefinition[]
+  financialTransactions   FinancialTransaction[]
 
   @@map("tenants")
 }
@@ -75,7 +82,8 @@ model User {
   tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
-  auditLogs    AuditLog[] @relation("AuditActor")
+  auditLogs             AuditLog[] @relation("AuditActor")
+  createdTransactions   FinancialTransaction[] @relation("TransactionCreator")
 
   @@index([tenantId])
   @@map("users")
@@ -123,4 +131,24 @@ model FieldDefinition {
   @@unique([tenantId, target, key])
   @@index([tenantId, target, enabled, sortOrder])
   @@map("field_definitions")
+}
+
+/// Shared ledger row (Step 08). Month/year come from occurredOn. Income reuses this in Step 14.
+model FinancialTransaction {
+  id           String          @id @default(cuid())
+  tenantId     String          @map("tenant_id")
+  tenant       Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  type         TransactionType
+  occurredOn   DateTime        @map("occurred_on") @db.Date
+  amount       Decimal         @db.Decimal(19, 2)
+  notes        String?
+  customValues Json            @default("{}") @map("custom_values")
+  deletedAt    DateTime?       @map("deleted_at")
+  createdById  String          @map("created_by_id")
+  createdBy    User            @relation("TransactionCreator", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  @@index([tenantId, type, deletedAt, occurredOn])
+  @@map("financial_transactions")
 }

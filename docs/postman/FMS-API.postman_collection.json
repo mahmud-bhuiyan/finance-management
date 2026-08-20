@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "5914500b-3ae9-4fe4-9371-f1b01cc92ff0",
     "name": "FMS API (v1)",
-    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. RBAC → Me / probes (switch login to company admin or normal user as needed)\n5. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
+    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. RBAC → Me / probes (switch login to company admin or normal user as needed)\n5. Fields → CRUD (company admin)\n6. Expenses → CRUD + soft delete (company admin; normal user is read-only)\n7. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -52,6 +52,10 @@
     },
     {
       "key": "fieldId",
+      "value": ""
+    },
+    {
+      "key": "expenseId",
       "value": ""
     }
   ],
@@ -850,6 +854,202 @@
             "header": [],
             "url": "{{baseUrl}}/fields",
             "description": "Negative check: login as self-registered normal user first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Expenses",
+      "description": "Expense CRUD on shared `financial_transactions` (Step 08). Company admin can write; normal user can list/get only. Soft delete sets `deleted_at`. Run **Auth → Login (company admin)** first.",
+      "item": [
+        {
+          "name": "List expenses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns expenses and fields', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.expenses).to.be.an('array');",
+                  "  pm.expect(json.fields).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/expenses?year=2026&month=8",
+            "description": "Lists non-deleted expenses for a month. Omit year/month to list recent rows."
+          },
+          "response": []
+        },
+        {
+          "name": "Create expense",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns expense with decimal amount', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.expense.type).to.eql('EXPENSE');",
+                  "  pm.expect(json.expense.amount).to.be.a('string');",
+                  "});",
+                  "if (json.expense && json.expense.id) {",
+                  "  pm.collectionVariables.set('expenseId', json.expense.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"20.00\",\n  \"notes\": \"Taxi\",\n  \"customValues\": {}\n}"
+            },
+            "url": "{{baseUrl}}/expenses",
+            "description": "Creates an expense. `amount` is a decimal string. Saves `expenseId` for later requests."
+          },
+          "response": []
+        },
+        {
+          "name": "Get expense by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "description": "Fetch a single non-deleted expense. Run **Create expense** first."
+          },
+          "response": []
+        },
+        {
+          "name": "Update expense",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"25.50\",\n  \"notes\": \"Taxi (updated)\"\n}"
+            },
+            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "description": "Updates amount and notes."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete expense (soft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "description": "Soft-deletes the expense (`deleted_at`). GET by id afterwards should be 404."
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted expense (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404 after soft delete', function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "description": "Negative check after **Delete expense (soft)**."
+          },
+          "response": []
+        },
+        {
+          "name": "Create expense (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"10.00\"\n}"
+            },
+            "url": "{{baseUrl}}/expenses",
+            "description": "Negative check: login as a normal user first."
           },
           "response": []
         }

@@ -20,3 +20,25 @@ export const requirePermission = (permission: Permission): RequestHandler => {
     next();
   };
 };
+
+export const requireAnyPermission = (
+  ...permissions: Permission[]
+): RequestHandler => {
+  return (req, _res, next) => {
+    if (!req.user) {
+      next(new AppError("Authentication required", 401, "UNAUTHORIZED"));
+      return;
+    }
+
+    const allowed = permissions.some((permission) =>
+      roleHasPermission(req.user!.role, permission),
+    );
+
+    if (!allowed) {
+      next(new AppError("Permission denied", 403, "FORBIDDEN"));
+      return;
+    }
+
+    next();
+  };
+};
