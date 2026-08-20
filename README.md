@@ -50,6 +50,7 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 01: [`docs/manual-test-guides/step-01-project-scaffold.md`](docs/manual-test-guides/step-01-project-scaffold.md) · [PDF](docs/manual-test-guides/step-01-project-scaffold.pdf)
 - Step 02: [`docs/manual-test-guides/step-02-auth.md`](docs/manual-test-guides/step-02-auth.md) · [PDF](docs/manual-test-guides/step-02-auth.pdf)
 - Step 03: [`docs/manual-test-guides/step-03-tenants.md`](docs/manual-test-guides/step-03-tenants.md) · [PDF](docs/manual-test-guides/step-03-tenants.pdf)
+- Step 04: [`docs/manual-test-guides/step-04-rbac.md`](docs/manual-test-guides/step-04-rbac.md) · [PDF](docs/manual-test-guides/step-04-rbac.pdf)
 
 ## Postman (API)
 

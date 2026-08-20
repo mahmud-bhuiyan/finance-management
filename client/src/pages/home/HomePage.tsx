@@ -21,11 +21,11 @@ export const HomePage = () => {
           Finance Management System
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-          Step 03 tenants are running
+          Step 04 RBAC is running
         </h1>
         <p className="text-lg text-slate-600">
-          Super Admin can create companies and company admins. Other roles stay
-          signed in with the httpOnly JWT cookie.
+          Roles map to permissions on the server. Super Admin manages companies;
+          company admins can write finance data; normal users are read-only.
         </p>
 
         <UserSessionCard user={user} onLogout={() => void logout()} />

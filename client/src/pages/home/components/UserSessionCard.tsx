@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "../../../components/ui/Button";
 import type { AuthUser } from "../../../hooks/useAuth";
+import { roleCan, PERMISSIONS } from "../../../lib/permissions";
 
 type UserSessionCardProps = {
   user: AuthUser;
@@ -9,6 +10,9 @@ type UserSessionCardProps = {
 
 export const UserSessionCard = ({ user, onLogout }: UserSessionCardProps) => {
   const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const canManageTenants = roleCan(user.role, PERMISSIONS.TENANTS_MANAGE);
+  const canWriteFinance = roleCan(user.role, PERMISSIONS.FINANCE_WRITE);
+  const canReadReports = roleCan(user.role, PERMISSIONS.REPORTS_READ);
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -26,13 +30,34 @@ export const UserSessionCard = ({ user, onLogout }: UserSessionCardProps) => {
         <Button type="button" onClick={onLogout}>
           Sign out
         </Button>
-        {isSuperAdmin && (
+        <Link
+          to="/access"
+          className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-medium text-teal-900 hover:bg-teal-100"
+        >
+          Role & access
+        </Link>
+        {canManageTenants && (
           <Link
             to="/tenants"
             className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
           >
             Manage companies
           </Link>
+        )}
+        {canWriteFinance && (
+          <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-900">
+            Finance write enabled
+          </span>
+        )}
+        {!canWriteFinance && canReadReports && (
+          <span className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm text-slate-700">
+            Read-only reports access
+          </span>
+        )}
+        {isSuperAdmin && (
+          <span className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm text-violet-900">
+            Platform admin
+          </span>
         )}
         <Link
           to="/login"
