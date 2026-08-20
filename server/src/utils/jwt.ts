@@ -6,6 +6,7 @@ export type AuthTokenPayload = {
   sub: string;
   email: string;
   role: UserRole;
+  tenantId?: string | null;
 };
 
 export const signAccessToken = (payload: AuthTokenPayload): string => {

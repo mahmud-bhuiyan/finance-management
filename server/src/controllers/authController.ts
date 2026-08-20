@@ -10,10 +10,13 @@ import {
   registerSchema,
 } from "../validators/authValidators.js";
 
+const isProduction = env.NODE_ENV === "production";
+
 const cookieOptions = (): CookieOptions => ({
   httpOnly: true,
-  secure: env.NODE_ENV === "production",
-  sameSite: "lax",
+  secure: isProduction,
+  // Cross-origin client ↔ API in production requires SameSite=None + Secure.
+  sameSite: isProduction ? "none" : "lax",
   maxAge: env.JWT_COOKIE_MAX_AGE_MS,
   path: "/",
 });
@@ -48,12 +51,7 @@ export const login: RequestHandler = async (req, res, next) => {
 
 export const logout: RequestHandler = (_req, res) => {
   res
-    .clearCookie(env.JWT_COOKIE_NAME, {
-      httpOnly: true,
-      secure: env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-    })
+    .clearCookie(env.JWT_COOKIE_NAME, cookieOptions())
     .status(200)
     .json({ ok: true });
 };

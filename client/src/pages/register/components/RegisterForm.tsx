@@ -60,7 +60,7 @@ export const RegisterForm = ({
       />
       {error && <ErrorBanner message={error} />}
       <div className="pt-1">
-        <AuthButton type="submit" disabled={submitting}>
+        <AuthButton type="submit" tone="pink" disabled={submitting}>
           {submitting ? "Signing up…" : "Sign up"}
         </AuthButton>
       </div>

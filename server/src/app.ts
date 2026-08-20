@@ -1,6 +1,7 @@
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import express from "express";
+import { API_PREFIX, API_VERSION } from "./config/api.js";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/index.js";
@@ -10,7 +11,7 @@ export const createApp = () => {
 
   app.use(
     cors({
-      origin: env.FRONTEND_URL,
+      origin: env.CLIENT_URL,
       credentials: true,
     }),
   );
@@ -21,11 +22,12 @@ export const createApp = () => {
     res.json({
       ok: true,
       message: "Finance Management System API",
-      docs: "/api/health",
+      version: API_VERSION,
+      docs: `${API_PREFIX}/health`,
     });
   });
 
-  app.use("/api", apiRouter);
+  app.use(API_PREFIX, apiRouter);
   app.use(errorHandler);
 
   return app;

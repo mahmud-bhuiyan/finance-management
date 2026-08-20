@@ -1,4 +1,14 @@
-const API_BASE = "";
+export const API_VERSION = "v1";
+
+const apiOrigin = (import.meta.env.VITE_API_URL ?? "").replace(/\/+$/, "");
+
+export const API_BASE = `${apiOrigin}/api/${API_VERSION}`;
+
+/** Paths are relative to API_BASE, e.g. `/auth/login` → `/api/v1/auth/login`. */
+const toApiPath = (path: string) => {
+  const withSlash = path.startsWith("/") ? path : `/${path}`;
+  return withSlash.replace(/^\/api(?:\/v\d+)?(?=\/|$)/, "") || "/";
+};
 
 type ApiErrorBody = {
   ok?: boolean;
@@ -22,7 +32,7 @@ export const apiFetch = async <T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> => {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${API_BASE}${toApiPath(path)}`, {
     ...options,
     credentials: "include",
     headers: {

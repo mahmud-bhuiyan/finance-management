@@ -1,0 +1,33 @@
+---
+description: Use server/client folders and /api/v1 routes; keep Postman git+cloud in sync
+alwaysApply: true
+---
+
+# Project conventions
+
+## Folders
+
+- Express API lives in **`server/`**. React app lives in **`client/`**.
+- Do not create or refer to `backend/` or `frontend/` in this repo.
+- Say "server" and "client" in docs, comments, scripts, and env names (`CLIENT_URL`).
+- Env files: **`server/.env.local`** (secrets; copy from `server/.env.local.example`) and **`client/.env`** only (public `VITE_*`).
+
+## API versioning
+
+- All HTTP routes are under **`/api/v1/`**.
+- Server prefix: `server/src/config/api.ts` (`API_PREFIX`).
+- Client base: `client/src/lib/api.ts` (`API_BASE`). Call `/auth/login`, not `/api/auth/login`.
+- Local: leave `client/.env` `VITE_API_URL` empty and keep the Vite `/api` proxy. Production (cross-origin): set `client/.env` `VITE_API_URL` to the API origin and `server/.env.local` `CLIENT_URL` to the SPA origin.
+- Breaking changes get `/api/v2` while `/api/v1` stays. Do not add unversioned `/api/...` routes.
+
+## Postman (git + cloud sync)
+
+- **One** collection only — do not create parallel collections per step.
+- Git file: **`docs/postman/FMS-API.postman_collection.json`**
+- Cloud IDs / checklist: **`docs/postman/SYNC.md`** (UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`)
+- When adding or changing any `/api/v1` route, in the **same change**:
+  1. Update the JSON (request, sample body, variables, short description, useful tests).
+  2. If Postman MCP (`plugin-postman-postman`) is **ready**, push the same update to that cloud UID (`putCollection` / request APIs) and add a short **collection comment** describing the change.
+  3. If MCP is not connected, still update the JSON and note cloud sync as follow-up.
+- Auth is cookie-based (`fms_token`); do not invent a separate Bearer-only flow unless the API adds one.
+- Keep `baseUrl` default as `http://localhost:4000/api/v1`.

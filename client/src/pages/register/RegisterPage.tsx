@@ -9,6 +9,7 @@ export const RegisterPage = () => {
   return (
     <AuthScreen
       icon={<UserPlusIcon />}
+      tone="pink"
       title="Create account"
       subtitle="Sign up to access your developer notes."
       footer={

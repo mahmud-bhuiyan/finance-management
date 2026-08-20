@@ -6,47 +6,72 @@ See plan: [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md)
 ## Stack (Step 01)
 
 - **PostgreSQL** + **Prisma**
-- **Express** (TypeScript) — `routes` / `controllers` / `services` / `middleware`
-- **React** + **Vite** + **Tailwind CSS**
+- **Express** (TypeScript) in `server/` — `routes` / `controllers` / `services` / `middleware`
+- **React** + **Vite** + **Tailwind CSS** in `client/`
+- HTTP API prefix: `/api/v1/`
 
 ## Quick start
 
 ### 1. Database
 
-Create a Postgres database named `fms_dev` (or update `server/.env`).
+Create a Postgres database named `fms_dev` (or update `server/.env.local`).
 
 ### 2. Server
 
 ```bash
 cd server
-cp .env.example .env   # if needed; edit DATABASE_URL
+cp .env.local.example .env.local   # if needed; edit DATABASE_URL
 npm install
 npx prisma generate
-npx prisma migrate dev --name step01_health
+npm run prisma:migrate
 npm run dev
 ```
 
 API: http://localhost:4000  
-Health: http://localhost:4000/api/health
+Health: http://localhost:4000/api/v1/health
 
 ### 3. Client
 
 ```bash
 cd client
+cp .env.example .env   # leave VITE_API_URL empty locally
 npm install
 npm run dev
 ```
 
 App: http://localhost:5173
 
+Locally the client calls `/api/v1` and Vite proxies to the server. In production (cross-origin), set `client/.env` `VITE_API_URL` to the API origin (no trailing slash) and set `server/.env.local` `CLIENT_URL` to the deployed SPA origin.
+
+Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE_*` only).
+
 ## Manual tests
 
 - Step 01: [`docs/manual-test-guides/step-01-project-scaffold.md`](docs/manual-test-guides/step-01-project-scaffold.md) · [PDF](docs/manual-test-guides/step-01-project-scaffold.pdf)
 - Step 02: [`docs/manual-test-guides/step-02-auth.md`](docs/manual-test-guides/step-02-auth.md) · [PDF](docs/manual-test-guides/step-02-auth.pdf)
+- Step 03: [`docs/manual-test-guides/step-03-tenants.md`](docs/manual-test-guides/step-03-tenants.md) · [PDF](docs/manual-test-guides/step-03-tenants.pdf)
+
+## Postman (API)
+
+- Cloud: **FMS API (v1)** in Postman (IDs in [`docs/postman/SYNC.md`](docs/postman/SYNC.md))
+- Git: [`docs/postman/FMS-API.postman_collection.json`](docs/postman/FMS-API.postman_collection.json) (import if needed)
+- How-to: [`docs/postman/README.md`](docs/postman/README.md)
+
+Start the server first (`cd server && npm run dev`). When APIs change, update the JSON **and** the cloud collection (if Postman MCP is connected), and leave a short collection comment.
 
 ## Auth env (Step 02)
 
-In `server/.env` set `JWT_SECRET` (min 32 characters). Copy keys from `server/.env.example` if needed.
+In `server/.env.local` set `JWT_SECRET` (min 32 characters). Copy keys from `server/.env.local.example` if needed.
+
+## Super Admin env (Step 03)
+
+In `server/.env.local` set:
+
+- `SUPER_ADMIN_EMAIL`
+- `SUPER_ADMIN_PASSWORD` (min 8 characters)
+- `SUPER_ADMIN_NAME` (optional)
+
+On `npm run dev`, the API creates that Super Admin if the email does not exist yet. Default examples in `.env.local.example`: `superadmin@fms.local` / `password123`.
 
 ## Project layout
 
@@ -59,6 +84,9 @@ finance-management/
     hooks/                                       # shared hooks only
     lib/
   docs/manual-test-guides/                       # MD + PDF per step
+  docs/postman/                                  # Importable Postman collection
 ```
 
-See coding rules in [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md) §3–4 and `.cursor/rules/client-structure.mdc`.
+See coding rules in [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md) §3–4 and `.cursor/rules/` (`project-conventions`, `server-structure`, `client-structure`).
+
+Folders are **`server/`** and **`client/`**. HTTP APIs live under **`/api/v1/`**.

@@ -16,7 +16,7 @@
 - [ ] Node.js 20+ installed (`node -v`)
 - [ ] PostgreSQL running locally
 - [ ] Database created (example): `fms_dev`
-- [ ] `server/.env` has a valid `DATABASE_URL` (copy from `.env.example` if needed)
+- [ ] `server/.env.local` has a valid `DATABASE_URL` (copy from `.env.local.example` if needed)
 
 Example `DATABASE_URL`:
 
@@ -31,15 +31,17 @@ postgresql://USER:PASSWORD@localhost:5432/fms_dev?schema=public
 From `finance-management/server`:
 
 ```bash
+cp .env.local.example .env.local   # if needed; edit DATABASE_URL
 npm install
 npx prisma generate
-npx prisma migrate dev --name step01_health
+npm run prisma:migrate
 npm run dev
 ```
 
 From `finance-management/client` (new terminal):
 
 ```bash
+cp .env.example .env   # leave VITE_API_URL empty locally
 npm install
 npm run dev
 ```
@@ -60,9 +62,9 @@ npm run dev
 
 | # | Test | Expected | Pass? |
 |---|------|----------|-------|
-| B1 | `npx prisma migrate dev` succeeds | Migration applied without error | [ ] |
-| B2 | GET `http://localhost:4000/api/health` | HTTP 200, `"ok": true`, `database.connected: true` | [ ] |
-| B3 | Stop Postgres (or break `DATABASE_URL`) and hit `/api/health` again | HTTP 503 (or ok false), `database.connected: false` with an error message | [ ] |
+| B1 | `npm run prisma:migrate` succeeds | Migration applied without error | [ ] |
+| B2 | GET `http://localhost:4000/api/v1/health` | HTTP 200, `"ok": true`, `database.connected: true` | [ ] |
+| B3 | Stop Postgres (or break `DATABASE_URL`) and hit `/api/v1/health` again | HTTP 503 (or ok false), `database.connected: false` with an error message | [ ] |
 | B4 | Restore Postgres / correct URL | Health returns connected again | [ ] |
 
 ### C. Client + Tailwind
