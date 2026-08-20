@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Step **01** done, Step **02** done, Step **03** (Tenants + Super Admin) in progress.  
+> Status: **In progress** — Steps **01–03** done, Step **04** (RBAC) in progress.  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -72,7 +72,8 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 4. **Page-based folders:** each route is `pages/<page>/` with its own `components/` and `hooks/` for page-only code. Keep `*Page.tsx` thin.  
 5. **Shared components are sorted by role** under `components/`: `ui/`, `feedback/`, `layout/`, `forms/` — so pieces are easy to find.  
 6. Shared hooks (e.g. `useAuth`) stay in `src/hooks/`; page-only hooks stay next to the page.  
-7. Prefer composition over prop-heavy mega-components.
+7. Prefer composition over prop-heavy mega-components.  
+8. **SPA shell:** `main.tsx` wraps the app with global contexts (`BrowserRouter`, `AuthProvider`, …); `App.tsx` holds the route table only. Use `Link` / `useNavigate` for in-app navigation — no full page reloads.
 
 ### Server (Express — organized & findable)
 
@@ -146,6 +147,8 @@ finance-management/
         forms/               # shared form helpers (multi-page)
       hooks/                 # shared only (e.g. useAuth)
       lib/                   # api client, helpers
+      main.tsx               # mount + global providers (router, auth, …)
+      App.tsx                # route table only (Routes / Route)
   docs/
     manual-test-guides/      # Step 01…N checklists (Markdown + PDF)
     postman/                 # FMS API (v1) — git JSON + cloud sync (see SYNC.md)
@@ -203,7 +206,7 @@ For every step, maintain a checklist under:
 
 `docs/manual-test-guides/step-XX-<name>.md`
 
-(Optional: export that MD to PDF in the same folder for a printable guide.)
+Export the same MD to **PDF in the same folder** (required — see §8 manual test rule).
 
 | Step | Name | Delivers | Maps to |
 |------|------|----------|---------|
@@ -225,14 +228,15 @@ For every step, maintain a checklist under:
 ### Manual test rule
 
 1. Implement the step.  
-2. Open the matching guide in `docs/manual-test-guides/`.  
-3. Run every checklist item (happy path + at least one auth/tenant negative case where relevant).  
+2. Add or update `docs/manual-test-guides/step-XX-<name>.md` **and** generate the matching PDF in the same folder (`step-XX-<name>.pdf`). From repo root: `npx md-to-pdf docs/manual-test-guides/step-XX-<name>.md` (see `docs/manual-test-guides/README.md`).  
+3. Open the guide and run every checklist item (happy path + at least one auth/tenant negative case where relevant).  
 4. If the step added or changed HTTP APIs, update `docs/postman/FMS-API.postman_collection.json`; if Postman MCP is connected, sync the cloud collection and leave a short collection comment (see `docs/postman/SYNC.md`). Spot-check those requests in Postman.  
 5. Only then mark related Notion tasks **Done** and start the next step.
 
 Step 01 guide: `finance-management/docs/manual-test-guides/step-01-project-scaffold.md`  
 Step 02 guide: `finance-management/docs/manual-test-guides/step-02-auth.md`  
 Step 03 guide: `finance-management/docs/manual-test-guides/step-03-tenants.md`  
+Step 04 guide: `finance-management/docs/manual-test-guides/step-04-rbac.md`  
 Create each next guide when that step starts.
 
 ---
@@ -286,9 +290,9 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Finish **Step 03 — Tenants + Super Admin** and pass `docs/manual-test-guides/step-03-tenants.md`.  
-2. Mark related Notion tasks Done (FMS-4, Step 03).  
-3. Continue with **Step 04 — RBAC**.  
+1. Finish **Step 04 — RBAC** and pass `docs/manual-test-guides/step-04-rbac.md`.  
+2. Mark related Notion tasks Done (Implement RBAC, tenant permission checks).  
+3. Continue with **Step 05 — Audit foundation**.  
 
 ---
 
@@ -305,6 +309,6 @@ For every major step, record briefly:
 | Server shape | routes / controllers / services / middleware / validators |
 | API prefix | `/api/v1/` (keep v1 when adding v2) |
 | Over-engineering | Avoid — practical PERN |
-| Testing | Manual test guide per step in `docs/` (MD + optional PDF); one Postman collection in git + cloud (`docs/postman/`, see `SYNC.md`) |
+| Testing | Manual test guide per step in `docs/` (**MD + PDF**); one Postman collection in git + cloud (`docs/postman/`, see `SYNC.md`) |
 | App folders | `server/` (Express API) + `client/` (React) — not `backend/` / `frontend/` |
 | Notion | Phases + Tasks; sort/group by phase |

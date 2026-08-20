@@ -31,3 +31,11 @@ alwaysApply: true
   3. If MCP is not connected, still update the JSON and note cloud sync as follow-up.
 - Auth is cookie-based (`fms_token`); do not invent a separate Bearer-only flow unless the API adds one.
 - Keep `baseUrl` default as `http://localhost:4000/api/v1`.
+
+## Manual test guides (MD + PDF)
+
+- Each implementation step gets **`docs/manual-test-guides/step-XX-<name>.md`** and a matching **`step-XX-<name>.pdf`** in the same folder.
+- When you **create or materially update** a step guide MD, **generate the PDF in the same change** (do not leave PDF as follow-up).
+- Command (from repo root): `npx md-to-pdf docs/manual-test-guides/step-XX-<name>.md`
+- Also update **`README.md`** manual-test links if the step is new, and **`docs/FMS-IMPLEMENTATION-PLAN.md`** step list when applicable.
+- See **`docs/manual-test-guides/README.md`** for the full checklist.

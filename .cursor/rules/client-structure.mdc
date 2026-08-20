@@ -49,3 +49,9 @@ components/
 
 - Cross-page hooks only (e.g. `useAuth`) live in `src/hooks/`.
 - Everything else stays under the page folder.
+
+## App shell (SPA — no full page reloads)
+
+- **`main.tsx`** — mount the app and wrap it with global providers only (`BrowserRouter`, `AuthProvider`, future contexts). Providers stay mounted so session state survives route changes.
+- **`App.tsx`** — route table only (`Routes` / `Route`). No providers here.
+- Navigate with **`Link`** or **`useNavigate`** from `react-router-dom` — never plain `<a href="/…">` for in-app links (that triggers a full reload).
