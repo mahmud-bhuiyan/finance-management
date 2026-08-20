@@ -33,6 +33,22 @@ enum AuditAction {
   DELETE
 }
 
+enum FieldTarget {
+  EXPENSE
+  INCOME
+}
+
+enum FieldType {
+  TEXT
+  LONG_TEXT
+  NUMBER
+  CURRENCY
+  DATE
+  BOOLEAN
+  DROPDOWN
+  FILE
+}
+
 /// Company / tenant (Step 03). Super Admin has no tenant.
 model Tenant {
   id        String       @id @default(cuid())
@@ -41,8 +57,9 @@ model Tenant {
   status    TenantStatus @default(ACTIVE)
   createdAt DateTime     @default(now()) @map("created_at")
   updatedAt DateTime     @updatedAt @map("updated_at")
-  users     User[]
-  auditLogs AuditLog[]
+  users            User[]
+  auditLogs        AuditLog[]
+  fieldDefinitions FieldDefinition[]
 
   @@map("tenants")
 }
@@ -82,4 +99,28 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([actorId])
   @@map("audit_logs")
+}
+
+/// Tenant-scoped custom field definition (Step 06). Reused across expense/income modules.
+model FieldDefinition {
+  id                  String      @id @default(cuid())
+  tenantId            String      @map("tenant_id")
+  tenant              Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  target              FieldTarget
+  key                 String
+  label               String
+  fieldType           FieldType   @map("field_type")
+  required            Boolean     @default(false)
+  enabled             Boolean     @default(true)
+  sortOrder           Int         @default(0) @map("sort_order")
+  options             Json?
+  showInReports       Boolean     @default(true) @map("show_in_reports")
+  visibleToNormalUser Boolean     @default(false) @map("visible_to_normal_user")
+  defaultValue        Json?       @map("default_value")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@unique([tenantId, target, key])
+  @@index([tenantId, target, enabled, sortOrder])
+  @@map("field_definitions")
 }
