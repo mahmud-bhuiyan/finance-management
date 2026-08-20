@@ -1,21 +1,22 @@
-import type { ReactNode } from "react";
+import type { ReactNode, ButtonHTMLAttributes } from "react";
+
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  children: ReactNode;
+};
 
 export const Button = ({
   children,
   type = "button",
-  onClick,
   className = "",
-}: {
-  children: ReactNode;
-  type?: "button" | "submit" | "reset";
-  onClick?: () => void;
-  className?: string;
-}) => {
+  disabled,
+  ...props
+}: ButtonProps) => {
   return (
     <button
       type={type}
-      onClick={onClick}
-      className={`rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 ${className}`}
+      disabled={disabled}
+      className={`rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+      {...props}
     >
       {children}
     </button>

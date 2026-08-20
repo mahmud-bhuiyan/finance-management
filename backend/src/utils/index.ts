@@ -1,2 +1,1 @@
-// Shared helpers (dates, money, pagination, …) added as needed.
-export {};
+export { AppError } from "./AppError.js";

@@ -1,0 +1,49 @@
+---
+description: Frontend page folders and sorted shared components
+globs: frontend/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend structure
+
+## Pages are folders
+
+Each route lives under `frontend/src/pages/<page-name>/`:
+
+```text
+pages/
+  login/
+    LoginPage.tsx
+    components/     # only used by this page
+    hooks/          # only used by this page
+  register/
+    RegisterPage.tsx
+    components/
+    hooks/
+  home/
+    HomePage.tsx
+    components/
+```
+
+- Keep `*Page.tsx` thin: compose page components + hooks.
+- Page-only UI → `pages/<page>/components/`.
+- Page-only hooks → `pages/<page>/hooks/`.
+- Do **not** dump page-specific files into global `components/` or `hooks/`.
+
+## Shared `components/` — sorted by role
+
+```text
+components/
+  ui/         # Button, Input, Select, Modal, Table, …
+  feedback/   # LoadingState, EmptyState, ErrorBanner, …
+  layout/     # AppShell, Sidebar, PageHeader, …
+  forms/      # shared form helpers used by multiple pages
+```
+
+- Put a shared piece here only after it is reused ~2–3 times (or clearly cross-page).
+- Prefer importing from the category folder (e.g. `components/ui/Button`).
+
+## Shared hooks
+
+- Cross-page hooks only (e.g. `useAuth`) live in `src/hooks/`.
+- Everything else stays under the page folder.

@@ -1,2 +1,2 @@
-// Zod schemas live here (auth, tenants, expenses, …) starting Step 02.
-export {};
+// Zod schemas live in dedicated files (e.g. authValidators.ts).
+export { loginSchema, registerSchema } from "./authValidators.js";
