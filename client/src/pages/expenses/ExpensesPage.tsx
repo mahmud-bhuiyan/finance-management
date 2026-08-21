@@ -4,10 +4,16 @@ import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
-import type { CreateExpensePayload, Expense } from "../../lib/expenses";
+import type {
+  CreateExpensePayload,
+  Expense,
+  ExpenseListFilters,
+} from "../../lib/expenses";
 import { currentYearMonth } from "../../lib/expenses";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
 import { listSupportItems, type SupportItem } from "../../lib/supportData";
+import { ExpenseAttachments } from "./components/ExpenseAttachments";
+import { ExpenseFilters } from "./components/ExpenseFilters";
 import { ExpenseForm } from "./components/ExpenseForm";
 import { ExpenseList } from "./components/ExpenseList";
 import { ExpenseMonthPicker } from "./components/ExpenseMonthPicker";
@@ -22,15 +28,25 @@ export const ExpensesPage = () => {
     (canWrite || roleCan(user.role, PERMISSIONS.REPORTS_READ)) &&
     !!user.tenant;
   const initial = useMemo(() => currentYearMonth(), []);
-  const [year, setYear] = useState(initial.year);
-  const [month, setMonth] = useState(initial.month);
+  const [filters, setFilters] = useState<ExpenseListFilters>({
+    year: initial.year,
+    month: initial.month,
+    q: "",
+    categoryId: "",
+    departmentId: "",
+    vendorId: "",
+    page: 1,
+    pageSize: 20,
+    sortBy: "occurredOn",
+    sortDir: "desc",
+  });
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [categories, setCategories] = useState<SupportItem[]>([]);
   const [departments, setDepartments] = useState<SupportItem[]>([]);
   const [vendors, setVendors] = useState<SupportItem[]>([]);
-  const expensesApi = useExpenses(!authLoading && canRead, year, month);
+  const expensesApi = useExpenses(!authLoading && canRead, filters);
 
   useEffect(() => {
     if (!canRead) {
@@ -64,7 +80,7 @@ export const ExpensesPage = () => {
     return <Navigate to="/" replace />;
   }
 
-  const defaultDate = `${year}-${String(month).padStart(2, "0")}-01`;
+  const defaultDate = `${filters.year}-${String(filters.month).padStart(2, "0")}-01`;
 
   const withCurrent = (
     options: SupportItem[],
@@ -94,6 +110,10 @@ export const ExpensesPage = () => {
   );
   const vendorOptions = withCurrent(vendors, editing?.vendor ?? null);
 
+  const patchFilters = (next: Partial<ExpenseListFilters>) => {
+    setFilters((current) => ({ ...current, ...next }));
+  };
+
   const handleSubmit = async (payload: CreateExpensePayload) => {
     setSubmitting(true);
     expensesApi.setError(null);
@@ -102,7 +122,8 @@ export const ExpensesPage = () => {
         await expensesApi.updateExpense(editing.id, payload);
         setEditing(null);
       } else {
-        await expensesApi.createExpense(payload);
+        const created = await expensesApi.createExpense(payload);
+        setEditing(created);
       }
     } catch (error) {
       expensesApi.setError(
@@ -145,9 +166,9 @@ export const ExpensesPage = () => {
             Expenses
           </h1>
           <p className="mt-2 text-slate-600">
-            Core expense records use date and amount. Optional category,
-            department, and vendor come from support data. Custom fields come
-            from the field builder.
+            Filter and page the list, then attach receipts while editing an
+            expense. Uploads stay on the server and download only through the
+            API.
           </p>
           <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium">
             <Link to="/" className="text-teal-800 hover:underline">
@@ -162,29 +183,47 @@ export const ExpensesPage = () => {
         </div>
 
         <ExpenseMonthPicker
-          year={year}
-          month={month}
+          year={filters.year}
+          month={filters.month}
           onChange={(next) => {
-            setYear(next.year);
-            setMonth(next.month);
+            patchFilters({ year: next.year, month: next.month, page: 1 });
             setEditing(null);
           }}
+        />
+
+        <ExpenseFilters
+          filters={filters}
+          categories={categories}
+          departments={departments}
+          vendors={vendors}
+          onChange={patchFilters}
         />
 
         {expensesApi.error && <ErrorBanner message={expensesApi.error} />}
 
         {canWrite && (
-          <ExpenseForm
-            fields={expensesApi.fields}
-            categories={categoryOptions}
-            departments={departmentOptions}
-            vendors={vendorOptions}
-            submitting={submitting}
-            editing={editing}
-            defaultDate={defaultDate}
-            onSubmit={handleSubmit}
-            onCancelEdit={() => setEditing(null)}
-          />
+          <>
+            <ExpenseForm
+              fields={expensesApi.fields}
+              categories={categoryOptions}
+              departments={departmentOptions}
+              vendors={vendorOptions}
+              submitting={submitting}
+              editing={editing}
+              defaultDate={defaultDate}
+              onSubmit={handleSubmit}
+              onCancelEdit={() => setEditing(null)}
+            />
+            {editing && (
+              <ExpenseAttachments
+                expenseId={editing.id}
+                canWrite={canWrite}
+                listAttachments={expensesApi.listAttachments}
+                uploadAttachment={expensesApi.uploadAttachment}
+                deleteAttachment={expensesApi.deleteAttachment}
+              />
+            )}
+          </>
         )}
 
         {expensesApi.loading ? (
@@ -193,10 +232,12 @@ export const ExpensesPage = () => {
           <ExpenseList
             expenses={expensesApi.expenses}
             fields={expensesApi.fields}
+            meta={expensesApi.meta}
             canWrite={canWrite}
             busyId={busyId}
             onEdit={setEditing}
             onDelete={handleDelete}
+            onPageChange={(page) => patchFilters({ page })}
           />
         )}
       </main>

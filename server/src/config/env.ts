@@ -18,6 +18,9 @@ const envSchema = z.object({
   SUPER_ADMIN_EMAIL: z.string().optional(),
   SUPER_ADMIN_PASSWORD: z.string().optional(),
   SUPER_ADMIN_NAME: z.string().optional(),
+  UPLOAD_DIR: z.string().default("./uploads"),
+  UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(5 * 1024 * 1024),
+  UPLOAD_MAX_PER_EXPENSE: z.coerce.number().int().positive().max(20).default(5),
 });
 
 const parsed = envSchema.safeParse(process.env);

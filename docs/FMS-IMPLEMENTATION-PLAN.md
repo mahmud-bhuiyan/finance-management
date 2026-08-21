@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–09** done. Next: Step **10** (Attachments + list UX).  
+> Status: **In progress** — Steps **01–09** done; Step **10** (Attachments + list UX) implemented (pending manual test pass).  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -242,6 +242,7 @@ Step 06 guide: `finance-management/docs/manual-test-guides/step-06-dynamic-field
 Step 07 guide: `finance-management/docs/manual-test-guides/step-07-dynamic-fields-ui.md`  
 Step 08 guide: `finance-management/docs/manual-test-guides/step-08-expense-core.md`  
 Step 09 guide: `finance-management/docs/manual-test-guides/step-09-expense-support-data.md`  
+Step 10 guide: `finance-management/docs/manual-test-guides/step-10-attachments-list-ux.md`  
 Create each next guide when that step starts.
 
 ---
@@ -295,15 +296,15 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Finish **Step 10 — Attachments + list UX** and pass its manual test guide.  
-2. Mark related Notion tasks Done (receipts/attachments, filters/search/pagination).  
-3. Continue with **Step 11 — Thin dashboard**.
+1. Run **Step 10** manual test guide and mark FMS-23 / FMS-24 Done when it passes.  
+2. Continue with **Step 11 — Thin dashboard**.  
+3. Then Step 12 (full dashboard) → 13 (reporting) → 14 (income).
 
 ### Remaining steps (10–14)
 
 | Step | Name | Status |
 |------|------|--------|
-| **10** | Attachments + list UX | Not started |
+| **10** | Attachments + list UX | Implemented — pending manual test |
 | **11** | Thin dashboard | Not started |
 | **12** | Full dashboard | Not started |
 | **13** | Reporting | Not started |

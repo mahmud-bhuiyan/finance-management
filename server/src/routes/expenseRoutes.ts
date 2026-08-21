@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { PERMISSIONS } from "../config/permissions.js";
 import {
+  create as createAttachment,
+  download as downloadAttachment,
+  list as listAttachments,
+  remove as removeAttachment,
+  uploadMiddleware,
+} from "../controllers/attachmentController.js";
+import {
   create,
   getById,
   list,
@@ -22,6 +29,27 @@ expenseRouter.get(
   "/",
   requireAnyPermission(PERMISSIONS.FINANCE_WRITE, PERMISSIONS.REPORTS_READ),
   list,
+);
+expenseRouter.get(
+  "/:id/attachments",
+  requireAnyPermission(PERMISSIONS.FINANCE_WRITE, PERMISSIONS.REPORTS_READ),
+  listAttachments,
+);
+expenseRouter.post(
+  "/:id/attachments",
+  requirePermission(PERMISSIONS.FINANCE_WRITE),
+  uploadMiddleware,
+  createAttachment,
+);
+expenseRouter.get(
+  "/:id/attachments/:attachmentId/download",
+  requireAnyPermission(PERMISSIONS.FINANCE_WRITE, PERMISSIONS.REPORTS_READ),
+  downloadAttachment,
+);
+expenseRouter.delete(
+  "/:id/attachments/:attachmentId",
+  requirePermission(PERMISSIONS.FINANCE_WRITE),
+  removeAttachment,
 );
 expenseRouter.get(
   "/:id",

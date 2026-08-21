@@ -1,30 +1,41 @@
 import { useCallback, useEffect, useState } from "react";
-import { ApiError, apiFetch } from "../../../lib/api";
+import { ApiError, apiFetch, apiUpload } from "../../../lib/api";
 import type {
   CreateExpensePayload,
   Expense,
+  ExpenseAttachment,
+  ExpenseListFilters,
+  ExpenseListMeta,
   ExpenseListResponse,
   UpdateExpensePayload,
 } from "../../../lib/expenses";
+import { buildExpenseListQuery } from "../../../lib/expenses";
 import type { FieldDefinition } from "../../../lib/fields";
 
-export const useExpenses = (
-  enabled: boolean,
-  year: number,
-  month: number,
-) => {
+const defaultMeta = (filters: ExpenseListFilters): ExpenseListMeta => ({
+  page: filters.page,
+  pageSize: filters.pageSize,
+  total: 0,
+  totalPages: 1,
+  sortBy: filters.sortBy,
+  sortDir: filters.sortDir,
+});
+
+export const useExpenses = (enabled: boolean, filters: ExpenseListFilters) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [fields, setFields] = useState<FieldDefinition[]>([]);
+  const [meta, setMeta] = useState<ExpenseListMeta>(() => defaultMeta(filters));
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const data = await apiFetch<ExpenseListResponse>(
-      `/expenses?year=${year}&month=${month}`,
+      `/expenses?${buildExpenseListQuery(filters)}`,
     );
     setExpenses(data.expenses);
     setFields(data.fields);
-  }, [year, month]);
+    setMeta(data.meta);
+  }, [filters]);
 
   useEffect(() => {
     if (!enabled) {
@@ -73,12 +84,46 @@ export const useExpenses = (
 
   const deleteExpense = async (id: string) => {
     await apiFetch<{ ok: boolean }>(`/expenses/${id}`, { method: "DELETE" });
-    setExpenses((current) => current.filter((expense) => expense.id !== id));
+    await refresh();
   };
+
+  const listAttachments = useCallback(async (expenseId: string) => {
+    const data = await apiFetch<{
+      ok: boolean;
+      attachments: ExpenseAttachment[];
+    }>(`/expenses/${expenseId}/attachments`);
+    return data.attachments;
+  }, []);
+
+  const uploadAttachment = useCallback(
+    async (expenseId: string, file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const data = await apiUpload<{
+        ok: boolean;
+        attachment: ExpenseAttachment;
+      }>(`/expenses/${expenseId}/attachments`, formData);
+      await refresh();
+      return data.attachment;
+    },
+    [refresh],
+  );
+
+  const deleteAttachment = useCallback(
+    async (expenseId: string, attachmentId: string) => {
+      await apiFetch<{ ok: boolean }>(
+        `/expenses/${expenseId}/attachments/${attachmentId}`,
+        { method: "DELETE" },
+      );
+      await refresh();
+    },
+    [refresh],
+  );
 
   return {
     expenses,
     fields,
+    meta,
     loading,
     error,
     setError,
@@ -86,5 +131,8 @@ export const useExpenses = (
     createExpense,
     updateExpense,
     deleteExpense,
+    listAttachments,
+    uploadAttachment,
+    deleteAttachment,
   };
 };

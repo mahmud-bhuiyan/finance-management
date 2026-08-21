@@ -21,12 +21,12 @@ import type {
 } from "../validators/expenseValidators.js";
 
 const ENTITY_TYPE = "FinancialTransaction";
-const LIST_LIMIT = 200;
 
 type ExpenseWithSupport = FinancialTransaction & {
   category: ExpenseCategory | null;
   department: Department | null;
   vendor: Vendor | null;
+  _count: { attachments: number };
 };
 
 const parseDateOnly = (value: string) => {
@@ -170,6 +170,7 @@ const toPublicExpense = (
   category: toRef(row.category),
   department: toRef(row.department),
   vendor: toRef(row.vendor),
+  attachmentCount: row._count.attachments,
   createdById: row.createdById,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
@@ -179,6 +180,11 @@ const supportInclude = {
   category: true,
   department: true,
   vendor: true,
+  _count: {
+    select: {
+      attachments: { where: { deletedAt: null } },
+    },
+  },
 } as const;
 
 const loadExpenseFields = async (tenantId: string) =>
@@ -222,11 +228,10 @@ const getExpenseForTenant = async (tenantId: string, id: string) => {
   return expense;
 };
 
-export const listExpenses = async (
+const buildListWhere = (
   tenantId: string,
   query: ListExpensesQuery,
-  role: UserRole,
-) => {
+): Prisma.FinancialTransactionWhereInput => {
   const where: Prisma.FinancialTransactionWhereInput = {
     tenantId,
     type: "EXPENSE",
@@ -239,21 +244,71 @@ export const listExpenses = async (
     where.occurredOn = { gte: start, lt: end };
   }
 
-  const [rows, fields] = await Promise.all([
+  if (query.categoryId) {
+    where.categoryId = query.categoryId;
+  }
+  if (query.departmentId) {
+    where.departmentId = query.departmentId;
+  }
+  if (query.vendorId) {
+    where.vendorId = query.vendorId;
+  }
+
+  const search = query.q?.trim();
+  if (search) {
+    where.notes = { contains: search, mode: "insensitive" };
+  }
+
+  return where;
+};
+
+const buildListOrderBy = (
+  query: ListExpensesQuery,
+): Prisma.FinancialTransactionOrderByWithRelationInput[] => {
+  const dir = query.sortDir;
+  if (query.sortBy === "amount") {
+    return [{ amount: dir }, { createdAt: "desc" }];
+  }
+  if (query.sortBy === "createdAt") {
+    return [{ createdAt: dir }];
+  }
+  return [{ occurredOn: dir }, { createdAt: "desc" }];
+};
+
+export const listExpenses = async (
+  tenantId: string,
+  query: ListExpensesQuery,
+  role: UserRole,
+) => {
+  const where = buildListWhere(tenantId, query);
+  const skip = (query.page - 1) * query.pageSize;
+
+  const [rows, total, fields] = await Promise.all([
     prisma.financialTransaction.findMany({
       where,
       include: supportInclude,
-      orderBy: [{ occurredOn: "desc" }, { createdAt: "desc" }],
-      take: LIST_LIMIT,
+      orderBy: buildListOrderBy(query),
+      skip,
+      take: query.pageSize,
     }),
+    prisma.financialTransaction.count({ where }),
     loadExpenseFields(tenantId),
   ]);
 
   const visibleFields = visibleFieldsForRole(fields, role);
+  const totalPages = Math.max(1, Math.ceil(total / query.pageSize));
 
   return {
     expenses: rows.map((row) => toPublicExpense(row, visibleFields)),
     fields: visibleFields.map(toPublicField),
+    meta: {
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+      totalPages,
+      sortBy: query.sortBy,
+      sortDir: query.sortDir,
+    },
   };
 };
 

@@ -1,0 +1,2 @@
+-- RenameIndex
+ALTER INDEX "financial_transactions_tenant_id_type_deleted_at_occurred_on_id" RENAME TO "financial_transactions_tenant_id_type_deleted_at_occurred_o_idx";
