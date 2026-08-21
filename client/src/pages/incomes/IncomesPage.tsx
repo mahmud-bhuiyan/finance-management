@@ -5,21 +5,21 @@ import { LoadingState } from "../../components/feedback/LoadingState";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
 import type {
-  CreateExpensePayload,
-  Expense,
-  ExpenseListFilters,
-} from "../../lib/expenses";
-import { currentYearMonth } from "../../lib/expenses";
+  CreateIncomePayload,
+  Income,
+  IncomeListFilters,
+} from "../../lib/incomes";
+import { currentYearMonth } from "../../lib/incomes";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
 import { listSupportItems, type SupportItem } from "../../lib/supportData";
-import { ExpenseAttachments } from "./components/ExpenseAttachments";
-import { ExpenseFilters } from "./components/ExpenseFilters";
-import { ExpenseForm } from "./components/ExpenseForm";
-import { ExpenseList } from "./components/ExpenseList";
-import { ExpenseMonthPicker } from "./components/ExpenseMonthPicker";
-import { useExpenses } from "./hooks/useExpenses";
+import { IncomeAttachments } from "./components/IncomeAttachments";
+import { IncomeFilters } from "./components/IncomeFilters";
+import { IncomeForm } from "./components/IncomeForm";
+import { IncomeList } from "./components/IncomeList";
+import { IncomeMonthPicker } from "./components/IncomeMonthPicker";
+import { useIncomes } from "./hooks/useIncomes";
 
-export const ExpensesPage = () => {
+export const IncomesPage = () => {
   const { user, loading: authLoading } = useAuth();
   const canWrite =
     !!user && roleCan(user.role, PERMISSIONS.FINANCE_WRITE);
@@ -28,7 +28,7 @@ export const ExpensesPage = () => {
     (canWrite || roleCan(user.role, PERMISSIONS.REPORTS_READ)) &&
     !!user.tenant;
   const initial = useMemo(() => currentYearMonth(), []);
-  const [filters, setFilters] = useState<ExpenseListFilters>({
+  const [filters, setFilters] = useState<IncomeListFilters>({
     year: initial.year,
     month: initial.month,
     q: "",
@@ -43,11 +43,11 @@ export const ExpensesPage = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [editing, setEditing] = useState<Expense | null>(null);
+  const [editing, setEditing] = useState<Income | null>(null);
   const [categories, setCategories] = useState<SupportItem[]>([]);
   const [departments, setDepartments] = useState<SupportItem[]>([]);
   const [vendors, setVendors] = useState<SupportItem[]>([]);
-  const expensesApi = useExpenses(!authLoading && canRead, filters);
+  const incomesApi = useIncomes(!authLoading && canRead, filters);
 
   useEffect(() => {
     if (!canRead) {
@@ -64,7 +64,7 @@ export const ExpensesPage = () => {
         setDepartments(nextDepartments);
         setVendors(nextVendors);
       } catch {
-        // Expense list can still work without pickers; form shows empty selects.
+        // Income list can still work without pickers; form shows empty selects.
       }
     })();
   }, [canRead]);
@@ -85,7 +85,7 @@ export const ExpensesPage = () => {
 
   const withCurrent = (
     options: SupportItem[],
-    current: Expense["category"],
+    current: Income["category"],
   ): SupportItem[] => {
     if (!current || options.some((item) => item.id === current.id)) {
       return options;
@@ -111,24 +111,24 @@ export const ExpensesPage = () => {
   );
   const vendorOptions = withCurrent(vendors, editing?.vendor ?? null);
 
-  const patchFilters = (next: Partial<ExpenseListFilters>) => {
+  const patchFilters = (next: Partial<IncomeListFilters>) => {
     setFilters((current) => ({ ...current, ...next }));
   };
 
-  const handleSubmit = async (payload: CreateExpensePayload) => {
+  const handleSubmit = async (payload: CreateIncomePayload) => {
     setSubmitting(true);
-    expensesApi.setError(null);
+    incomesApi.setError(null);
     try {
       if (editing) {
-        await expensesApi.updateExpense(editing.id, payload);
+        await incomesApi.updateIncome(editing.id, payload);
         setEditing(null);
       } else {
-        const created = await expensesApi.createExpense(payload);
+        const created = await incomesApi.createIncome(payload);
         setEditing(created);
       }
     } catch (error) {
-      expensesApi.setError(
-        error instanceof ApiError ? error.message : "Could not save expense",
+      incomesApi.setError(
+        error instanceof ApiError ? error.message : "Could not save income",
       );
       throw error;
     } finally {
@@ -137,19 +137,19 @@ export const ExpensesPage = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Soft-delete this expense? It will leave the list.")) {
+    if (!window.confirm("Soft-delete this income? It will leave the list.")) {
       return;
     }
     setBusyId(id);
-    expensesApi.setError(null);
+    incomesApi.setError(null);
     try {
-      await expensesApi.deleteExpense(id);
+      await incomesApi.deleteIncome(id);
       if (editing?.id === id) {
         setEditing(null);
       }
     } catch (error) {
-      expensesApi.setError(
-        error instanceof ApiError ? error.message : "Could not delete expense",
+      incomesApi.setError(
+        error instanceof ApiError ? error.message : "Could not delete income",
       );
     } finally {
       setBusyId(null);
@@ -164,12 +164,12 @@ export const ExpensesPage = () => {
             {canWrite ? "Company admin" : "Read only"}
           </p>
           <h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">
-            Expenses
+            Income
           </h1>
           <p className="mt-2 text-slate-600">
-            Filter and page the list, then attach receipts while editing an
-            expense. Uploads stay on the server and download only through the
-            API.
+            Record income on the shared ledger. Categories, departments, and
+            customers reuse the support data from Categories &amp; vendors.
+            Totals feed Net Balance on the dashboard.
           </p>
           <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium">
             <Link to="/" className="text-teal-800 hover:underline">
@@ -178,21 +178,21 @@ export const ExpensesPage = () => {
             <Link to="/dashboard" className="text-teal-800 hover:underline">
               Dashboard
             </Link>
+            <Link to="/expenses" className="text-teal-800 hover:underline">
+              Expenses
+            </Link>
             <Link to="/reports" className="text-teal-800 hover:underline">
               Reports
             </Link>
-            <Link to="/incomes" className="text-teal-800 hover:underline">
-              Income
-            </Link>
             {canWrite && (
               <Link to="/expense-support" className="text-teal-800 hover:underline">
-                Manage categories / vendors
+                Manage categories / customers
               </Link>
             )}
           </div>
         </div>
 
-        <ExpenseMonthPicker
+        <IncomeMonthPicker
           year={filters.year}
           month={filters.month}
           onChange={(next) => {
@@ -201,7 +201,7 @@ export const ExpensesPage = () => {
           }}
         />
 
-        <ExpenseFilters
+        <IncomeFilters
           filters={filters}
           categories={categories}
           departments={departments}
@@ -209,12 +209,12 @@ export const ExpensesPage = () => {
           onChange={patchFilters}
         />
 
-        {expensesApi.error && <ErrorBanner message={expensesApi.error} />}
+        {incomesApi.error && <ErrorBanner message={incomesApi.error} />}
 
         {canWrite && (
           <>
-            <ExpenseForm
-              fields={expensesApi.fields}
+            <IncomeForm
+              fields={incomesApi.fields}
               categories={categoryOptions}
               departments={departmentOptions}
               vendors={vendorOptions}
@@ -225,24 +225,24 @@ export const ExpensesPage = () => {
               onCancelEdit={() => setEditing(null)}
             />
             {editing && (
-              <ExpenseAttachments
-                expenseId={editing.id}
+              <IncomeAttachments
+                incomeId={editing.id}
                 canWrite={canWrite}
-                listAttachments={expensesApi.listAttachments}
-                uploadAttachment={expensesApi.uploadAttachment}
-                deleteAttachment={expensesApi.deleteAttachment}
+                listAttachments={incomesApi.listAttachments}
+                uploadAttachment={incomesApi.uploadAttachment}
+                deleteAttachment={incomesApi.deleteAttachment}
               />
             )}
           </>
         )}
 
-        {expensesApi.loading ? (
-          <LoadingState message="Loading expenses…" />
+        {incomesApi.loading ? (
+          <LoadingState message="Loading incomes…" />
         ) : (
-          <ExpenseList
-            expenses={expensesApi.expenses}
-            fields={expensesApi.fields}
-            meta={expensesApi.meta}
+          <IncomeList
+            incomes={incomesApi.incomes}
+            fields={incomesApi.fields}
+            meta={incomesApi.meta}
             canWrite={canWrite}
             busyId={busyId}
             onEdit={setEditing}

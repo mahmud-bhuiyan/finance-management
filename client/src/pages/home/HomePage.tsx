@@ -21,11 +21,11 @@ export const HomePage = () => {
           Finance Management System
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-          Step 11 Thin dashboard is running
+          Step 14 Income module is running
         </h1>
         <p className="text-lg text-slate-600">
-          Company admins and normal users can open KPI cards and expense charts
-          with date and dimension filters. Income stays at zero until Step 14.
+          Company admins can manage expenses and income on the shared ledger.
+          Dashboard Net Balance updates as Income − Expense.
         </p>
 
         <UserSessionCard user={user} onLogout={() => void logout()} />

@@ -6,6 +6,7 @@ import { ExpenseSupportPage } from "./pages/expense-support/ExpenseSupportPage";
 import { ExpensesPage } from "./pages/expenses/ExpensesPage";
 import { FieldsPage } from "./pages/fields/FieldsPage";
 import { HomePage } from "./pages/home/HomePage";
+import { IncomesPage } from "./pages/incomes/IncomesPage";
 import { LoginPage } from "./pages/login/LoginPage";
 import { RegisterPage } from "./pages/register/RegisterPage";
 import { ReportsPage } from "./pages/reports/ReportsPage";
@@ -22,6 +23,7 @@ const App = () => (
     <Route path="/dashboard" element={<DashboardPage />} />
     <Route path="/reports" element={<ReportsPage />} />
     <Route path="/expenses" element={<ExpensesPage />} />
+    <Route path="/incomes" element={<IncomesPage />} />
     <Route path="/expense-support" element={<ExpenseSupportPage />} />
     <Route path="/fields" element={<FieldsPage />} />
   </Routes>
