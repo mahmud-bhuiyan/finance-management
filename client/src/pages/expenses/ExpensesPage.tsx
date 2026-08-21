@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
@@ -7,6 +7,7 @@ import { ApiError } from "../../lib/api";
 import type { CreateExpensePayload, Expense } from "../../lib/expenses";
 import { currentYearMonth } from "../../lib/expenses";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
+import { listSupportItems, type SupportItem } from "../../lib/supportData";
 import { ExpenseForm } from "./components/ExpenseForm";
 import { ExpenseList } from "./components/ExpenseList";
 import { ExpenseMonthPicker } from "./components/ExpenseMonthPicker";
@@ -26,7 +27,30 @@ export const ExpensesPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Expense | null>(null);
+  const [categories, setCategories] = useState<SupportItem[]>([]);
+  const [departments, setDepartments] = useState<SupportItem[]>([]);
+  const [vendors, setVendors] = useState<SupportItem[]>([]);
   const expensesApi = useExpenses(!authLoading && canRead, year, month);
+
+  useEffect(() => {
+    if (!canRead) {
+      return;
+    }
+    void (async () => {
+      try {
+        const [nextCategories, nextDepartments, nextVendors] = await Promise.all([
+          listSupportItems("category", { active: true }),
+          listSupportItems("department", { active: true }),
+          listSupportItems("vendor", { active: true }),
+        ]);
+        setCategories(nextCategories);
+        setDepartments(nextDepartments);
+        setVendors(nextVendors);
+      } catch {
+        // Expense list can still work without pickers; form shows empty selects.
+      }
+    })();
+  }, [canRead]);
 
   if (authLoading) {
     return <LoadingState message="Loading session…" />;
@@ -41,6 +65,34 @@ export const ExpensesPage = () => {
   }
 
   const defaultDate = `${year}-${String(month).padStart(2, "0")}-01`;
+
+  const withCurrent = (
+    options: SupportItem[],
+    current: Expense["category"],
+  ): SupportItem[] => {
+    if (!current || options.some((item) => item.id === current.id)) {
+      return options;
+    }
+    return [
+      {
+        id: current.id,
+        tenantId: user.tenant?.id ?? "",
+        name: `${current.name} (inactive)`,
+        notes: null,
+        active: false,
+        createdAt: "",
+        updatedAt: "",
+      },
+      ...options,
+    ];
+  };
+
+  const categoryOptions = withCurrent(categories, editing?.category ?? null);
+  const departmentOptions = withCurrent(
+    departments,
+    editing?.department ?? null,
+  );
+  const vendorOptions = withCurrent(vendors, editing?.vendor ?? null);
 
   const handleSubmit = async (payload: CreateExpensePayload) => {
     setSubmitting(true);
@@ -93,15 +145,20 @@ export const ExpensesPage = () => {
             Expenses
           </h1>
           <p className="mt-2 text-slate-600">
-            Core expense records use date and amount. Custom fields come from
-            the field builder. Month is derived from the transaction date.
+            Core expense records use date and amount. Optional category,
+            department, and vendor come from support data. Custom fields come
+            from the field builder.
           </p>
-          <Link
-            to="/"
-            className="mt-3 inline-block text-sm font-medium text-teal-800 hover:underline"
-          >
-            ← Back home
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium">
+            <Link to="/" className="text-teal-800 hover:underline">
+              ← Back home
+            </Link>
+            {canWrite && (
+              <Link to="/expense-support" className="text-teal-800 hover:underline">
+                Manage categories / vendors
+              </Link>
+            )}
+          </div>
         </div>
 
         <ExpenseMonthPicker
@@ -119,6 +176,9 @@ export const ExpensesPage = () => {
         {canWrite && (
           <ExpenseForm
             fields={expensesApi.fields}
+            categories={categoryOptions}
+            departments={departmentOptions}
+            vendors={vendorOptions}
             submitting={submitting}
             editing={editing}
             defaultDate={defaultDate}

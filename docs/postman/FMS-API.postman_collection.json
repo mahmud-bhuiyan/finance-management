@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "5914500b-3ae9-4fe4-9371-f1b01cc92ff0",
     "name": "FMS API (v1)",
-    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. RBAC → Me / probes (switch login to company admin or normal user as needed)\n5. Fields → CRUD (company admin)\n6. Expenses → CRUD + soft delete (company admin; normal user is read-only)\n7. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
+    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. RBAC → Me / probes (switch login to company admin or normal user as needed)\n5. Fields → CRUD (company admin)\n6. Categories / Departments / Vendors → CRUD + soft delete (company admin)\n7. Expenses → CRUD + soft delete with optional support ids (company admin; normal user is read-only)\n8. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -56,6 +56,18 @@
     },
     {
       "key": "expenseId",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "departmentId",
+      "value": ""
+    },
+    {
+      "key": "vendorId",
       "value": ""
     }
   ],
@@ -860,8 +872,521 @@
       ]
     },
     {
+      "name": "Categories",
+      "description": "Tenant-scoped categories CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
+      "item": [
+        {
+          "name": "List categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns categories array', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.categories).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/categories",
+            "description": "Lists active (non-deleted) categories. Use ?includeInactive=true to include inactive."
+          },
+          "response": []
+        },
+        {
+          "name": "Create category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns category', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.category.name).to.be.a('string');",
+                  "});",
+                  "if (json.category && json.category.id) {",
+                  "  pm.collectionVariables.set('categoryId', json.category.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample category\",\n  \"notes\": \"Step 09\"\n}"
+            },
+            "url": "{{baseUrl}}/categories",
+            "description": "Creates a category. Saves categoryId."
+          },
+          "response": []
+        },
+        {
+          "name": "Get category by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/categories/{{categoryId}}",
+            "description": "Fetch one category. Run Create first."
+          },
+          "response": []
+        },
+        {
+          "name": "Update category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated notes\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/categories/{{categoryId}}",
+            "description": "Updates notes/active on category."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete category (soft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/categories/{{categoryId}}",
+            "description": "Soft-deletes the category."
+          },
+          "response": []
+        },
+        {
+          "name": "Create category (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Should fail\"\n}"
+            },
+            "url": "{{baseUrl}}/categories",
+            "description": "Negative check: login as normal user first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Departments",
+      "description": "Tenant-scoped departments CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
+      "item": [
+        {
+          "name": "List departments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns departments array', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.departments).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/departments",
+            "description": "Lists active (non-deleted) departments. Use ?includeInactive=true to include inactive."
+          },
+          "response": []
+        },
+        {
+          "name": "Create department",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns department', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.department.name).to.be.a('string');",
+                  "});",
+                  "if (json.department && json.department.id) {",
+                  "  pm.collectionVariables.set('departmentId', json.department.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample department\",\n  \"notes\": \"Step 09\"\n}"
+            },
+            "url": "{{baseUrl}}/departments",
+            "description": "Creates a department. Saves departmentId."
+          },
+          "response": []
+        },
+        {
+          "name": "Get department by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/departments/{{departmentId}}",
+            "description": "Fetch one department. Run Create first."
+          },
+          "response": []
+        },
+        {
+          "name": "Update department",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated notes\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/departments/{{departmentId}}",
+            "description": "Updates notes/active on department."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete department (soft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/departments/{{departmentId}}",
+            "description": "Soft-deletes the department."
+          },
+          "response": []
+        },
+        {
+          "name": "Create department (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Should fail\"\n}"
+            },
+            "url": "{{baseUrl}}/departments",
+            "description": "Negative check: login as normal user first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vendors",
+      "description": "Tenant-scoped vendors CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
+      "item": [
+        {
+          "name": "List vendors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns vendors array', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.vendors).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/vendors",
+            "description": "Lists active (non-deleted) vendors. Use ?includeInactive=true to include inactive."
+          },
+          "response": []
+        },
+        {
+          "name": "Create vendor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns vendor', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.vendor.name).to.be.a('string');",
+                  "});",
+                  "if (json.vendor && json.vendor.id) {",
+                  "  pm.collectionVariables.set('vendorId', json.vendor.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample vendor\",\n  \"notes\": \"Step 09\"\n}"
+            },
+            "url": "{{baseUrl}}/vendors",
+            "description": "Creates a vendor. Saves vendorId."
+          },
+          "response": []
+        },
+        {
+          "name": "Get vendor by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/vendors/{{vendorId}}",
+            "description": "Fetch one vendor. Run Create first."
+          },
+          "response": []
+        },
+        {
+          "name": "Update vendor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated notes\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/vendors/{{vendorId}}",
+            "description": "Updates notes/active on vendor."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete vendor (soft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/vendors/{{vendorId}}",
+            "description": "Soft-deletes the vendor."
+          },
+          "response": []
+        },
+        {
+          "name": "Create vendor (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Should fail\"\n}"
+            },
+            "url": "{{baseUrl}}/vendors",
+            "description": "Negative check: login as normal user first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Expenses",
-      "description": "Expense CRUD on shared `financial_transactions` (Step 08). Company admin can write; normal user can list/get only. Soft delete sets `deleted_at`. Run **Auth → Login (company admin)** first.",
+      "description": "Expense CRUD on shared `financial_transactions` (Step 08 + 09 support FKs). Company admin can write; normal user can list/get only. Soft delete sets `deleted_at`. Run **Auth → Login (company admin)** first. Prefer creating Categories / Departments / Vendors first so `categoryId` vars are set.",
       "item": [
         {
           "name": "List expenses",
@@ -926,10 +1451,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"20.00\",\n  \"notes\": \"Taxi\",\n  \"customValues\": {}\n}"
+              "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"20.00\",\n  \"notes\": \"Taxi\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"vendorId\": \"{{vendorId}}\",\n  \"customValues\": {}\n}"
             },
             "url": "{{baseUrl}}/expenses",
-            "description": "Creates an expense. `amount` is a decimal string. Saves `expenseId` for later requests."
+            "description": "Creates an expense. Optional `categoryId` / `departmentId` / `vendorId` from Step 09. `amount` is a decimal string. Saves `expenseId` for later requests."
           },
           "response": []
         },

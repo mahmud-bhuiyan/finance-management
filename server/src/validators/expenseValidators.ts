@@ -5,6 +5,11 @@ const dateOnlySchema = z
   .trim()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD");
 
+const optionalSupportIdSchema = z.preprocess(
+  (value) => (value === "" ? null : value),
+  z.union([z.string().trim().min(1), z.null()]).optional(),
+);
+
 export const amountSchema = z
   .union([z.number(), z.string()])
   .transform((value, ctx) => {
@@ -53,6 +58,9 @@ export const createExpenseSchema = z.object({
   amount: amountSchema,
   notes: z.string().trim().max(500).optional(),
   customValues: z.record(z.string(), z.unknown()).optional(),
+  categoryId: optionalSupportIdSchema,
+  departmentId: optionalSupportIdSchema,
+  vendorId: optionalSupportIdSchema,
 });
 
 export const updateExpenseSchema = z
@@ -61,6 +69,9 @@ export const updateExpenseSchema = z
     amount: amountSchema.optional(),
     notes: z.string().trim().max(500).nullable().optional(),
     customValues: z.record(z.string(), z.unknown()).optional(),
+    categoryId: optionalSupportIdSchema,
+    departmentId: optionalSupportIdSchema,
+    vendorId: optionalSupportIdSchema,
   })
   .refine(
     (data) =>

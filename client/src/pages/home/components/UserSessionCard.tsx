@@ -56,6 +56,14 @@ export const UserSessionCard = ({ user, onLogout }: UserSessionCardProps) => {
             Expenses
           </Link>
         )}
+        {canWriteFinance && user.tenant && (
+          <Link
+            to="/expense-support"
+            className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-medium text-teal-900 hover:bg-teal-100"
+          >
+            Categories & vendors
+          </Link>
+        )}
         {canReadAudit && (
           <Link
             to="/audit"

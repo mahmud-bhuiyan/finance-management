@@ -7,9 +7,13 @@ import type {
   Expense,
 } from "../../../lib/expenses";
 import type { FieldDefinition } from "../../../lib/fields";
+import type { SupportItem } from "../../../lib/supportData";
 
 type ExpenseFormProps = {
   fields: FieldDefinition[];
+  categories: SupportItem[];
+  departments: SupportItem[];
+  vendors: SupportItem[];
   submitting: boolean;
   editing: Expense | null;
   defaultDate: string;
@@ -19,8 +23,42 @@ type ExpenseFormProps = {
 
 const todayDate = () => new Date().toISOString().slice(0, 10);
 
+const SupportSelect = ({
+  label,
+  value,
+  options,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: SupportItem[];
+  disabled: boolean;
+  onChange: (value: string) => void;
+}) => (
+  <label className="block space-y-1.5 text-sm text-slate-700">
+    <span className="font-medium text-slate-800">{label}</span>
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      disabled={disabled}
+      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-teal-700/30 focus:ring-2 disabled:opacity-60"
+    >
+      <option value="">— None —</option>
+      {options.map((option) => (
+        <option key={option.id} value={option.id}>
+          {option.name}
+        </option>
+      ))}
+    </select>
+  </label>
+);
+
 export const ExpenseForm = ({
   fields,
+  categories,
+  departments,
+  vendors,
   submitting,
   editing,
   defaultDate,
@@ -30,6 +68,9 @@ export const ExpenseForm = ({
   const [occurredOn, setOccurredOn] = useState(defaultDate || todayDate());
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
+  const [vendorId, setVendorId] = useState("");
   const [customValues, setCustomValues] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
@@ -37,6 +78,9 @@ export const ExpenseForm = ({
       setOccurredOn(editing.occurredOn);
       setAmount(editing.amount);
       setNotes(editing.notes ?? "");
+      setCategoryId(editing.categoryId ?? "");
+      setDepartmentId(editing.departmentId ?? "");
+      setVendorId(editing.vendorId ?? "");
       setCustomValues(editing.customValues);
       return;
     }
@@ -44,6 +88,9 @@ export const ExpenseForm = ({
     setOccurredOn(defaultDate || todayDate());
     setAmount("");
     setNotes("");
+    setCategoryId("");
+    setDepartmentId("");
+    setVendorId("");
     setCustomValues({});
   }, [editing, defaultDate]);
 
@@ -53,12 +100,18 @@ export const ExpenseForm = ({
       occurredOn,
       amount,
       ...(notes.trim() ? { notes: notes.trim() } : { notes: "" }),
+      categoryId: categoryId || null,
+      departmentId: departmentId || null,
+      vendorId: vendorId || null,
       customValues,
     });
 
     if (!editing) {
       setAmount("");
       setNotes("");
+      setCategoryId("");
+      setDepartmentId("");
+      setVendorId("");
       setCustomValues({});
     }
   };
@@ -89,6 +142,27 @@ export const ExpenseForm = ({
           onChange={(event) => setAmount(event.target.value)}
           required
           disabled={submitting}
+        />
+        <SupportSelect
+          label="Category (optional)"
+          value={categoryId}
+          options={categories}
+          disabled={submitting}
+          onChange={setCategoryId}
+        />
+        <SupportSelect
+          label="Department (optional)"
+          value={departmentId}
+          options={departments}
+          disabled={submitting}
+          onChange={setDepartmentId}
+        />
+        <SupportSelect
+          label="Vendor (optional)"
+          value={vendorId}
+          options={vendors}
+          disabled={submitting}
+          onChange={setVendorId}
         />
       </div>
       <label className="mt-4 block space-y-1.5 text-sm text-slate-700">

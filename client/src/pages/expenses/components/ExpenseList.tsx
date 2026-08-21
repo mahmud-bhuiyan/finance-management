@@ -45,6 +45,9 @@ export const ExpenseList = ({
           <tr>
             <th className="px-4 py-3 font-medium">Date</th>
             <th className="px-4 py-3 font-medium">Amount</th>
+            <th className="px-4 py-3 font-medium">Category</th>
+            <th className="px-4 py-3 font-medium">Department</th>
+            <th className="px-4 py-3 font-medium">Vendor</th>
             <th className="px-4 py-3 font-medium">Notes</th>
             {fields.map((field) => (
               <th key={field.id} className="px-4 py-3 font-medium">
@@ -62,6 +65,15 @@ export const ExpenseList = ({
               </td>
               <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-900">
                 {formatExpenseAmount(expense.amount)}
+              </td>
+              <td className="px-4 py-3 text-slate-700">
+                {expense.category?.name ?? "—"}
+              </td>
+              <td className="px-4 py-3 text-slate-700">
+                {expense.department?.name ?? "—"}
+              </td>
+              <td className="px-4 py-3 text-slate-700">
+                {expense.vendor?.name ?? "—"}
               </td>
               <td className="max-w-xs truncate px-4 py-3 text-slate-600">
                 {expense.notes || "—"}
