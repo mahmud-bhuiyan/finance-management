@@ -21,3 +21,7 @@ Keep **git** and **Postman cloud** aligned. Do not create a second collection.
 ## Auth reminder
 
 Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:4000/api/v1`.
+
+## Pending cloud sync
+
+- **Step 09** updated git collection with Categories / Departments / Vendors folders and expense FK body fields. Postman MCP was not connected at implement time — push to UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0` when MCP is available (or re-import the JSON).

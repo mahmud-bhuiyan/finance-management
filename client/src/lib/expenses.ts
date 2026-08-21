@@ -1,4 +1,5 @@
 import type { FieldDefinition } from "./fields";
+import type { SupportRef } from "./supportData";
 
 export type Expense = {
   id: string;
@@ -8,6 +9,12 @@ export type Expense = {
   amount: string;
   notes: string | null;
   customValues: Record<string, unknown>;
+  categoryId: string | null;
+  departmentId: string | null;
+  vendorId: string | null;
+  category: SupportRef | null;
+  department: SupportRef | null;
+  vendor: SupportRef | null;
   createdById: string;
   createdAt: string;
   updatedAt: string;
@@ -18,6 +25,9 @@ export type CreateExpensePayload = {
   amount: string;
   notes?: string;
   customValues?: Record<string, unknown>;
+  categoryId?: string | null;
+  departmentId?: string | null;
+  vendorId?: string | null;
 };
 
 export type UpdateExpensePayload = {
@@ -25,6 +35,9 @@ export type UpdateExpensePayload = {
   amount?: string;
   notes?: string | null;
   customValues?: Record<string, unknown>;
+  categoryId?: string | null;
+  departmentId?: string | null;
+  vendorId?: string | null;
 };
 
 export type ExpenseListResponse = {

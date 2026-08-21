@@ -1,9 +1,19 @@
-import type { FieldDefinition, FinancialTransaction, UserRole } from "@prisma/client";
+import type {
+  Department,
+  ExpenseCategory,
+  FieldDefinition,
+  FinancialTransaction,
+  UserRole,
+  Vendor,
+} from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
 import { writeAuditLog } from "./auditService.js";
 import { toPublicField } from "./fieldService.js";
+import {
+  assertActiveSupportRef,
+} from "./supportDataService.js";
 import type {
   CreateExpenseInput,
   ListExpensesQuery,
@@ -12,6 +22,12 @@ import type {
 
 const ENTITY_TYPE = "FinancialTransaction";
 const LIST_LIMIT = 200;
+
+type ExpenseWithSupport = FinancialTransaction & {
+  category: ExpenseCategory | null;
+  department: Department | null;
+  vendor: Vendor | null;
+};
 
 const parseDateOnly = (value: string) => {
   const [year, month, day] = value.split("-").map(Number);
@@ -134,8 +150,11 @@ const filterCustomValues = (
   );
 };
 
+const toRef = (row: { id: string; name: string } | null) =>
+  row ? { id: row.id, name: row.name } : null;
+
 const toPublicExpense = (
-  row: FinancialTransaction,
+  row: ExpenseWithSupport,
   visibleFields: FieldDefinition[],
 ) => ({
   id: row.id,
@@ -145,10 +164,22 @@ const toPublicExpense = (
   amount: row.amount.toFixed(2),
   notes: row.notes,
   customValues: filterCustomValues(asRecord(row.customValues), visibleFields),
+  categoryId: row.categoryId,
+  departmentId: row.departmentId,
+  vendorId: row.vendorId,
+  category: toRef(row.category),
+  department: toRef(row.department),
+  vendor: toRef(row.vendor),
   createdById: row.createdById,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
 });
+
+const supportInclude = {
+  category: true,
+  department: true,
+  vendor: true,
+} as const;
 
 const loadExpenseFields = async (tenantId: string) =>
   prisma.fieldDefinition.findMany({
@@ -156,9 +187,27 @@ const loadExpenseFields = async (tenantId: string) =>
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
 
+const resolveSupportIds = async (
+  tenantId: string,
+  input: {
+    categoryId?: string | null;
+    departmentId?: string | null;
+    vendorId?: string | null;
+  },
+) => {
+  const [categoryId, departmentId, vendorId] = await Promise.all([
+    assertActiveSupportRef("category", tenantId, input.categoryId),
+    assertActiveSupportRef("department", tenantId, input.departmentId),
+    assertActiveSupportRef("vendor", tenantId, input.vendorId),
+  ]);
+
+  return { categoryId, departmentId, vendorId };
+};
+
 const getExpenseForTenant = async (tenantId: string, id: string) => {
   const expense = await prisma.financialTransaction.findUnique({
     where: { id },
+    include: supportInclude,
   });
 
   if (
@@ -193,6 +242,7 @@ export const listExpenses = async (
   const [rows, fields] = await Promise.all([
     prisma.financialTransaction.findMany({
       where,
+      include: supportInclude,
       orderBy: [{ occurredOn: "desc" }, { createdAt: "desc" }],
       take: LIST_LIMIT,
     }),
@@ -234,6 +284,7 @@ export const createExpense = async (
     input.customValues,
     {},
   );
+  const supportIds = await resolveSupportIds(tenantId, input);
 
   const expense = await prisma.financialTransaction.create({
     data: {
@@ -243,8 +294,12 @@ export const createExpense = async (
       amount: new Prisma.Decimal(input.amount),
       notes: input.notes?.trim() ? input.notes.trim() : null,
       customValues: customValues as Prisma.InputJsonValue,
+      categoryId: supportIds.categoryId ?? null,
+      departmentId: supportIds.departmentId ?? null,
+      vendorId: supportIds.vendorId ?? null,
       createdById: actorId,
     },
+    include: supportInclude,
   });
 
   const visibleFields = visibleFieldsForRole(fields, "COMPANY_ADMIN");
@@ -282,6 +337,12 @@ export const updateExpense = async (
         )
       : undefined;
 
+  const supportIds = await resolveSupportIds(tenantId, {
+    categoryId: input.categoryId,
+    departmentId: input.departmentId,
+    vendorId: input.vendorId,
+  });
+
   const expense = await prisma.financialTransaction.update({
     where: { id },
     data: {
@@ -297,7 +358,17 @@ export const updateExpense = async (
       ...(customValues !== undefined
         ? { customValues: customValues as Prisma.InputJsonValue }
         : {}),
+      ...(supportIds.categoryId !== undefined
+        ? { categoryId: supportIds.categoryId }
+        : {}),
+      ...(supportIds.departmentId !== undefined
+        ? { departmentId: supportIds.departmentId }
+        : {}),
+      ...(supportIds.vendorId !== undefined
+        ? { vendorId: supportIds.vendorId }
+        : {}),
     },
+    include: supportInclude,
   });
 
   const visibleFields = visibleFieldsForRole(fields, "COMPANY_ADMIN");

@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–07** done, Step **08** (Expense core) in progress.  
+> Status: **In progress** — Steps **01–08** done, Step **09** (Expense support data) in progress.  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -241,6 +241,7 @@ Step 05 guide: `finance-management/docs/manual-test-guides/step-05-audit.md`
 Step 06 guide: `finance-management/docs/manual-test-guides/step-06-dynamic-fields-api.md`  
 Step 07 guide: `finance-management/docs/manual-test-guides/step-07-dynamic-fields-ui.md`  
 Step 08 guide: `finance-management/docs/manual-test-guides/step-08-expense-core.md`  
+Step 09 guide: `finance-management/docs/manual-test-guides/step-09-expense-support-data.md`  
 Create each next guide when that step starts.
 
 ---
@@ -294,16 +295,15 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Finish **Step 08 — Expense core** and pass `docs/manual-test-guides/step-08-expense-core.md`.  
-2. Mark related Notion tasks Done (`financial_transactions`, expense CRUD, audit, finance write vs read-only).  
-3. Continue with **Step 09 — Expense support data** (categories, departments, vendors).  
+1. Finish **Step 09 — Expense support data** and pass `docs/manual-test-guides/step-09-expense-support-data.md`.  
+2. Mark related Notion tasks Done (categories, departments, vendors/payees).  
+3. Continue with **Step 10 — Attachments + list UX**.
 
-### Remaining steps (08–14)
+### Remaining steps (09–14)
 
 | Step | Name | Status |
 |------|------|--------|
-| **08** | Expense core | **In progress** |
-| **09** | Expense support data | Not started |
+| **09** | Expense support data | **In progress** |
 | **10** | Attachments + list UX | Not started |
 | **11** | Thin dashboard | Not started |
 | **12** | Full dashboard | Not started |
