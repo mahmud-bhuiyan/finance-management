@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–12** done; Step **13** (Reporting) implemented (pending manual test pass).  
+> Status: **In progress** — Steps **01–14** implemented (Step **13** pending manual test pass; Step **14** pending manual test pass).  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -246,6 +246,7 @@ Step 10 guide: `finance-management/docs/manual-test-guides/step-10-attachments-l
 Step 11 guide: `finance-management/docs/manual-test-guides/step-11-thin-dashboard.md`  
 Step 12 guide: `finance-management/docs/manual-test-guides/step-12-full-dashboard.md`  
 Step 13 guide: `finance-management/docs/manual-test-guides/step-13-reporting.md`  
+Step 14 guide: `finance-management/docs/manual-test-guides/step-14-income-module.md`  
 Create each next guide when that step starts.
 
 ---
@@ -299,16 +300,16 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Run **Step 13** manual test guide and mark related Notion tasks Done when it passes (FMS-38 / FMS-39 / FMS-40 / FMS-41 / FMS-42 / FMS-43 / FMS-46).  
-2. Continue with **Step 14 — Income module**.  
-3. Excel (FMS-44) and PDF (FMS-45) export remain deferred after Step 13 CSV.
+1. Run **Step 13** and **Step 14** manual test guides; mark related Notion tasks Done when each passes.  
+2. Excel (FMS-44) and PDF (FMS-45) export remain deferred after Step 13 CSV.  
+3. Planned implementation steps **01–14** are otherwise complete for the MVP path.
 
-### Remaining steps (13–14)
+### Remaining / follow-up
 
 | Step | Name | Status |
 |------|------|--------|
 | **13** | Reporting | Implemented — pending manual test (CSV; Excel/PDF later) |
-| **14** | Income module | Not started |
+| **14** | Income module | Implemented — pending manual test |
 
 ---
 

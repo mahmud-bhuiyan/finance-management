@@ -60,6 +60,7 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 11: [`docs/manual-test-guides/step-11-thin-dashboard.md`](docs/manual-test-guides/step-11-thin-dashboard.md) · [PDF](docs/manual-test-guides/step-11-thin-dashboard.pdf)
 - Step 12: [`docs/manual-test-guides/step-12-full-dashboard.md`](docs/manual-test-guides/step-12-full-dashboard.md) · [PDF](docs/manual-test-guides/step-12-full-dashboard.pdf)
 - Step 13: [`docs/manual-test-guides/step-13-reporting.md`](docs/manual-test-guides/step-13-reporting.md) · [PDF](docs/manual-test-guides/step-13-reporting.pdf)
+- Step 14: [`docs/manual-test-guides/step-14-income-module.md`](docs/manual-test-guides/step-14-income-module.md) · [PDF](docs/manual-test-guides/step-14-income-module.pdf)
 
 ## Postman (API)
 

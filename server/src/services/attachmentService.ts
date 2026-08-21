@@ -38,26 +38,26 @@ const toPublicAttachment = (row: ExpenseAttachment) => ({
   createdAt: row.createdAt.toISOString(),
 });
 
-const getExpenseRow = async (tenantId: string, expenseId: string) => {
-  const expense = await prisma.financialTransaction.findUnique({
-    where: { id: expenseId },
+const getLedgerRow = async (tenantId: string, transactionId: string) => {
+  const row = await prisma.financialTransaction.findUnique({
+    where: { id: transactionId },
   });
 
   if (
-    !expense ||
-    expense.tenantId !== tenantId ||
-    expense.type !== "EXPENSE" ||
-    expense.deletedAt
+    !row ||
+    row.tenantId !== tenantId ||
+    (row.type !== "EXPENSE" && row.type !== "INCOME") ||
+    row.deletedAt
   ) {
-    throw new AppError("Expense not found", 404, "EXPENSE_NOT_FOUND");
+    throw new AppError("Transaction not found", 404, "TRANSACTION_NOT_FOUND");
   }
 
-  return expense;
+  return row;
 };
 
-const getAttachmentForExpense = async (
+const getAttachmentForTransaction = async (
   tenantId: string,
-  expenseId: string,
+  transactionId: string,
   attachmentId: string,
 ) => {
   const attachment = await prisma.expenseAttachment.findUnique({
@@ -67,7 +67,7 @@ const getAttachmentForExpense = async (
   if (
     !attachment ||
     attachment.tenantId !== tenantId ||
-    attachment.transactionId !== expenseId ||
+    attachment.transactionId !== transactionId ||
     attachment.deletedAt
   ) {
     throw new AppError("Attachment not found", 404, "ATTACHMENT_NOT_FOUND");
@@ -76,13 +76,16 @@ const getAttachmentForExpense = async (
   return attachment;
 };
 
-export const listAttachments = async (tenantId: string, expenseId: string) => {
-  await getExpenseRow(tenantId, expenseId);
+export const listAttachments = async (
+  tenantId: string,
+  transactionId: string,
+) => {
+  await getLedgerRow(tenantId, transactionId);
 
   const rows = await prisma.expenseAttachment.findMany({
     where: {
       tenantId,
-      transactionId: expenseId,
+      transactionId,
       deletedAt: null,
     },
     orderBy: { createdAt: "desc" },
@@ -93,11 +96,11 @@ export const listAttachments = async (tenantId: string, expenseId: string) => {
 
 export const createAttachment = async (
   tenantId: string,
-  expenseId: string,
+  transactionId: string,
   file: UploadedFileInput,
   actorId: string,
 ) => {
-  await getExpenseRow(tenantId, expenseId);
+  await getLedgerRow(tenantId, transactionId);
 
   if (!ALLOWED_ATTACHMENT_MIME.has(file.mimeType)) {
     throw new AppError(
@@ -118,14 +121,14 @@ export const createAttachment = async (
   const activeCount = await prisma.expenseAttachment.count({
     where: {
       tenantId,
-      transactionId: expenseId,
+      transactionId,
       deletedAt: null,
     },
   });
 
   if (activeCount >= env.UPLOAD_MAX_PER_EXPENSE) {
     throw new AppError(
-      `At most ${env.UPLOAD_MAX_PER_EXPENSE} attachments per expense`,
+      `At most ${env.UPLOAD_MAX_PER_EXPENSE} attachments per transaction`,
       400,
       "ATTACHMENT_LIMIT",
     );
@@ -134,7 +137,7 @@ export const createAttachment = async (
   const fileToken = randomUUID();
   const storageKey = buildStorageKey(
     tenantId,
-    expenseId,
+    transactionId,
     fileToken,
     file.originalName,
   );
@@ -146,7 +149,7 @@ export const createAttachment = async (
     attachment = await prisma.expenseAttachment.create({
       data: {
         tenantId,
-        transactionId: expenseId,
+        transactionId,
         originalName: file.originalName.slice(0, 200),
         mimeType: file.mimeType,
         sizeBytes: file.sizeBytes,
@@ -175,13 +178,13 @@ export const createAttachment = async (
 
 export const deleteAttachment = async (
   tenantId: string,
-  expenseId: string,
+  transactionId: string,
   attachmentId: string,
   actorId: string,
 ) => {
-  const existing = await getAttachmentForExpense(
+  const existing = await getAttachmentForTransaction(
     tenantId,
-    expenseId,
+    transactionId,
     attachmentId,
   );
 
@@ -204,12 +207,12 @@ export const deleteAttachment = async (
 
 export const openAttachmentDownload = async (
   tenantId: string,
-  expenseId: string,
+  transactionId: string,
   attachmentId: string,
 ) => {
-  const attachment = await getAttachmentForExpense(
+  const attachment = await getAttachmentForTransaction(
     tenantId,
-    expenseId,
+    transactionId,
     attachmentId,
   );
   const stream = await openUploadStream(attachment.storageKey);

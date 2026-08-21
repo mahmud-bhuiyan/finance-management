@@ -198,7 +198,7 @@ model Vendor {
   @@map("vendors")
 }
 
-/// Shared ledger row (Step 08). Month/year come from occurredOn. Income reuses this in Step 14.
+/// Shared ledger row (Step 08). Income CRUD reuses this in Step 14 (`type=INCOME`).
 model FinancialTransaction {
   id           String           @id @default(cuid())
   tenantId     String           @map("tenant_id")

@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "5914500b-3ae9-4fe4-9371-f1b01cc92ff0",
     "name": "FMS API (v1)",
-    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. RBAC → Me / probes (switch login to company admin or normal user as needed)\n5. Fields → CRUD (company admin)\n6. Categories / Departments / Vendors → CRUD + soft delete (company admin)\n7. Expenses → CRUD + soft delete with optional support ids (company admin; normal user is read-only)\n8. Dashboard → Summary KPIs + charts (company admin or normal user)\n9. Reports → Summary tables + CSV export (company admin or normal user)\n10. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
+    "description": "Finance Management System \u2014 `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman \u2192 **Import** \u2192 choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman\u2019s cookie jar sends it on later requests to the same host \u2014 no Bearer header needed.\n\n**Suggested order**\n1. Health \u2192 Health check\n2. Auth \u2192 Login (Super Admin) \u2014 uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants \u2192 List / Create / Create admin / Update status\n4. RBAC \u2192 Me / probes (switch login to company admin or normal user as needed)\n5. Fields \u2192 CRUD (company admin)\n6. Categories / Departments / Vendors \u2192 CRUD + soft delete (company admin)\n7. Expenses \u2192 CRUD + soft delete with optional support ids (company admin; normal user is read-only)\n8. Incomes \u2192 CRUD + soft delete on shared ledger (company admin; normal user is read-only)\n9. Dashboard \u2192 Summary KPIs + charts incl. Net Balance (company admin or normal user)\n10. Reports \u2192 Summary tables + CSV export (company admin or normal user)\n11. Auth \u2192 Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -72,6 +72,10 @@
     },
     {
       "key": "attachmentId",
+      "value": ""
+    },
+    {
+      "key": "incomeId",
       "value": ""
     }
   ],
@@ -259,7 +263,7 @@
           "response": []
         },
         {
-          "name": "Me (unauthenticated — expect 401)",
+          "name": "Me (unauthenticated \u2014 expect 401)",
           "event": [
             {
               "listen": "prerequest",
@@ -287,7 +291,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/auth/me",
-            "description": "Negative check: no session cookie → 401. Clears cookies for the API host first."
+            "description": "Negative check: no session cookie \u2192 401. Clears cookies for the API host first."
           },
           "response": []
         }
@@ -295,7 +299,7 @@
     },
     {
       "name": "Tenants (Super Admin)",
-      "description": "All routes require Super Admin session. Run **Auth → Login (Super Admin)** first.",
+      "description": "All routes require Super Admin session. Run **Auth \u2192 Login (Super Admin)** first.",
       "item": [
         {
           "name": "List tenants",
@@ -477,7 +481,7 @@
           "response": []
         },
         {
-          "name": "List tenants (unauthenticated — expect 401)",
+          "name": "List tenants (unauthenticated \u2014 expect 401)",
           "event": [
             {
               "listen": "prerequest",
@@ -513,7 +517,7 @@
     },
     {
       "name": "RBAC",
-      "description": "Role and permission probes. Run the matching **Auth → Login** for Super Admin, company admin, or normal user before each group.",
+      "description": "Role and permission probes. Run the matching **Auth \u2192 Login** for Super Admin, company admin, or normal user before each group.",
       "item": [
         {
           "name": "RBAC profile (me)",
@@ -613,7 +617,7 @@
           "response": []
         },
         {
-          "name": "Probe finance-write (normal user — expect 403)",
+          "name": "Probe finance-write (normal user \u2014 expect 403)",
           "event": [
             {
               "listen": "test",
@@ -639,7 +643,7 @@
     },
     {
       "name": "Audit",
-      "description": "Audit trail listing. Requires `audit:read` (Super Admin or Company Admin). Run the matching **Auth → Login** first.",
+      "description": "Audit trail listing. Requires `audit:read` (Super Admin or Company Admin). Run the matching **Auth \u2192 Login** first.",
       "item": [
         {
           "name": "List audit logs",
@@ -670,7 +674,7 @@
           "response": []
         },
         {
-          "name": "List audit logs (normal user — expect 403)",
+          "name": "List audit logs (normal user \u2014 expect 403)",
           "event": [
             {
               "listen": "test",
@@ -696,7 +700,7 @@
     },
     {
       "name": "Fields",
-      "description": "Dynamic field definition CRUD (Step 06). Requires company membership + `fields:manage` (company admin). Run **Auth → Login (company admin)** first.",
+      "description": "Dynamic field definition CRUD (Step 06). Requires company membership + `fields:manage` (company admin). Run **Auth \u2192 Login (company admin)** first.",
       "item": [
         {
           "name": "List field definitions",
@@ -851,7 +855,7 @@
           "response": []
         },
         {
-          "name": "List fields (normal user — expect 403)",
+          "name": "List fields (normal user \u2014 expect 403)",
           "event": [
             {
               "listen": "test",
@@ -877,7 +881,7 @@
     },
     {
       "name": "Categories",
-      "description": "Tenant-scoped categories CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
+      "description": "Tenant-scoped categories CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth \u2192 Login (company admin) first.",
       "item": [
         {
           "name": "List categories",
@@ -1013,7 +1017,7 @@
           "response": []
         },
         {
-          "name": "Create category (normal user — expect 403)",
+          "name": "Create category (normal user \u2014 expect 403)",
           "event": [
             {
               "listen": "test",
@@ -1048,7 +1052,7 @@
     },
     {
       "name": "Departments",
-      "description": "Tenant-scoped departments CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
+      "description": "Tenant-scoped departments CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth \u2192 Login (company admin) first.",
       "item": [
         {
           "name": "List departments",
@@ -1184,7 +1188,7 @@
           "response": []
         },
         {
-          "name": "Create department (normal user — expect 403)",
+          "name": "Create department (normal user \u2014 expect 403)",
           "event": [
             {
               "listen": "test",
@@ -1219,7 +1223,7 @@
     },
     {
       "name": "Vendors",
-      "description": "Tenant-scoped vendors CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
+      "description": "Tenant-scoped vendors CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth \u2192 Login (company admin) first.",
       "item": [
         {
           "name": "List vendors",
@@ -1355,7 +1359,7 @@
           "response": []
         },
         {
-          "name": "Create vendor (normal user — expect 403)",
+          "name": "Create vendor (normal user \u2014 expect 403)",
           "event": [
             {
               "listen": "test",
@@ -1390,7 +1394,7 @@
     },
     {
       "name": "Dashboard",
-      "description": "Steps 11–12 dashboard aggregation (full charts + paymentMethod filter). Requires company tenant + `reports:read` or `finance:write`. Run **Auth → Login (company admin)** or login as normal user first.",
+      "description": "Steps 11\u201312 dashboard aggregation (full charts + paymentMethod filter). Requires company tenant + `reports:read` or `finance:write`. Run **Auth \u2192 Login (company admin)** or login as normal user first.",
       "item": [
         {
           "name": "Summary (this month)",
@@ -1460,7 +1464,7 @@
           "response": []
         },
         {
-          "name": "Summary (invalid paymentMethod → 400)",
+          "name": "Summary (invalid paymentMethod \u2192 400)",
           "event": [
             {
               "listen": "test",
@@ -1483,7 +1487,7 @@
           "response": []
         },
         {
-          "name": "Summary (custom missing dates → 400)",
+          "name": "Summary (custom missing dates \u2192 400)",
           "event": [
             {
               "listen": "test",
@@ -1509,7 +1513,7 @@
     },
     {
       "name": "Reports",
-      "description": "Step 13 reporting (monthly + dimension breakdowns + CSV export). Requires company tenant + `reports:read` or `finance:write`. Run **Auth → Login (company admin)** or login as normal user first. Excel/PDF are deferred.",
+      "description": "Step 13 reporting (monthly + dimension breakdowns + CSV export). Requires company tenant + `reports:read` or `finance:write`. Run **Auth \u2192 Login (company admin)** or login as normal user first. Excel/PDF are deferred.",
       "item": [
         {
           "name": "Summary (this month)",
@@ -1631,7 +1635,7 @@
           "response": []
         },
         {
-          "name": "Summary (invalid paymentMethod → 400)",
+          "name": "Summary (invalid paymentMethod \u2192 400)",
           "event": [
             {
               "listen": "test",
@@ -1654,7 +1658,7 @@
           "response": []
         },
         {
-          "name": "Summary (custom missing dates → 400)",
+          "name": "Summary (custom missing dates \u2192 400)",
           "event": [
             {
               "listen": "test",
@@ -1680,7 +1684,7 @@
     },
     {
       "name": "Expenses",
-      "description": "Expense CRUD (Steps 08–10). List supports filters, search, pagination, sorting (`meta`). Attachments: multipart upload + authenticated download. Soft delete for expenses and attachments. Run **Auth → Login (company admin)** first.",
+      "description": "Expense CRUD (Steps 08\u201310). List supports filters, search, pagination, sorting (`meta`). Attachments: multipart upload + authenticated download. Soft delete for expenses and attachments. Run **Auth \u2192 Login (company admin)** first.",
       "item": [
         {
           "name": "List expenses",
@@ -1860,7 +1864,7 @@
           "response": []
         },
         {
-          "name": "Upload attachment (normal user — expect 403)",
+          "name": "Upload attachment (normal user \u2014 expect 403)",
           "event": [
             {
               "listen": "test",
@@ -1981,7 +1985,7 @@
           "response": []
         },
         {
-          "name": "Create expense (normal user — expect 403)",
+          "name": "Create expense (normal user \u2014 expect 403)",
           "event": [
             {
               "listen": "test",
@@ -2008,6 +2012,231 @@
               "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"10.00\"\n}"
             },
             "url": "{{baseUrl}}/expenses",
+            "description": "Negative check: login as a normal user first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Incomes",
+      "description": "Income CRUD (Step 14). Same shape as Expenses on `financial_transactions` with `type=INCOME`. Income custom fields (`target=INCOME`). Reuses categories/departments/vendors (vendor = customer/payor). Attachments supported. Soft delete + audit. Run **Auth \u2192 Login (company admin)** first.",
+      "item": [
+        {
+          "name": "List incomes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns incomes, fields, and meta', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.incomes).to.be.an('array');",
+                  "  pm.expect(json.fields).to.be.an('array');",
+                  "  pm.expect(json.meta).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/incomes?year=2026&month=8&page=1&pageSize=20&sortBy=occurredOn&sortDir=desc&q=&paymentMethod=",
+            "description": "Lists non-deleted incomes with pagination. Optional filters match expenses. Response includes `meta` and `attachmentCount`."
+          },
+          "response": []
+        },
+        {
+          "name": "Create income",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns income with type INCOME', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.income.type).to.eql('INCOME');",
+                  "  pm.expect(json.income.amount).to.be.a('string');",
+                  "});",
+                  "if (json.income && json.income.id) {",
+                  "  pm.collectionVariables.set('incomeId', json.income.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"500.00\",\n  \"notes\": \"Consulting invoice\",\n  \"paymentMethod\": \"BANK_TRANSFER\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"vendorId\": \"{{vendorId}}\",\n  \"customValues\": {}\n}"
+            },
+            "url": "{{baseUrl}}/incomes",
+            "description": "Creates an income row (`type=INCOME`). Optional support ids + paymentMethod. Saves `incomeId`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get income by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/incomes/{{incomeId}}",
+            "description": "Fetch a single non-deleted income. Run **Create income** first."
+          },
+          "response": []
+        },
+        {
+          "name": "Update income",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"550.00\",\n  \"notes\": \"Consulting invoice (updated)\"\n}"
+            },
+            "url": "{{baseUrl}}/incomes/{{incomeId}}",
+            "description": "Updates amount and notes."
+          },
+          "response": []
+        },
+        {
+          "name": "List income attachments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns attachments array', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.attachments).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments",
+            "description": "Lists non-deleted attachments for an income."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete income (soft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/incomes/{{incomeId}}",
+            "description": "Soft-deletes the income (`deleted_at`)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted income (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404 after soft delete', function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/incomes/{{incomeId}}",
+            "description": "Negative check after **Delete income (soft)**."
+          },
+          "response": []
+        },
+        {
+          "name": "Create income (normal user \u2014 expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"10.00\"\n}"
+            },
+            "url": "{{baseUrl}}/incomes",
             "description": "Negative check: login as a normal user first."
           },
           "response": []

@@ -106,7 +106,7 @@ export const DashboardPage = () => {
           <p className="mt-2 text-slate-600">
             KPI cards plus line, area, pie, doughnut, bar, and stacked charts.
             Filter by period, category, department, vendor, or payment method.
-            Income stays at zero until the income module (Step 14).
+            Record expenses and income; Net Balance is Income − Expense.
           </p>
           <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium">
             <Link to="/" className="text-teal-800 hover:underline">
