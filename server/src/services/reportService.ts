@@ -5,6 +5,8 @@ import {
   type FieldDefinition,
   type UserRole,
 } from "@prisma/client";
+import ExcelJS from "exceljs";
+import PDFDocument from "pdfkit";
 import { prisma } from "../config/prisma.js";
 import { paymentMethodLabel } from "../constants/paymentMethods.js";
 import { toCsv } from "../utils/csv.js";
@@ -13,7 +15,8 @@ import type {
   ReportSummaryQuery,
 } from "../validators/reportValidators.js";
 
-const CSV_ROW_LIMIT = 5_000;
+const EXPORT_ROW_LIMIT = 5_000;
+const PDF_TX_PREVIEW_LIMIT = 40;
 
 const parseDateOnly = (value: string) => {
   const [year, month, day] = value.split("-").map(Number);
@@ -307,11 +310,24 @@ export const getReportSummary = async (
   };
 };
 
-export const buildReportCsv = async (
+type ExportCell = string | number | null;
+
+type ReportExportDataset = {
+  from: Date;
+  to: Date;
+  headers: string[];
+  dataRows: ExportCell[][];
+  reportFields: FieldDefinition[];
+  rowCount: number;
+  totalMatching: number;
+  truncated: boolean;
+};
+
+const loadReportExportDataset = async (
   tenantId: string,
   role: UserRole,
   query: ReportExportQuery,
-) => {
+): Promise<ReportExportDataset> => {
   const { from, to } = resolveReportRange(query);
   const typeFilter =
     query.type === "ALL"
@@ -329,7 +345,7 @@ export const buildReportCsv = async (
     prisma.financialTransaction.findMany({
       where,
       orderBy: [{ occurredOn: "asc" }, { createdAt: "asc" }],
-      take: CSV_ROW_LIMIT,
+      take: EXPORT_ROW_LIMIT,
       include: {
         category: { select: { name: true } },
         department: { select: { name: true } },
@@ -351,8 +367,7 @@ export const buildReportCsv = async (
     "department",
     "vendor",
   ];
-  const customHeaders = reportFields.map((field) => field.key);
-  const headers = [...baseHeaders, ...customHeaders];
+  const headers = [...baseHeaders, ...reportFields.map((field) => field.key)];
 
   const dataRows = rows.map((row) => {
     const custom = asRecord(row.customValues);
@@ -367,23 +382,213 @@ export const buildReportCsv = async (
       row.department?.name ?? "",
       row.vendor?.name ?? "",
       ...reportFields.map((field) => formatCustomValue(custom[field.key])),
-    ];
+    ] satisfies ExportCell[];
   });
 
-  const csv = toCsv(headers, dataRows);
-  const fromLabel = toDateOnly(from);
-  const toLabel = toDateOnly(to);
-  const filename = `fms-report-${fromLabel}_to_${toLabel}.csv`;
-
   return {
-    csv,
-    filename,
-    meta: {
-      rowCount: rows.length,
-      truncated: totalMatching > rows.length,
-      totalMatching,
-      limit: CSV_ROW_LIMIT,
-      customFieldKeys: reportFields.map((field) => field.key),
-    },
+    from,
+    to,
+    headers,
+    dataRows,
+    reportFields,
+    rowCount: rows.length,
+    totalMatching,
+    truncated: totalMatching > rows.length,
+  };
+};
+
+const exportFilename = (from: Date, to: Date, ext: string) =>
+  `fms-report-${toDateOnly(from)}_to_${toDateOnly(to)}.${ext}`;
+
+const exportMeta = (dataset: ReportExportDataset) => ({
+  rowCount: dataset.rowCount,
+  truncated: dataset.truncated,
+  totalMatching: dataset.totalMatching,
+  limit: EXPORT_ROW_LIMIT,
+  customFieldKeys: dataset.reportFields.map((field) => field.key),
+});
+
+export const buildReportCsv = async (
+  tenantId: string,
+  role: UserRole,
+  query: ReportExportQuery,
+) => {
+  const dataset = await loadReportExportDataset(tenantId, role, query);
+  return {
+    csv: toCsv(dataset.headers, dataset.dataRows),
+    filename: exportFilename(dataset.from, dataset.to, "csv"),
+    meta: exportMeta(dataset),
+  };
+};
+
+export const buildReportExcel = async (
+  tenantId: string,
+  role: UserRole,
+  query: ReportExportQuery,
+) => {
+  const dataset = await loadReportExportDataset(tenantId, role, query);
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "FMS";
+  workbook.created = new Date();
+
+  const sheet = workbook.addWorksheet("Transactions", {
+    views: [{ state: "frozen", ySplit: 1 }],
+  });
+  sheet.addRow(dataset.headers);
+  sheet.getRow(1).font = { bold: true };
+  for (const row of dataset.dataRows) {
+    sheet.addRow(row);
+  }
+  sheet.columns.forEach((column) => {
+    let max = 10;
+    column.eachCell?.({ includeEmpty: true }, (cell) => {
+      const length = String(cell.value ?? "").length;
+      if (length > max) max = Math.min(length, 40);
+    });
+    column.width = max + 2;
+  });
+
+  const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+  return {
+    buffer,
+    filename: exportFilename(dataset.from, dataset.to, "xlsx"),
+    meta: exportMeta(dataset),
+  };
+};
+
+const pdfLine = (doc: PDFKit.PDFDocument, label: string, value: string) => {
+  doc.font("Helvetica-Bold").text(`${label}: `, { continued: true });
+  doc.font("Helvetica").text(value);
+};
+
+const pdfSectionTitle = (doc: PDFKit.PDFDocument, title: string) => {
+  doc.moveDown(0.8);
+  doc.fontSize(13).font("Helvetica-Bold").text(title);
+  doc.moveDown(0.3);
+  doc.fontSize(10).font("Helvetica");
+};
+
+const pdfEnsureSpace = (doc: PDFKit.PDFDocument, needed = 72) => {
+  if (doc.y > doc.page.height - doc.page.margins.bottom - needed) {
+    doc.addPage();
+  }
+};
+
+export const buildReportPdf = async (
+  tenantId: string,
+  role: UserRole,
+  query: ReportExportQuery,
+) => {
+  const [summary, dataset] = await Promise.all([
+    getReportSummary(tenantId, query),
+    loadReportExportDataset(tenantId, role, query),
+  ]);
+
+  const doc = new PDFDocument({ margin: 48, size: "LETTER" });
+  const chunks: Buffer[] = [];
+  doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+  const done = new Promise<Buffer>((resolve, reject) => {
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+  });
+
+  const fromLabel = toDateOnly(dataset.from);
+  const toLabel = toDateOnly(dataset.to);
+
+  doc.fontSize(18).font("Helvetica-Bold").text("FMS Report");
+  doc.moveDown(0.4);
+  doc.fontSize(10).font("Helvetica");
+  pdfLine(doc, "Period", `${fromLabel} → ${toLabel}`);
+  pdfLine(doc, "Preset", summary.filters.preset);
+  pdfLine(doc, "Type filter", query.type);
+  if (summary.filters.categoryId) {
+    pdfLine(doc, "Category filter", summary.filters.categoryId);
+  }
+  if (summary.filters.departmentId) {
+    pdfLine(doc, "Department filter", summary.filters.departmentId);
+  }
+  if (summary.filters.vendorId) {
+    pdfLine(doc, "Vendor filter", summary.filters.vendorId);
+  }
+  if (summary.filters.paymentMethod) {
+    pdfLine(
+      doc,
+      "Payment method",
+      paymentMethodLabel(summary.filters.paymentMethod),
+    );
+  }
+
+  pdfSectionTitle(doc, "Summary");
+  pdfLine(doc, "Total expense", summary.summary.totalExpense);
+  pdfLine(doc, "Total income", summary.summary.totalIncome);
+  pdfLine(doc, "Net balance", summary.summary.netBalance);
+  pdfLine(doc, "Expense count", String(summary.summary.expenseCount));
+  pdfLine(doc, "Income count", String(summary.summary.incomeCount));
+
+  const writeBreakdown = (
+    title: string,
+    rows: { name: string; total: string; count: number }[],
+  ) => {
+    pdfEnsureSpace(doc, 90);
+    pdfSectionTitle(doc, title);
+    if (rows.length === 0) {
+      doc.text("No rows.");
+      return;
+    }
+    for (const row of rows) {
+      pdfEnsureSpace(doc, 28);
+      doc.text(`${row.name} — ${row.total} (${row.count})`);
+    }
+  };
+
+  pdfEnsureSpace(doc, 90);
+  pdfSectionTitle(doc, "By month");
+  if (summary.byMonth.length === 0) {
+    doc.text("No rows.");
+  } else {
+    for (const row of summary.byMonth) {
+      pdfEnsureSpace(doc, 28);
+      doc.text(
+        `${row.month}: expense ${row.expense}, income ${row.income}, net ${row.net}`,
+      );
+    }
+  }
+
+  writeBreakdown("By category (expenses)", summary.byCategory);
+  writeBreakdown("By department (expenses)", summary.byDepartment);
+  writeBreakdown("By vendor (expenses)", summary.byVendor);
+  writeBreakdown("By payment method (expenses)", summary.byPaymentMethod);
+
+  pdfEnsureSpace(doc, 90);
+  pdfSectionTitle(doc, "Transactions (preview)");
+  const preview = dataset.dataRows.slice(0, PDF_TX_PREVIEW_LIMIT);
+  if (preview.length === 0) {
+    doc.text("No matching transactions.");
+  } else {
+    doc.text(
+      `Showing ${preview.length} of ${dataset.totalMatching} matching row(s)` +
+        (dataset.truncated ? ` (export cap ${EXPORT_ROW_LIMIT})` : "") +
+        ".",
+    );
+    doc.moveDown(0.3);
+    for (const row of preview) {
+      pdfEnsureSpace(doc, 36);
+      const type = String(row[1] ?? "");
+      const occurredOn = String(row[2] ?? "");
+      const amount = String(row[3] ?? "");
+      const notes = String(row[4] ?? "").slice(0, 80);
+      const category = String(row[6] ?? "");
+      doc.text(
+        `${occurredOn}  ${type}  ${amount}  ${category}${notes ? ` — ${notes}` : ""}`,
+      );
+    }
+  }
+
+  doc.end();
+  const buffer = await done;
+  return {
+    buffer,
+    filename: exportFilename(dataset.from, dataset.to, "pdf"),
+    meta: exportMeta(dataset),
   };
 };

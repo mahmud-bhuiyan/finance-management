@@ -1,6 +1,8 @@
 import type { RequestHandler } from "express";
 import {
   buildReportCsv,
+  buildReportExcel,
+  buildReportPdf,
   getReportSummary,
 } from "../services/reportService.js";
 import {
@@ -33,6 +35,49 @@ export const exportCsv: RequestHandler = async (req, res, next) => {
       `attachment; filename="${filename.replace(/"/g, "")}"`,
     );
     res.status(200).send(csv);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const exportExcel: RequestHandler = async (req, res, next) => {
+  try {
+    const query = reportExportQuerySchema.parse(req.query);
+    const { buffer, filename } = await buildReportExcel(
+      req.user!.tenantId!,
+      req.user!.role,
+      query,
+    );
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${filename.replace(/"/g, "")}"`,
+    );
+    res.status(200).send(buffer);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const exportPdf: RequestHandler = async (req, res, next) => {
+  try {
+    const query = reportExportQuerySchema.parse(req.query);
+    const { buffer, filename } = await buildReportPdf(
+      req.user!.tenantId!,
+      req.user!.role,
+      query,
+    );
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${filename.replace(/"/g, "")}"`,
+    );
+    res.status(200).send(buffer);
   } catch (error) {
     next(error);
   }

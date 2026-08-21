@@ -30,3 +30,4 @@ Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:40
 - **Step 12** updated git collection: Dashboard full chart assertions + `paymentMethod` filter (incl. invalid enum → 400). Expense create/list bodies include optional `paymentMethod`. Postman MCP still not connected — re-import or sync cloud when available.
 - **Step 13** updated git collection: **Reports** folder (`GET /reports/summary`, `GET /reports/export.csv`, filter negatives). Postman MCP still not connected — re-import or sync cloud when available.
 - **Step 14** updated git collection: **Incomes** folder (`/incomes` CRUD + attachments list + soft-delete negatives) and `incomeId` variable. Postman MCP still not connected — re-import or sync cloud when available.
+- **Step 15** updated git collection: Reports **Export Excel** (`/reports/export.xlsx`) and **Export PDF** (`/reports/export.pdf`). Postman MCP still not connected — re-import or sync cloud when available.

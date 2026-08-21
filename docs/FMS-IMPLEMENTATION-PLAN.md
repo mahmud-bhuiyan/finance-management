@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–14** implemented (Step **13** pending manual test pass; Step **14** pending manual test pass).  
+> Status: **In progress** — Steps **01–15** implemented (Steps **13–15** pending manual test pass).  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -224,6 +224,7 @@ Export the same MD to **PDF in the same folder** (required — see §8 manual te
 | **12** | Full dashboard | Remaining chart types + richer filters | Phase 4 |
 | **13** | Reporting | Monthly/category/etc. + CSV (Excel/PDF after) | Phase 5 |
 | **14** | Income module | Income CRUD + Net Balance on dashboard | Phase 6 |
+| **15** | Report Excel/PDF | `.xlsx` + PDF exports (same filters/roles as CSV) | Phase 5 |
 
 ### Manual test rule
 
@@ -247,6 +248,7 @@ Step 11 guide: `finance-management/docs/manual-test-guides/step-11-thin-dashboar
 Step 12 guide: `finance-management/docs/manual-test-guides/step-12-full-dashboard.md`  
 Step 13 guide: `finance-management/docs/manual-test-guides/step-13-reporting.md`  
 Step 14 guide: `finance-management/docs/manual-test-guides/step-14-income-module.md`  
+Step 15 guide: `finance-management/docs/manual-test-guides/step-15-report-excel-pdf.md`  
 Create each next guide when that step starts.
 
 ---
@@ -300,16 +302,17 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Run **Step 13** and **Step 14** manual test guides; mark related Notion tasks Done when each passes.  
-2. Excel (FMS-44) and PDF (FMS-45) export remain deferred after Step 13 CSV.  
-3. Planned implementation steps **01–14** are otherwise complete for the MVP path.
+1. Run **Step 13**, **Step 14**, and **Step 15** manual test guides; mark related Notion tasks Done when each passes.  
+2. Planned implementation steps **01–15** cover the MVP path (Phases 1–6 + deferred Excel/PDF).  
+3. After manual passes, treat the early MVP as complete unless new product work is scoped.
 
 ### Remaining / follow-up
 
 | Step | Name | Status |
 |------|------|--------|
-| **13** | Reporting | Implemented — pending manual test (CSV; Excel/PDF later) |
+| **13** | Reporting | Implemented — pending manual test (CSV) |
 | **14** | Income module | Implemented — pending manual test |
+| **15** | Report Excel/PDF | Implemented — pending manual test (FMS-44, FMS-45) |
 
 ---
 

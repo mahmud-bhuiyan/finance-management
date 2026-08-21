@@ -18,6 +18,7 @@ Each implementation step has a checklist here as **Markdown + PDF**.
 | 12 | [step-12-full-dashboard.md](step-12-full-dashboard.md) | [step-12-full-dashboard.pdf](step-12-full-dashboard.pdf) |
 | 13 | [step-13-reporting.md](step-13-reporting.md) | [step-13-reporting.pdf](step-13-reporting.pdf) |
 | 14 | [step-14-income-module.md](step-14-income-module.md) | [step-14-income-module.pdf](step-14-income-module.pdf) |
+| 15 | [step-15-report-excel-pdf.md](step-15-report-excel-pdf.md) | [step-15-report-excel-pdf.pdf](step-15-report-excel-pdf.pdf) |
 
 ## When adding or updating a step guide
 
