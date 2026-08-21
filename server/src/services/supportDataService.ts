@@ -289,12 +289,5 @@ export const assertActiveSupportRef = async (
   }
 
   const row = await getForTenant(kind, tenantId, id);
-  if (!row.active) {
-    throw new AppError(
-      `${labelFor[kind]} is inactive`,
-      400,
-      `${notFoundCode[kind].replace("_NOT_FOUND", "_INACTIVE")}`,
-    );
-  }
   return row.id;
 };

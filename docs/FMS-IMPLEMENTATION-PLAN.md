@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–08** done, Step **09** (Expense support data) in progress.  
+> Status: **In progress** — Steps **01–09** done. Next: Step **10** (Attachments + list UX).  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -295,15 +295,14 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Finish **Step 09 — Expense support data** and pass `docs/manual-test-guides/step-09-expense-support-data.md`.  
-2. Mark related Notion tasks Done (categories, departments, vendors/payees).  
-3. Continue with **Step 10 — Attachments + list UX**.
+1. Finish **Step 10 — Attachments + list UX** and pass its manual test guide.  
+2. Mark related Notion tasks Done (receipts/attachments, filters/search/pagination).  
+3. Continue with **Step 11 — Thin dashboard**.
 
-### Remaining steps (09–14)
+### Remaining steps (10–14)
 
 | Step | Name | Status |
 |------|------|--------|
-| **09** | Expense support data | **In progress** |
 | **10** | Attachments + list UX | Not started |
 | **11** | Thin dashboard | Not started |
 | **12** | Full dashboard | Not started |

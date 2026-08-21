@@ -66,6 +66,34 @@ export const ExpensesPage = () => {
 
   const defaultDate = `${year}-${String(month).padStart(2, "0")}-01`;
 
+  const withCurrent = (
+    options: SupportItem[],
+    current: Expense["category"],
+  ): SupportItem[] => {
+    if (!current || options.some((item) => item.id === current.id)) {
+      return options;
+    }
+    return [
+      {
+        id: current.id,
+        tenantId: user.tenant?.id ?? "",
+        name: `${current.name} (inactive)`,
+        notes: null,
+        active: false,
+        createdAt: "",
+        updatedAt: "",
+      },
+      ...options,
+    ];
+  };
+
+  const categoryOptions = withCurrent(categories, editing?.category ?? null);
+  const departmentOptions = withCurrent(
+    departments,
+    editing?.department ?? null,
+  );
+  const vendorOptions = withCurrent(vendors, editing?.vendor ?? null);
+
   const handleSubmit = async (payload: CreateExpensePayload) => {
     setSubmitting(true);
     expensesApi.setError(null);
@@ -148,9 +176,9 @@ export const ExpensesPage = () => {
         {canWrite && (
           <ExpenseForm
             fields={expensesApi.fields}
-            categories={categories}
-            departments={departments}
-            vendors={vendors}
+            categories={categoryOptions}
+            departments={departmentOptions}
+            vendors={vendorOptions}
             submitting={submitting}
             editing={editing}
             defaultDate={defaultDate}

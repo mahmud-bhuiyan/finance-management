@@ -110,7 +110,7 @@ curl -s -b cookies.txt -H "Content-Type: application/json" \
 | E2 | GET `/api/v1/categories` as **Super Admin** | HTTP 403 `TENANT_REQUIRED` | [ ] |
 | E3 | GET `/api/v1/vendors` without cookie | HTTP 401 | [ ] |
 | E4 | POST expense with another tenant’s `categoryId` | HTTP 404 `CATEGORY_NOT_FOUND` | [ ] |
-| E5 | POST expense with inactive `categoryId` | HTTP 400 `CATEGORY_INACTIVE` | [ ] |
+| E5 | POST expense with soft-deleted `categoryId` | HTTP 404 `CATEGORY_NOT_FOUND` | [ ] |
 
 ---
 
