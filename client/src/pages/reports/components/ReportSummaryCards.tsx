@@ -26,8 +26,6 @@ export const ReportSummaryCards = ({ summary }: ReportSummaryCardsProps) => (
       </p>
       <p className="mt-1 text-xs text-slate-500">
         {summary.incomeCount} transaction{summary.incomeCount === 1 ? "" : "s"}
-        {" · "}
-        zero until Step 14
       </p>
     </article>
     <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-2 lg:col-span-1">

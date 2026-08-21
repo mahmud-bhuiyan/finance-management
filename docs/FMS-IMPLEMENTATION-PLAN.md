@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–15** implemented (Steps **13–15** pending manual test pass).  
+> Status: **In progress** — Steps **01–15** implemented. Step **13** manual verification largely passed (admin UI + API); Steps **14–15** API smoke passed — finish role UI checks then mark Notion Done.  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -302,17 +302,17 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Run **Step 13**, **Step 14**, and **Step 15** manual test guides; mark related Notion tasks Done when each passes.  
-2. Planned implementation steps **01–15** cover the MVP path (Phases 1–6 + deferred Excel/PDF).  
-3. After manual passes, treat the early MVP as complete unless new product work is scoped.
+1. Finish remaining manual role checks for Steps **13–15** (normal user reports/exports; Super Admin `/reports` redirect on client).  
+2. Mark related Notion tasks Done when each guide fully passes (Step 13: FMS-38…43,46; Step 14: FMS-47…51; Step 15: FMS-44,45).  
+3. Planned implementation steps **01–15** cover the MVP path (Phases 1–6 + Excel/PDF). After full manual passes, treat the early MVP as complete unless new product work is scoped (e.g. tenant user management FMS-8, automated tests).
 
 ### Remaining / follow-up
 
 | Step | Name | Status |
 |------|------|--------|
-| **13** | Reporting | Implemented — pending manual test (CSV) |
-| **14** | Income module | Implemented — pending manual test |
-| **15** | Report Excel/PDF | Implemented — pending manual test (FMS-44, FMS-45) |
+| **13** | Reporting | Implemented — admin UI + API verified; normal-user UI check still open |
+| **14** | Income module | Implemented — API smoke verified (CRUD, soft delete, Net Balance); UI checklist open |
+| **15** | Report Excel/PDF | Implemented — API Excel/PDF verified; UI download checklist open |
 
 ---
 

@@ -30,7 +30,7 @@ export const KpiCards = ({ kpis }: KpiCardsProps) => (
     <Card
       label="Total income"
       value={formatMoney(kpis.totalIncome)}
-      hint="Income module lands in Step 14"
+      hint={`${kpis.incomeCount} income${kpis.incomeCount === 1 ? "" : "s"}`}
     />
     <Card
       label="Net balance"
