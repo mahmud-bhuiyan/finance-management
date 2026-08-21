@@ -13,6 +13,7 @@ Each implementation step has a checklist here as **Markdown + PDF**.
 | 07 | [step-07-dynamic-fields-ui.md](step-07-dynamic-fields-ui.md) | [step-07-dynamic-fields-ui.pdf](step-07-dynamic-fields-ui.pdf) |
 | 08 | [step-08-expense-core.md](step-08-expense-core.md) | [step-08-expense-core.pdf](step-08-expense-core.pdf) |
 | 09 | [step-09-expense-support-data.md](step-09-expense-support-data.md) | [step-09-expense-support-data.pdf](step-09-expense-support-data.pdf) |
+| 10 | [step-10-attachments-list-ux.md](step-10-attachments-list-ux.md) | [step-10-attachments-list-ux.pdf](step-10-attachments-list-ux.pdf) |
 
 ## When adding or updating a step guide
 

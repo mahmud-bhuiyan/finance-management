@@ -53,3 +53,44 @@ export const apiFetch = async <T>(
 
   return data;
 };
+
+/** Multipart upload — do not set Content-Type (browser sets boundary). */
+export const apiUpload = async <T>(
+  path: string,
+  formData: FormData,
+): Promise<T> => {
+  const response = await fetch(`${API_BASE}${toApiPath(path)}`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  const data = (await response.json().catch(() => ({}))) as ApiErrorBody & T;
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.message ?? "Upload failed",
+      response.status,
+      data.code,
+    );
+  }
+
+  return data;
+};
+
+export const apiDownloadBlob = async (path: string): Promise<Blob> => {
+  const response = await fetch(`${API_BASE}${toApiPath(path)}`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const data = (await response.json().catch(() => ({}))) as ApiErrorBody;
+    throw new ApiError(
+      data.message ?? "Download failed",
+      response.status,
+      data.code,
+    );
+  }
+
+  return response.blob();
+};

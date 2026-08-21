@@ -69,6 +69,10 @@
     {
       "key": "vendorId",
       "value": ""
+    },
+    {
+      "key": "attachmentId",
+      "value": ""
     }
   ],
   "item": [
@@ -1386,7 +1390,7 @@
     },
     {
       "name": "Expenses",
-      "description": "Expense CRUD on shared `financial_transactions` (Step 08 + 09 support FKs). Company admin can write; normal user can list/get only. Soft delete sets `deleted_at`. Run **Auth → Login (company admin)** first. Prefer creating Categories / Departments / Vendors first so `categoryId` vars are set.",
+      "description": "Expense CRUD (Steps 08–10). List supports filters, search, pagination, sorting (`meta`). Attachments: multipart upload + authenticated download. Soft delete for expenses and attachments. Run **Auth → Login (company admin)** first.",
       "item": [
         {
           "name": "List expenses",
@@ -1400,10 +1404,13 @@
                   "  pm.response.to.have.status(200);",
                   "});",
                   "const json = pm.response.json();",
-                  "pm.test('Returns expenses and fields', function () {",
+                  "pm.test('Returns expenses, fields, and meta', function () {",
                   "  pm.expect(json.ok).to.eql(true);",
                   "  pm.expect(json.expenses).to.be.an('array');",
                   "  pm.expect(json.fields).to.be.an('array');",
+                  "  pm.expect(json.meta).to.be.an('object');",
+                  "  pm.expect(json.meta).to.have.property('total');",
+                  "  pm.expect(json.meta).to.have.property('page');",
                   "});"
                 ]
               }
@@ -1412,8 +1419,8 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/expenses?year=2026&month=8",
-            "description": "Lists non-deleted expenses for a month. Omit year/month to list recent rows."
+            "url": "{{baseUrl}}/expenses?year=2026&month=8&page=1&pageSize=20&sortBy=occurredOn&sortDir=desc&q=",
+            "description": "Lists non-deleted expenses with pagination. Optional: year/month, q (notes search), categoryId, departmentId, vendorId, page, pageSize, sortBy (occurredOn|amount|createdAt), sortDir (asc|desc). Response includes `meta` and `attachmentCount` per row."
           },
           "response": []
         },
@@ -1455,6 +1462,143 @@
             },
             "url": "{{baseUrl}}/expenses",
             "description": "Creates an expense. Optional `categoryId` / `departmentId` / `vendorId` from Step 09. `amount` is a decimal string. Saves `expenseId` for later requests."
+          },
+          "response": []
+        },
+        {
+          "name": "List attachments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns attachments array', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.attachments).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments",
+            "description": "Lists non-deleted attachments for an expense. Run **Create expense** first."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload attachment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns attachment metadata', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.attachment).to.have.property(\"id\");",
+                  "  pm.expect(json.attachment).to.have.property(\"originalName\");",
+                  "});",
+                  "if (json.attachment && json.attachment.id) {",
+                  "  pm.collectionVariables.set('attachmentId', json.attachment.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "JPEG / PNG / WebP / PDF only. Field name must be `file`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments",
+            "description": "Multipart upload. Select a local file for `file`. Saves `attachmentId`. Max 5 per expense."
+          },
+          "response": []
+        },
+        {
+          "name": "Download attachment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments/{{attachmentId}}/download",
+            "description": "Authenticated binary download. Run **Upload attachment** first."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete attachment (soft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments/{{attachmentId}}",
+            "description": "Soft-deletes the attachment and removes the stored file."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload attachment (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments",
+            "description": "Negative check: login as normal user first."
           },
           "response": []
         },

@@ -10,6 +10,11 @@ const optionalSupportIdSchema = z.preprocess(
   z.union([z.string().trim().min(1), z.null()]).optional(),
 );
 
+const optionalIdQuerySchema = z.preprocess(
+  (value) => (value === "" || value === undefined ? undefined : value),
+  z.string().trim().min(1).optional(),
+);
+
 export const amountSchema = z
   .union([z.number(), z.string()])
   .transform((value, ctx) => {
@@ -42,6 +47,16 @@ export const listExpensesQuerySchema = z
   .object({
     year: z.coerce.number().int().min(2000).max(2100).optional(),
     month: z.coerce.number().int().min(1).max(12).optional(),
+    q: z.string().trim().max(200).optional(),
+    categoryId: optionalIdQuerySchema,
+    departmentId: optionalIdQuerySchema,
+    vendorId: optionalIdQuerySchema,
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+    sortBy: z
+      .enum(["occurredOn", "amount", "createdAt"])
+      .default("occurredOn"),
+    sortDir: z.enum(["asc", "desc"]).default("desc"),
   })
   .superRefine((data, ctx) => {
     if ((data.year === undefined) !== (data.month === undefined)) {
@@ -81,6 +96,11 @@ export const updateExpenseSchema = z
 
 export const expenseIdParamSchema = z.object({
   id: z.string().trim().min(1),
+});
+
+export const attachmentIdParamSchema = z.object({
+  id: z.string().trim().min(1),
+  attachmentId: z.string().trim().min(1),
 });
 
 export type ListExpensesQuery = z.infer<typeof listExpensesQuerySchema>;

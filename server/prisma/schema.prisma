@@ -70,6 +70,7 @@ model Tenant {
   expenseCategories       ExpenseCategory[]
   departments             Department[]
   vendors                 Vendor[]
+  expenseAttachments      ExpenseAttachment[]
 
   @@map("tenants")
 }
@@ -87,6 +88,7 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   auditLogs             AuditLog[] @relation("AuditActor")
   createdTransactions   FinancialTransaction[] @relation("TransactionCreator")
+  uploadedAttachments   ExpenseAttachment[] @relation("AttachmentUploader")
 
   @@index([tenantId])
   @@map("users")
@@ -208,10 +210,31 @@ model FinancialTransaction {
   createdBy    User             @relation("TransactionCreator", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Cascade)
   createdAt    DateTime         @default(now()) @map("created_at")
   updatedAt    DateTime         @updatedAt @map("updated_at")
+  attachments  ExpenseAttachment[]
 
   @@index([tenantId, type, deletedAt, occurredOn])
   @@index([categoryId])
   @@index([departmentId])
   @@index([vendorId])
   @@map("financial_transactions")
+}
+
+/// Receipt / file attached to an expense (Step 10). Bytes live on disk (or S3 later); DB holds metadata.
+model ExpenseAttachment {
+  id            String               @id @default(cuid())
+  tenantId      String               @map("tenant_id")
+  tenant        Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  transactionId String               @map("transaction_id")
+  transaction   FinancialTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  originalName  String               @map("original_name")
+  mimeType      String               @map("mime_type")
+  sizeBytes     Int                  @map("size_bytes")
+  storageKey    String               @map("storage_key")
+  deletedAt     DateTime?            @map("deleted_at")
+  createdById   String               @map("created_by_id")
+  createdBy     User                 @relation("AttachmentUploader", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt     DateTime             @default(now()) @map("created_at")
+
+  @@index([tenantId, transactionId, deletedAt])
+  @@map("expense_attachments")
 }
