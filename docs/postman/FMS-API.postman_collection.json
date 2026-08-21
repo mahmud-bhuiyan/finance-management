@@ -1513,7 +1513,7 @@
     },
     {
       "name": "Reports",
-      "description": "Step 13 reporting (monthly + dimension breakdowns + CSV export). Requires company tenant + `reports:read` or `finance:write`. Run **Auth \u2192 Login (company admin)** or login as normal user first. Excel/PDF are deferred.",
+      "description": "Step 13–15 reporting (monthly + dimension breakdowns + CSV / Excel / PDF export). Requires company tenant + `reports:read` or `finance:write`. Run **Auth \u2192 Login (company admin)** or login as normal user first.",
       "item": [
         {
           "name": "Summary (this month)",
@@ -1631,6 +1631,72 @@
             "header": [],
             "url": "{{baseUrl}}/reports/export.csv?preset=this_month&type=EXPENSE",
             "description": "CSV restricted to EXPENSE rows."
+          },
+          "response": []
+        },
+        {
+          "name": "Export Excel (this month)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Excel content type', function () {",
+                  "  const ct = pm.response.headers.get('Content-Type') || '';",
+                  "  pm.expect(ct).to.match(/spreadsheetml|octet-stream/i);",
+                  "});",
+                  "pm.test('Attachment disposition', function () {",
+                  "  const cd = pm.response.headers.get('Content-Disposition') || '';",
+                  "  pm.expect(cd).to.match(/attachment/i);",
+                  "  pm.expect(cd).to.match(/\\.xlsx/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reports/export.xlsx?preset=this_month&type=ALL",
+            "description": "Downloads transaction rows as Excel (.xlsx). Same filters as CSV (`type`, categoryId, departmentId, vendorId, paymentMethod, preset/custom range). Cap: 5000 rows."
+          },
+          "response": []
+        },
+        {
+          "name": "Export PDF (this month)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('PDF content type', function () {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.match(/application\\/pdf/i);",
+                  "});",
+                  "pm.test('Attachment disposition', function () {",
+                  "  const cd = pm.response.headers.get('Content-Disposition') || '';",
+                  "  pm.expect(cd).to.match(/attachment/i);",
+                  "  pm.expect(cd).to.match(/\\.pdf/i);",
+                  "});",
+                  "pm.test('Looks like a PDF', function () {",
+                  "  pm.expect(pm.response.text().slice(0, 5)).to.eql('%PDF-');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reports/export.pdf?preset=this_month&type=ALL",
+            "description": "Downloads a printable PDF: period filters, summary KPIs, breakdown sections, and a short transaction preview. Same query filters as CSV/Excel."
           },
           "response": []
         },

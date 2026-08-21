@@ -93,9 +93,9 @@ Open http://localhost:5173 and sign in as a **company admin**.
 
 ## Pass criteria
 
-All **required** rows above pass. Excel/PDF export is **out of scope** for Step 13.
+All **required** rows above pass. Excel/PDF export remains out of scope here — covered in **Step 15**.
 
-**When all required items pass:** mark related Notion tasks Done (FMS-38, FMS-39, FMS-40, FMS-41, FMS-42, FMS-43, FMS-46), then start **Step 14 — Income module**. Leave FMS-44 (Excel) and FMS-45 (PDF) for a later pass.
+**When all required items pass:** mark related Notion tasks Done (FMS-38, FMS-39, FMS-40, FMS-41, FMS-42, FMS-43, FMS-46), then start **Step 14 — Income module**. Excel (FMS-44) and PDF (FMS-45) are Step 15.
 
 ---
 

@@ -109,7 +109,7 @@ Open http://localhost:5173 and sign in as a **company admin**.
 
 ## Pass criteria
 
-All **required** rows above pass. Excel/PDF export remains out of scope (deferred from Step 13).
+All **required** rows above pass. Excel/PDF export is covered in **Step 15** (not part of this income checklist).
 
 **When all required items pass:** mark related Notion tasks Done (FMS-47, FMS-48, FMS-49, FMS-50, FMS-51, FMS-52). Phase 6 / implementation steps 01–14 are complete for the planned MVP path.
 

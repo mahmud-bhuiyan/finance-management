@@ -8,6 +8,8 @@ import { ApiError } from "../../lib/api";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
 import {
   downloadReportCsv,
+  downloadReportExcel,
+  downloadReportPdf,
   type ReportFilters,
 } from "../../lib/reports";
 import { listSupportItems, type SupportItem } from "../../lib/supportData";
@@ -24,6 +26,8 @@ const monthStartUtc = () => {
     .toISOString()
     .slice(0, 10);
 };
+
+type ExportKind = "csv" | "xlsx" | "pdf";
 
 export const ReportsPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -47,7 +51,7 @@ export const ReportsPage = () => {
   const [categories, setCategories] = useState<SupportItem[]>([]);
   const [departments, setDepartments] = useState<SupportItem[]>([]);
   const [vendors, setVendors] = useState<SupportItem[]>([]);
-  const [exporting, setExporting] = useState(false);
+  const [exporting, setExporting] = useState<ExportKind | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
   const query = useMemo(
@@ -102,23 +106,33 @@ export const ReportsPage = () => {
     setFilters((current) => ({ ...current, ...next }));
   };
 
-  const handleExportCsv = async () => {
+  const handleExport = async (kind: ExportKind) => {
     if (filters.preset === "custom" && (!filters.from || !filters.to)) {
       setExportError("Custom range needs from and to dates.");
       return;
     }
-    setExporting(true);
+    setExporting(kind);
     setExportError(null);
     try {
-      await downloadReportCsv(query);
+      if (kind === "csv") {
+        await downloadReportCsv(query);
+      } else if (kind === "xlsx") {
+        await downloadReportExcel(query);
+      } else {
+        await downloadReportPdf(query);
+      }
     } catch (err) {
+      const label =
+        kind === "csv" ? "CSV" : kind === "xlsx" ? "Excel" : "PDF";
       setExportError(
-        err instanceof ApiError ? err.message : "CSV download failed",
+        err instanceof ApiError ? err.message : `${label} download failed`,
       );
     } finally {
-      setExporting(false);
+      setExporting(null);
     }
   };
+
+  const busy = exporting !== null || report.loading;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -131,8 +145,8 @@ export const ReportsPage = () => {
             Reports
           </h1>
           <p className="mt-2 text-slate-600">
-            Monthly and dimension breakdowns for the selected period, plus CSV
-            export of matching transactions. Excel/PDF come later.
+            Monthly and dimension breakdowns for the selected period, plus CSV,
+            Excel, and PDF export of matching data.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-medium">
             <Link to="/" className="text-teal-800 hover:underline">
@@ -146,10 +160,24 @@ export const ReportsPage = () => {
             </Link>
             <Button
               type="button"
-              disabled={exporting || report.loading}
-              onClick={() => void handleExportCsv()}
+              disabled={busy}
+              onClick={() => void handleExport("csv")}
             >
-              {exporting ? "Downloading…" : "Download CSV"}
+              {exporting === "csv" ? "Downloading…" : "Download CSV"}
+            </Button>
+            <Button
+              type="button"
+              disabled={busy}
+              onClick={() => void handleExport("xlsx")}
+            >
+              {exporting === "xlsx" ? "Downloading…" : "Download Excel"}
+            </Button>
+            <Button
+              type="button"
+              disabled={busy}
+              onClick={() => void handleExport("pdf")}
+            >
+              {exporting === "pdf" ? "Downloading…" : "Download PDF"}
             </Button>
           </div>
           {report.data && (

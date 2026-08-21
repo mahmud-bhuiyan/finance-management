@@ -82,21 +82,41 @@ const buildQuery = (query: ReportQuery) => {
   return params.toString();
 };
 
+const downloadFilename = (query: ReportQuery, ext: string) => {
+  const from = query.from ?? query.preset;
+  const to = query.to ?? "";
+  return `fms-report-${from}${to ? `_to_${to}` : ""}.${ext}`;
+};
+
+const triggerBlobDownload = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+};
+
 export const fetchReportSummary = (query: ReportQuery) =>
   apiFetch<ReportSummary>(`/reports/summary?${buildQuery(query)}`);
 
 export const downloadReportCsv = async (query: ReportQuery) => {
   const blob = await apiDownloadBlob(`/reports/export.csv?${buildQuery(query)}`);
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  const from = query.from ?? query.preset;
-  const to = query.to ?? "";
-  anchor.href = url;
-  anchor.download = `fms-report-${from}${to ? `_to_${to}` : ""}.csv`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
+  triggerBlobDownload(blob, downloadFilename(query, "csv"));
+};
+
+export const downloadReportExcel = async (query: ReportQuery) => {
+  const blob = await apiDownloadBlob(
+    `/reports/export.xlsx?${buildQuery(query)}`,
+  );
+  triggerBlobDownload(blob, downloadFilename(query, "xlsx"));
+};
+
+export const downloadReportPdf = async (query: ReportQuery) => {
+  const blob = await apiDownloadBlob(`/reports/export.pdf?${buildQuery(query)}`);
+  triggerBlobDownload(blob, downloadFilename(query, "pdf"));
 };
 
 export const formatMoney = (value: string) => {
