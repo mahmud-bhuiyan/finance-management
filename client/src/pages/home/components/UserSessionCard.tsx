@@ -17,6 +17,7 @@ export const UserSessionCard = ({ user, onLogout }: UserSessionCardProps) => {
     !!user.tenant && (canWriteFinance || canReadReports);
   const canReadAudit = roleCan(user.role, PERMISSIONS.AUDIT_READ);
   const canManageFields = roleCan(user.role, PERMISSIONS.FIELDS_MANAGE);
+  const canManageUsers = roleCan(user.role, PERMISSIONS.USERS_MANAGE);
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -40,6 +41,14 @@ export const UserSessionCard = ({ user, onLogout }: UserSessionCardProps) => {
         >
           Role & access
         </Link>
+        {canManageUsers && user.tenant && (
+          <Link
+            to="/users"
+            className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-medium text-teal-900 hover:bg-teal-100"
+          >
+            Users
+          </Link>
+        )}
         {canManageFields && (
           <Link
             to="/fields"

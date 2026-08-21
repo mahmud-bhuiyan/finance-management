@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "5914500b-3ae9-4fe4-9371-f1b01cc92ff0",
     "name": "FMS API (v1)",
-    "description": "Finance Management System \u2014 `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman \u2192 **Import** \u2192 choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman\u2019s cookie jar sends it on later requests to the same host \u2014 no Bearer header needed.\n\n**Suggested order**\n1. Health \u2192 Health check\n2. Auth \u2192 Login (Super Admin) \u2014 uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants \u2192 List / Create / Create admin / Update status\n4. RBAC \u2192 Me / probes (switch login to company admin or normal user as needed)\n5. Fields \u2192 CRUD (company admin)\n6. Categories / Departments / Vendors \u2192 CRUD + soft delete (company admin)\n7. Expenses \u2192 CRUD + soft delete with optional support ids (company admin; normal user is read-only)\n8. Incomes \u2192 CRUD + soft delete on shared ledger (company admin; normal user is read-only)\n9. Dashboard \u2192 Summary KPIs + charts incl. Net Balance (company admin or normal user)\n10. Reports \u2192 Summary tables + CSV export (company admin or normal user)\n11. Auth \u2192 Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
+    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. Auth → Login (company admin)\n5. Users → List / Create normal user / role & status (Step 16)\n6. RBAC → Me / probes (switch login to company admin or normal user as needed)\n7. Fields → CRUD (company admin)\n8. Categories / Departments / Vendors → CRUD + soft delete (company admin)\n9. Expenses → CRUD + soft delete with optional support ids (company admin; normal user is read-only)\n10. Incomes → CRUD + soft delete on shared ledger (company admin; normal user is read-only)\n11. Dashboard → Summary KPIs + charts incl. Net Balance (company admin or normal user)\n12. Reports → Summary tables + CSV / Excel / PDF export (company admin or normal user)\n13. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -77,6 +77,22 @@
     {
       "key": "incomeId",
       "value": ""
+    },
+    {
+      "key": "tenantUserId",
+      "value": ""
+    },
+    {
+      "key": "normalUserEmail",
+      "value": "user@acme.example"
+    },
+    {
+      "key": "normalUserPassword",
+      "value": "password123"
+    },
+    {
+      "key": "normalUserName",
+      "value": "Acme Reader"
     }
   ],
   "item": [
@@ -263,7 +279,7 @@
           "response": []
         },
         {
-          "name": "Me (unauthenticated \u2014 expect 401)",
+          "name": "Me (unauthenticated — expect 401)",
           "event": [
             {
               "listen": "prerequest",
@@ -291,7 +307,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/auth/me",
-            "description": "Negative check: no session cookie \u2192 401. Clears cookies for the API host first."
+            "description": "Negative check: no session cookie → 401. Clears cookies for the API host first."
           },
           "response": []
         }
@@ -299,7 +315,7 @@
     },
     {
       "name": "Tenants (Super Admin)",
-      "description": "All routes require Super Admin session. Run **Auth \u2192 Login (Super Admin)** first.",
+      "description": "All routes require Super Admin session. Run **Auth → Login (Super Admin)** first.",
       "item": [
         {
           "name": "List tenants",
@@ -481,7 +497,7 @@
           "response": []
         },
         {
-          "name": "List tenants (unauthenticated \u2014 expect 401)",
+          "name": "List tenants (unauthenticated — expect 401)",
           "event": [
             {
               "listen": "prerequest",
@@ -516,8 +532,187 @@
       ]
     },
     {
+      "name": "Users",
+      "description": "Tenant user management (Step 16 / FMS-8). Requires company admin cookie (`users:manage`). Create normal users here before role checks on reports/dashboard.",
+      "item": [
+        {
+          "name": "List users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns users array', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.users).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users",
+            "description": "Lists company users (company admin + normal user roles)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create normal user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('User is NORMAL_USER ACTIVE', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.user.role).to.eql('NORMAL_USER');",
+                  "  pm.expect(json.user.status).to.eql('ACTIVE');",
+                  "});",
+                  "if (json.user && json.user.id) {",
+                  "  pm.collectionVariables.set('tenantUserId', json.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{normalUserEmail}}\",\n  \"password\": \"{{normalUserPassword}}\",\n  \"name\": \"{{normalUserName}}\",\n  \"role\": \"NORMAL_USER\"\n}"
+            },
+            "url": "{{baseUrl}}/users",
+            "description": "Invite a read-only normal user into the signed-in company admin's tenant. Saves `tenantUserId`."
+          },
+          "response": []
+        },
+        {
+          "name": "Update user role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"NORMAL_USER\"\n}"
+            },
+            "url": "{{baseUrl}}/users/{{tenantUserId}}",
+            "description": "Change role between COMPANY_ADMIN and NORMAL_USER. Cannot change own role."
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('User is INACTIVE', function () {",
+                  "  pm.expect(json.user.status).to.eql('INACTIVE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/users/{{tenantUserId}}",
+            "description": "Deactivate a teammate. Inactive users cannot log in or call authenticated APIs."
+          },
+          "response": []
+        },
+        {
+          "name": "Reactivate user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('User is ACTIVE', function () {",
+                  "  pm.expect(json.user.status).to.eql('ACTIVE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/users/{{tenantUserId}}",
+            "description": "Restore an inactive user."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "RBAC",
-      "description": "Role and permission probes. Run the matching **Auth \u2192 Login** for Super Admin, company admin, or normal user before each group.",
+      "description": "Role and permission probes. Run the matching **Auth → Login** for Super Admin, company admin, or normal user before each group.",
       "item": [
         {
           "name": "RBAC profile (me)",
@@ -617,7 +812,7 @@
           "response": []
         },
         {
-          "name": "Probe finance-write (normal user \u2014 expect 403)",
+          "name": "Probe finance-write (normal user — expect 403)",
           "event": [
             {
               "listen": "test",
@@ -643,7 +838,7 @@
     },
     {
       "name": "Audit",
-      "description": "Audit trail listing. Requires `audit:read` (Super Admin or Company Admin). Run the matching **Auth \u2192 Login** first.",
+      "description": "Audit trail listing. Requires `audit:read` (Super Admin or Company Admin). Run the matching **Auth → Login** first.",
       "item": [
         {
           "name": "List audit logs",
@@ -674,7 +869,7 @@
           "response": []
         },
         {
-          "name": "List audit logs (normal user \u2014 expect 403)",
+          "name": "List audit logs (normal user — expect 403)",
           "event": [
             {
               "listen": "test",
@@ -700,7 +895,7 @@
     },
     {
       "name": "Fields",
-      "description": "Dynamic field definition CRUD (Step 06). Requires company membership + `fields:manage` (company admin). Run **Auth \u2192 Login (company admin)** first.",
+      "description": "Dynamic field definition CRUD (Step 06). Requires company membership + `fields:manage` (company admin). Run **Auth → Login (company admin)** first.",
       "item": [
         {
           "name": "List field definitions",
@@ -855,7 +1050,7 @@
           "response": []
         },
         {
-          "name": "List fields (normal user \u2014 expect 403)",
+          "name": "List fields (normal user — expect 403)",
           "event": [
             {
               "listen": "test",
@@ -881,7 +1076,7 @@
     },
     {
       "name": "Categories",
-      "description": "Tenant-scoped categories CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth \u2192 Login (company admin) first.",
+      "description": "Tenant-scoped categories CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
       "item": [
         {
           "name": "List categories",
@@ -1017,7 +1212,7 @@
           "response": []
         },
         {
-          "name": "Create category (normal user \u2014 expect 403)",
+          "name": "Create category (normal user — expect 403)",
           "event": [
             {
               "listen": "test",
@@ -1052,7 +1247,7 @@
     },
     {
       "name": "Departments",
-      "description": "Tenant-scoped departments CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth \u2192 Login (company admin) first.",
+      "description": "Tenant-scoped departments CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
       "item": [
         {
           "name": "List departments",
@@ -1188,7 +1383,7 @@
           "response": []
         },
         {
-          "name": "Create department (normal user \u2014 expect 403)",
+          "name": "Create department (normal user — expect 403)",
           "event": [
             {
               "listen": "test",
@@ -1223,7 +1418,7 @@
     },
     {
       "name": "Vendors",
-      "description": "Tenant-scoped vendors CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth \u2192 Login (company admin) first.",
+      "description": "Tenant-scoped vendors CRUD (Step 09). Soft delete. Company admin write; finance write or reports read for list/get. Run Auth → Login (company admin) first.",
       "item": [
         {
           "name": "List vendors",
@@ -1359,7 +1554,7 @@
           "response": []
         },
         {
-          "name": "Create vendor (normal user \u2014 expect 403)",
+          "name": "Create vendor (normal user — expect 403)",
           "event": [
             {
               "listen": "test",
@@ -1394,7 +1589,7 @@
     },
     {
       "name": "Dashboard",
-      "description": "Steps 11\u201312 dashboard aggregation (full charts + paymentMethod filter). Requires company tenant + `reports:read` or `finance:write`. Run **Auth \u2192 Login (company admin)** or login as normal user first.",
+      "description": "Steps 11–12 dashboard aggregation (full charts + paymentMethod filter). Requires company tenant + `reports:read` or `finance:write`. Run **Auth → Login (company admin)** or login as normal user first.",
       "item": [
         {
           "name": "Summary (this month)",
@@ -1464,7 +1659,7 @@
           "response": []
         },
         {
-          "name": "Summary (invalid paymentMethod \u2192 400)",
+          "name": "Summary (invalid paymentMethod → 400)",
           "event": [
             {
               "listen": "test",
@@ -1487,7 +1682,7 @@
           "response": []
         },
         {
-          "name": "Summary (custom missing dates \u2192 400)",
+          "name": "Summary (custom missing dates → 400)",
           "event": [
             {
               "listen": "test",
@@ -1513,7 +1708,7 @@
     },
     {
       "name": "Reports",
-      "description": "Step 13–15 reporting (monthly + dimension breakdowns + CSV / Excel / PDF export). Requires company tenant + `reports:read` or `finance:write`. Run **Auth \u2192 Login (company admin)** or login as normal user first.",
+      "description": "Step 13–15 reporting (monthly + dimension breakdowns + CSV / Excel / PDF export). Requires company tenant + `reports:read` or `finance:write`. Run **Auth → Login (company admin)** or login as normal user first.",
       "item": [
         {
           "name": "Summary (this month)",
@@ -1701,7 +1896,7 @@
           "response": []
         },
         {
-          "name": "Summary (invalid paymentMethod \u2192 400)",
+          "name": "Summary (invalid paymentMethod → 400)",
           "event": [
             {
               "listen": "test",
@@ -1724,7 +1919,7 @@
           "response": []
         },
         {
-          "name": "Summary (custom missing dates \u2192 400)",
+          "name": "Summary (custom missing dates → 400)",
           "event": [
             {
               "listen": "test",
@@ -1750,7 +1945,7 @@
     },
     {
       "name": "Expenses",
-      "description": "Expense CRUD (Steps 08\u201310). List supports filters, search, pagination, sorting (`meta`). Attachments: multipart upload + authenticated download. Soft delete for expenses and attachments. Run **Auth \u2192 Login (company admin)** first.",
+      "description": "Expense CRUD (Steps 08–10). List supports filters, search, pagination, sorting (`meta`). Attachments: multipart upload + authenticated download. Soft delete for expenses and attachments. Run **Auth → Login (company admin)** first.",
       "item": [
         {
           "name": "List expenses",
@@ -1930,7 +2125,7 @@
           "response": []
         },
         {
-          "name": "Upload attachment (normal user \u2014 expect 403)",
+          "name": "Upload attachment (normal user — expect 403)",
           "event": [
             {
               "listen": "test",
@@ -2051,7 +2246,7 @@
           "response": []
         },
         {
-          "name": "Create expense (normal user \u2014 expect 403)",
+          "name": "Create expense (normal user — expect 403)",
           "event": [
             {
               "listen": "test",
@@ -2086,7 +2281,7 @@
     },
     {
       "name": "Incomes",
-      "description": "Income CRUD (Step 14). Same shape as Expenses on `financial_transactions` with `type=INCOME`. Income custom fields (`target=INCOME`). Reuses categories/departments/vendors (vendor = customer/payor). Attachments supported. Soft delete + audit. Run **Auth \u2192 Login (company admin)** first.",
+      "description": "Income CRUD (Step 14). Same shape as Expenses on `financial_transactions` with `type=INCOME`. Income custom fields (`target=INCOME`). Reuses categories/departments/vendors (vendor = customer/payor). Attachments supported. Soft delete + audit. Run **Auth → Login (company admin)** first.",
       "item": [
         {
           "name": "List incomes",
@@ -2276,7 +2471,7 @@
           "response": []
         },
         {
-          "name": "Create income (normal user \u2014 expect 403)",
+          "name": "Create income (normal user — expect 403)",
           "event": [
             {
               "listen": "test",

@@ -10,6 +10,7 @@ import { rbacRouter } from "./rbacRoutes.js";
 import { reportRouter } from "./reportRoutes.js";
 import { createSupportDataRouter } from "./supportDataRoutes.js";
 import { tenantRouter } from "./tenantRoutes.js";
+import { userRouter } from "./userRoutes.js";
 
 export const apiRouter = Router();
 
@@ -24,5 +25,6 @@ apiRouter.use("/fields", fieldRouter);
 apiRouter.use("/categories", createSupportDataRouter("category"));
 apiRouter.use("/departments", createSupportDataRouter("department"));
 apiRouter.use("/vendors", createSupportDataRouter("vendor"));
+apiRouter.use("/users", userRouter);
 apiRouter.use("/rbac", rbacRouter);
 apiRouter.use("/tenants", tenantRouter);

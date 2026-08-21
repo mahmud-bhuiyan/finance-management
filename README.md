@@ -62,6 +62,7 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 13: [`docs/manual-test-guides/step-13-reporting.md`](docs/manual-test-guides/step-13-reporting.md) · [PDF](docs/manual-test-guides/step-13-reporting.pdf)
 - Step 14: [`docs/manual-test-guides/step-14-income-module.md`](docs/manual-test-guides/step-14-income-module.md) · [PDF](docs/manual-test-guides/step-14-income-module.pdf)
 - Step 15: [`docs/manual-test-guides/step-15-report-excel-pdf.md`](docs/manual-test-guides/step-15-report-excel-pdf.md) · [PDF](docs/manual-test-guides/step-15-report-excel-pdf.pdf)
+- Step 16: [`docs/manual-test-guides/step-16-tenant-users.md`](docs/manual-test-guides/step-16-tenant-users.md) · [PDF](docs/manual-test-guides/step-16-tenant-users.pdf)
 
 ## Postman (API)
 
