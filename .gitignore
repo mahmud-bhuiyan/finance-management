@@ -3,9 +3,11 @@ dist/
 build/
 .env
 .env.local
+.env.test
 !.env.local.example
 *.log
 .DS_Store
 .vite/
 coverage/
 server/uploads/
+server/uploads-test/

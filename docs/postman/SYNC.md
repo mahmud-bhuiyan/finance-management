@@ -24,5 +24,4 @@ Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:40
 
 ## Pending cloud sync
 
-- **Steps 09–17:** git collection is the source of truth (`docs/postman/FMS-API.postman_collection.json`). Postman MCP is listed as ready but cloud API calls return **Invalid API Key** (re-auth the Postman MCP / API key, then `putCollection` to UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`, or re-import the JSON).
-- **Step 17 git updates:** Users negatives (`403` / `401`) + create second company admin; Incomes attachment upload/download/delete (+ `403`); `incomeAttachmentId` variable.
+- None — cloud collection UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0` re-aligned with git on 2026-08-22 (folder/request order, List expenses pagination, collection description, unauthenticated request names; collection comment left in Postman).

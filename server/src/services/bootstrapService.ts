@@ -26,7 +26,9 @@ export const ensureSuperAdmin = async () => {
         where: { id: existing.id },
         data: { role: "SUPER_ADMIN", tenantId: null },
       });
-      console.log(`Promoted ${email} to SUPER_ADMIN`);
+      if (env.NODE_ENV !== "test") {
+        console.log(`Promoted ${email} to SUPER_ADMIN`);
+      }
     }
     return;
   }
@@ -40,5 +42,7 @@ export const ensureSuperAdmin = async () => {
     },
   });
 
-  console.log(`Created Super Admin ${email}`);
+  if (env.NODE_ENV !== "test") {
+    console.log(`Created Super Admin ${email}`);
+  }
 };

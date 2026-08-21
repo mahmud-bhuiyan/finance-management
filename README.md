@@ -64,6 +64,7 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 15: [`docs/manual-test-guides/step-15-report-excel-pdf.md`](docs/manual-test-guides/step-15-report-excel-pdf.md) · [PDF](docs/manual-test-guides/step-15-report-excel-pdf.pdf)
 - Step 16: [`docs/manual-test-guides/step-16-tenant-users.md`](docs/manual-test-guides/step-16-tenant-users.md) · [PDF](docs/manual-test-guides/step-16-tenant-users.pdf)
 - Step 17: [`docs/manual-test-guides/step-17-admin-shell.md`](docs/manual-test-guides/step-17-admin-shell.md) · [PDF](docs/manual-test-guides/step-17-admin-shell.pdf)
+- Step 18: [`docs/manual-test-guides/step-18-automated-tests.md`](docs/manual-test-guides/step-18-automated-tests.md) · [PDF](docs/manual-test-guides/step-18-automated-tests.pdf)
 
 ## Postman (API)
 
@@ -86,6 +87,16 @@ In `server/.env.local` set:
 - `SUPER_ADMIN_NAME` (optional)
 
 On `npm run dev`, the API creates that Super Admin if the email does not exist yet. Default examples in `.env.local.example`: `superadmin@fms.local` / `password123`.
+
+## Automated tests (Step 18)
+
+From `server/`:
+
+```bash
+npm test
+```
+
+Runs Vitest against database `fms_test` (created automatically). If local Postgres is down, an embedded cluster is started for the run. Dev data in `fms_dev` is not truncated.
 
 ## Project layout
 
