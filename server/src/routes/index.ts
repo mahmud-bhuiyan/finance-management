@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { auditRouter } from "./auditRoutes.js";
 import { authRouter } from "./authRoutes.js";
+import { dashboardRouter } from "./dashboardRoutes.js";
 import { expenseRouter } from "./expenseRoutes.js";
 import { fieldRouter } from "./fieldRoutes.js";
 import { healthRouter } from "./healthRoutes.js";
@@ -13,6 +14,7 @@ export const apiRouter = Router();
 apiRouter.use("/health", healthRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/audit", auditRouter);
+apiRouter.use("/dashboard", dashboardRouter);
 apiRouter.use("/expenses", expenseRouter);
 apiRouter.use("/fields", fieldRouter);
 apiRouter.use("/categories", createSupportDataRouter("category"));
