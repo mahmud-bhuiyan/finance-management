@@ -11,6 +11,7 @@ import { LoginPage } from "./pages/login/LoginPage";
 import { RegisterPage } from "./pages/register/RegisterPage";
 import { ReportsPage } from "./pages/reports/ReportsPage";
 import { TenantsPage } from "./pages/tenants/TenantsPage";
+import { UsersPage } from "./pages/users/UsersPage";
 
 const App = () => (
   <Routes>
@@ -18,6 +19,7 @@ const App = () => (
     <Route path="/login" element={<LoginPage />} />
     <Route path="/register" element={<RegisterPage />} />
     <Route path="/tenants" element={<TenantsPage />} />
+    <Route path="/users" element={<UsersPage />} />
     <Route path="/access" element={<AccessPage />} />
     <Route path="/audit" element={<AuditPage />} />
     <Route path="/dashboard" element={<DashboardPage />} />

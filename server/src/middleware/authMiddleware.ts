@@ -1,6 +1,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import type { UserRole } from "@prisma/client";
 import { env } from "../config/env.js";
+import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
 import { verifyAccessToken } from "../utils/jwt.js";
 
@@ -31,7 +32,35 @@ const readToken = (req: Request): string | null => {
   return null;
 };
 
-export const requireAuth: RequestHandler = (req, _res, next) => {
+const loadActiveSessionUser = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      tenantId: true,
+      status: true,
+    },
+  });
+
+  if (!user) {
+    throw new AppError("Authentication required", 401, "UNAUTHORIZED");
+  }
+
+  if (user.status === "INACTIVE") {
+    throw new AppError("This account is inactive", 403, "USER_INACTIVE");
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    tenantId: user.tenantId,
+  };
+};
+
+export const requireAuth: RequestHandler = async (req, _res, next) => {
   try {
     const token = readToken(req);
     if (!token) {
@@ -39,19 +68,18 @@ export const requireAuth: RequestHandler = (req, _res, next) => {
     }
 
     const payload = verifyAccessToken(token);
-    req.user = {
-      id: payload.sub,
-      email: payload.email,
-      role: payload.role,
-      tenantId: payload.tenantId ?? null,
-    };
+    req.user = await loadActiveSessionUser(payload.sub);
     next();
-  } catch {
+  } catch (error) {
+    if (error instanceof AppError) {
+      next(error);
+      return;
+    }
     next(new AppError("Authentication required", 401, "UNAUTHORIZED"));
   }
 };
 
-export const optionalAuth = (
+export const optionalAuth = async (
   req: Request,
   _res: Response,
   next: NextFunction,
@@ -64,14 +92,9 @@ export const optionalAuth = (
     }
 
     const payload = verifyAccessToken(token);
-    req.user = {
-      id: payload.sub,
-      email: payload.email,
-      role: payload.role,
-      tenantId: payload.tenantId ?? null,
-    };
+    req.user = await loadActiveSessionUser(payload.sub);
   } catch {
-    // ignore invalid optional tokens
+    // ignore invalid / inactive optional tokens
   }
   next();
 };

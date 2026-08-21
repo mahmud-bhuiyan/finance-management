@@ -15,6 +15,7 @@ const toPublicAdmin = (user: User) => ({
   email: user.email,
   name: user.name,
   role: user.role,
+  status: user.status,
   tenantId: user.tenantId,
   createdAt: user.createdAt.toISOString(),
 });

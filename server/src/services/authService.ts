@@ -23,6 +23,7 @@ export const toPublicUser = (user: UserWithTenant) => ({
   email: user.email,
   name: user.name,
   role: user.role,
+  status: user.status,
   tenantId: user.tenantId,
   tenant: toPublicTenant(user.tenant),
   createdAt: user.createdAt.toISOString(),
@@ -85,6 +86,10 @@ export const loginUser = async (input: LoginInput) => {
     throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
   }
 
+  if (user.status === "INACTIVE") {
+    throw new AppError("This account is inactive", 403, "USER_INACTIVE");
+  }
+
   if (user.tenant?.status === "INACTIVE") {
     throw new AppError("This company is inactive", 403, "TENANT_INACTIVE");
   }
@@ -99,6 +104,10 @@ export const getUserById = async (id: string) => {
   });
   if (!user) {
     throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+
+  if (user.status === "INACTIVE") {
+    throw new AppError("This account is inactive", 403, "USER_INACTIVE");
   }
 
   return toPublicUser(user);

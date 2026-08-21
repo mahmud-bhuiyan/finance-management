@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–15** implemented. Step **13** manual verification largely passed (admin UI + API); Steps **14–15** API smoke passed — finish role UI checks then mark Notion Done.  
+> Status: **In progress** — Steps **01–15** MVP implemented; **Step 16** (tenant user management / FMS-8) in progress to unlock remaining role UI checks.  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -225,6 +225,7 @@ Export the same MD to **PDF in the same folder** (required — see §8 manual te
 | **13** | Reporting | Monthly/category/etc. + CSV (Excel/PDF after) | Phase 5 |
 | **14** | Income module | Income CRUD + Net Balance on dashboard | Phase 6 |
 | **15** | Report Excel/PDF | `.xlsx` + PDF exports (same filters/roles as CSV) | Phase 5 |
+| **16** | Tenant users | Invite / role / deactivate within company (`users:manage`) | Phase 1 |
 
 ### Manual test rule
 
@@ -249,6 +250,7 @@ Step 12 guide: `finance-management/docs/manual-test-guides/step-12-full-dashboar
 Step 13 guide: `finance-management/docs/manual-test-guides/step-13-reporting.md`  
 Step 14 guide: `finance-management/docs/manual-test-guides/step-14-income-module.md`  
 Step 15 guide: `finance-management/docs/manual-test-guides/step-15-report-excel-pdf.md`  
+Step 16 guide: `finance-management/docs/manual-test-guides/step-16-tenant-users.md`  
 Create each next guide when that step starts.
 
 ---
@@ -302,17 +304,19 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Finish remaining manual role checks for Steps **13–15** (normal user reports/exports; Super Admin `/reports` redirect on client).  
-2. Mark related Notion tasks Done when each guide fully passes (Step 13: FMS-38…43,46; Step 14: FMS-47…51; Step 15: FMS-44,45).  
-3. Planned implementation steps **01–15** cover the MVP path (Phases 1–6 + Excel/PDF). After full manual passes, treat the early MVP as complete unless new product work is scoped (e.g. tenant user management FMS-8, automated tests).
+1. Finish **Step 16** manual checklist (invite normal user, role change, deactivate).  
+2. Use that normal user to complete remaining Steps **13–15** role UI checks (reports/exports/incomes).  
+3. Mark related Notion tasks Done (FMS-8; Step 13: FMS-38…43,46; Step 14: FMS-47…51; Step 15: FMS-44,45).  
+4. Remaining open product items after that: admin shell polish (FMS-9), automated tests (FMS-10,19,29,52), secure storage hardening (FMS-23).
 
 ### Remaining / follow-up
 
 | Step | Name | Status |
 |------|------|--------|
-| **13** | Reporting | Implemented — admin UI + API verified; normal-user UI check still open |
-| **14** | Income module | Implemented — API smoke verified (CRUD, soft delete, Net Balance); UI checklist open |
-| **15** | Report Excel/PDF | Implemented — API Excel/PDF verified; UI download checklist open |
+| **13** | Reporting | Implemented — finish normal-user UI after Step 16 |
+| **14** | Income module | Implemented — finish UI role checklist after Step 16 |
+| **15** | Report Excel/PDF | Implemented — finish UI download role checklist after Step 16 |
+| **16** | Tenant users | Implementing — APIs + `/users` UI; API smoke passed (FMS-8) |
 
 ---
 

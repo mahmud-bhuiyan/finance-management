@@ -13,6 +13,7 @@ export type AuthUser = {
   email: string;
   name: string | null;
   role: string;
+  status?: string;
   tenantId: string | null;
   tenant: {
     id: string;
