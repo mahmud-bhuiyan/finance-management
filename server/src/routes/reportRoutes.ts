@@ -1,0 +1,22 @@
+import { Router } from "express";
+import { PERMISSIONS } from "../config/permissions.js";
+import { exportCsv, summary } from "../controllers/reportController.js";
+import { requireAuth } from "../middleware/authMiddleware.js";
+import { requireAnyPermission } from "../middleware/requirePermission.js";
+import { requireTenant } from "../middleware/requireTenant.js";
+
+export const reportRouter = Router();
+
+reportRouter.use(requireAuth, requireTenant);
+
+reportRouter.get(
+  "/summary",
+  requireAnyPermission(PERMISSIONS.FINANCE_WRITE, PERMISSIONS.REPORTS_READ),
+  summary,
+);
+
+reportRouter.get(
+  "/export.csv",
+  requireAnyPermission(PERMISSIONS.FINANCE_WRITE, PERMISSIONS.REPORTS_READ),
+  exportCsv,
+);

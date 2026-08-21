@@ -8,6 +8,7 @@ import { FieldsPage } from "./pages/fields/FieldsPage";
 import { HomePage } from "./pages/home/HomePage";
 import { LoginPage } from "./pages/login/LoginPage";
 import { RegisterPage } from "./pages/register/RegisterPage";
+import { ReportsPage } from "./pages/reports/ReportsPage";
 import { TenantsPage } from "./pages/tenants/TenantsPage";
 
 const App = () => (
@@ -19,6 +20,7 @@ const App = () => (
     <Route path="/access" element={<AccessPage />} />
     <Route path="/audit" element={<AuditPage />} />
     <Route path="/dashboard" element={<DashboardPage />} />
+    <Route path="/reports" element={<ReportsPage />} />
     <Route path="/expenses" element={<ExpensesPage />} />
     <Route path="/expense-support" element={<ExpenseSupportPage />} />
     <Route path="/fields" element={<FieldsPage />} />

@@ -57,6 +57,12 @@ export const UserSessionCard = ({ user, onLogout }: UserSessionCardProps) => {
               Dashboard
             </Link>
             <Link
+              to="/reports"
+              className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-medium text-teal-900 hover:bg-teal-100"
+            >
+              Reports
+            </Link>
+            <Link
               to="/expenses"
               className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-medium text-teal-900 hover:bg-teal-100"
             >

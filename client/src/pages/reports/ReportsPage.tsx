@@ -2,14 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { Button } from "../../components/ui/Button";
 import { useAuth } from "../../hooks/useAuth";
-import type { DashboardFilters } from "../../lib/dashboard";
+import { ApiError } from "../../lib/api";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
+import {
+  downloadReportCsv,
+  type ReportFilters,
+} from "../../lib/reports";
 import { listSupportItems, type SupportItem } from "../../lib/supportData";
-import { DashboardCharts } from "./components/DashboardCharts";
-import { DashboardFiltersPanel } from "./components/DashboardFilters";
-import { KpiCards } from "./components/KpiCards";
-import { useDashboard } from "./hooks/useDashboard";
+import { ReportFiltersPanel } from "./components/ReportFilters";
+import { ReportSummaryCards } from "./components/ReportSummaryCards";
+import { ReportTables } from "./components/ReportTables";
+import { useReportSummary } from "./hooks/useReportSummary";
 
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 
@@ -20,7 +25,7 @@ const monthStartUtc = () => {
     .slice(0, 10);
 };
 
-export const DashboardPage = () => {
+export const ReportsPage = () => {
   const { user, loading: authLoading } = useAuth();
   const canWrite =
     !!user && roleCan(user.role, PERMISSIONS.FINANCE_WRITE);
@@ -29,7 +34,7 @@ export const DashboardPage = () => {
     (canWrite || roleCan(user.role, PERMISSIONS.REPORTS_READ)) &&
     !!user.tenant;
 
-  const [filters, setFilters] = useState<DashboardFilters>(() => ({
+  const [filters, setFilters] = useState<ReportFilters>(() => ({
     preset: "this_month",
     from: monthStartUtc(),
     to: todayUtc(),
@@ -37,10 +42,13 @@ export const DashboardPage = () => {
     departmentId: "",
     vendorId: "",
     paymentMethod: "",
+    type: "ALL",
   }));
   const [categories, setCategories] = useState<SupportItem[]>([]);
   const [departments, setDepartments] = useState<SupportItem[]>([]);
   const [vendors, setVendors] = useState<SupportItem[]>([]);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const query = useMemo(
     () => ({
@@ -51,11 +59,12 @@ export const DashboardPage = () => {
       departmentId: filters.departmentId || undefined,
       vendorId: filters.vendorId || undefined,
       paymentMethod: filters.paymentMethod || undefined,
+      type: filters.type,
     }),
     [filters],
   );
 
-  const dashboard = useDashboard(!authLoading && canRead, query);
+  const report = useReportSummary(!authLoading && canRead, query);
 
   useEffect(() => {
     if (!canRead) {
@@ -72,7 +81,7 @@ export const DashboardPage = () => {
         setDepartments(nextDepartments);
         setVendors(nextVendors);
       } catch {
-        // Charts still work without dimension pickers.
+        // Tables still work without dimension pickers.
       }
     })();
   }, [canRead]);
@@ -89,8 +98,26 @@ export const DashboardPage = () => {
     return <Navigate to="/" replace />;
   }
 
-  const patchFilters = (next: Partial<DashboardFilters>) => {
+  const patchFilters = (next: Partial<ReportFilters>) => {
     setFilters((current) => ({ ...current, ...next }));
+  };
+
+  const handleExportCsv = async () => {
+    if (filters.preset === "custom" && (!filters.from || !filters.to)) {
+      setExportError("Custom range needs from and to dates.");
+      return;
+    }
+    setExporting(true);
+    setExportError(null);
+    try {
+      await downloadReportCsv(query);
+    } catch (err) {
+      setExportError(
+        err instanceof ApiError ? err.message : "CSV download failed",
+      );
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -101,32 +128,38 @@ export const DashboardPage = () => {
             {canWrite ? "Company admin" : "Read only"}
           </p>
           <h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">
-            Dashboard
+            Reports
           </h1>
           <p className="mt-2 text-slate-600">
-            KPI cards plus line, area, pie, doughnut, bar, and stacked charts.
-            Filter by period, category, department, vendor, or payment method.
-            Income stays at zero until the income module (Step 14).
+            Monthly and dimension breakdowns for the selected period, plus CSV
+            export of matching transactions. Excel/PDF come later.
           </p>
-          <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium">
+          <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-medium">
             <Link to="/" className="text-teal-800 hover:underline">
               ← Back home
             </Link>
-            <Link to="/reports" className="text-teal-800 hover:underline">
-              Reports
+            <Link to="/dashboard" className="text-teal-800 hover:underline">
+              Dashboard
             </Link>
             <Link to="/expenses" className="text-teal-800 hover:underline">
               Expenses
             </Link>
+            <Button
+              type="button"
+              disabled={exporting || report.loading}
+              onClick={() => void handleExportCsv()}
+            >
+              {exporting ? "Downloading…" : "Download CSV"}
+            </Button>
           </div>
-          {dashboard.data && (
+          {report.data && (
             <p className="mt-2 text-xs text-slate-500">
-              Showing {dashboard.data.filters.from} → {dashboard.data.filters.to}
+              Showing {report.data.filters.from} → {report.data.filters.to}
             </p>
           )}
         </div>
 
-        <DashboardFiltersPanel
+        <ReportFiltersPanel
           filters={filters}
           categories={categories}
           departments={departments}
@@ -134,14 +167,16 @@ export const DashboardPage = () => {
           onChange={patchFilters}
         />
 
-        {dashboard.error && <ErrorBanner message={dashboard.error} />}
+        {(report.error || exportError) && (
+          <ErrorBanner message={report.error ?? exportError ?? ""} />
+        )}
 
-        {dashboard.loading && !dashboard.data ? (
-          <LoadingState message="Loading dashboard…" />
-        ) : dashboard.data ? (
+        {report.loading && !report.data ? (
+          <LoadingState message="Loading report…" />
+        ) : report.data ? (
           <>
-            <KpiCards kpis={dashboard.data.kpis} />
-            <DashboardCharts charts={dashboard.data.charts} />
+            <ReportSummaryCards summary={report.data.summary} />
+            <ReportTables data={report.data} />
           </>
         ) : null}
       </main>

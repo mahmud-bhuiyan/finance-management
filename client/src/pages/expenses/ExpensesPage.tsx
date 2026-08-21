@@ -175,6 +175,12 @@ export const ExpensesPage = () => {
             <Link to="/" className="text-teal-800 hover:underline">
               ← Back home
             </Link>
+            <Link to="/dashboard" className="text-teal-800 hover:underline">
+              Dashboard
+            </Link>
+            <Link to="/reports" className="text-teal-800 hover:underline">
+              Reports
+            </Link>
             {canWrite && (
               <Link to="/expense-support" className="text-teal-800 hover:underline">
                 Manage categories / vendors
