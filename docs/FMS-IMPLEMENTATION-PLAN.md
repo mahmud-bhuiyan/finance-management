@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–10** done; Step **11** (Thin dashboard) implemented (pending manual test pass).  
+> Status: **In progress** — Steps **01–11** done; Step **12** (Full dashboard) implemented (pending manual test pass).  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -244,6 +244,7 @@ Step 08 guide: `finance-management/docs/manual-test-guides/step-08-expense-core.
 Step 09 guide: `finance-management/docs/manual-test-guides/step-09-expense-support-data.md`  
 Step 10 guide: `finance-management/docs/manual-test-guides/step-10-attachments-list-ux.md`  
 Step 11 guide: `finance-management/docs/manual-test-guides/step-11-thin-dashboard.md`  
+Step 12 guide: `finance-management/docs/manual-test-guides/step-12-full-dashboard.md`  
 Create each next guide when that step starts.
 
 ---
@@ -297,16 +298,15 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Run **Step 11** manual test guide and mark related Notion tasks Done when it passes (FMS-30 / FMS-31 + thin slice of charts/filters).  
-2. Continue with **Step 12 — Full dashboard**.  
-3. Then Step 13 (reporting) → 14 (income).
+1. Run **Step 12** manual test guide and mark related Notion tasks Done when it passes (FMS-32 / FMS-33 / FMS-34 / FMS-35).  
+2. Continue with **Step 13 — Reporting**.  
+3. Then Step 14 (income).
 
-### Remaining steps (11–14)
+### Remaining steps (12–14)
 
 | Step | Name | Status |
 |------|------|--------|
-| **11** | Thin dashboard | Implemented — pending manual test |
-| **12** | Full dashboard | Not started |
+| **12** | Full dashboard | Implemented — pending manual test |
 | **13** | Reporting | Not started |
 | **14** | Income module | Not started |
 

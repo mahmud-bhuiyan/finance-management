@@ -15,6 +15,7 @@ Each implementation step has a checklist here as **Markdown + PDF**.
 | 09 | [step-09-expense-support-data.md](step-09-expense-support-data.md) | [step-09-expense-support-data.pdf](step-09-expense-support-data.pdf) |
 | 10 | [step-10-attachments-list-ux.md](step-10-attachments-list-ux.md) | [step-10-attachments-list-ux.pdf](step-10-attachments-list-ux.pdf) |
 | 11 | [step-11-thin-dashboard.md](step-11-thin-dashboard.md) | [step-11-thin-dashboard.pdf](step-11-thin-dashboard.pdf) |
+| 12 | [step-12-full-dashboard.md](step-12-full-dashboard.md) | [step-12-full-dashboard.pdf](step-12-full-dashboard.pdf) |
 
 ## When adding or updating a step guide
 

@@ -2,6 +2,7 @@ import { Button } from "../../../components/ui/Button";
 import type { Expense, ExpenseListMeta } from "../../../lib/expenses";
 import { formatExpenseAmount } from "../../../lib/expenses";
 import type { FieldDefinition } from "../../../lib/fields";
+import { paymentMethodLabel } from "../../../lib/paymentMethods";
 
 type ExpenseListProps = {
   expenses: Expense[];
@@ -53,6 +54,7 @@ export const ExpenseList = ({
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Department</th>
               <th className="px-4 py-3 font-medium">Vendor</th>
+              <th className="px-4 py-3 font-medium">Payment</th>
               <th className="px-4 py-3 font-medium">Notes</th>
               <th className="px-4 py-3 font-medium">Files</th>
               {fields.map((field) => (
@@ -83,6 +85,9 @@ export const ExpenseList = ({
                 </td>
                 <td className="px-4 py-3 text-slate-700">
                   {expense.vendor?.name ?? "—"}
+                </td>
+                <td className="px-4 py-3 text-slate-700">
+                  {paymentMethodLabel(expense.paymentMethod)}
                 </td>
                 <td className="max-w-xs truncate px-4 py-3 text-slate-600">
                   {expense.notes || "—"}

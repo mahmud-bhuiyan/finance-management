@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import type { PaymentMethod } from "./paymentMethods";
 
 export type DashboardPreset =
   | "this_month"
@@ -14,6 +15,7 @@ export type DashboardFilters = {
   categoryId: string;
   departmentId: string;
   vendorId: string;
+  paymentMethod: string;
 };
 
 export type DashboardKpis = {
@@ -46,12 +48,27 @@ export type DashboardSummary = {
     categoryId: string | null;
     departmentId: string | null;
     vendorId: string | null;
+    paymentMethod: PaymentMethod | null;
   };
   kpis: DashboardKpis;
   charts: {
     expenseByDay: { date: string; total: string }[];
     expenseByCategory: ChartSlice[];
+    expenseByDepartment: ChartSlice[];
     expenseByVendor: ChartSlice[];
+    expenseByPaymentMethod: ChartSlice[];
+    expenseByMonth: { month: string; total: string }[];
+    incomeVsExpenseByMonth: {
+      month: string;
+      expense: string;
+      income: string;
+    }[];
+    expenseStackedByMonthCategory: {
+      month: string;
+      categoryId: string | null;
+      categoryName: string;
+      total: string;
+    }[];
   };
 };
 
@@ -62,6 +79,7 @@ export type DashboardQuery = {
   categoryId?: string;
   departmentId?: string;
   vendorId?: string;
+  paymentMethod?: string;
 };
 
 const buildQuery = (query: DashboardQuery) => {
@@ -74,6 +92,7 @@ const buildQuery = (query: DashboardQuery) => {
   if (query.categoryId) params.set("categoryId", query.categoryId);
   if (query.departmentId) params.set("departmentId", query.departmentId);
   if (query.vendorId) params.set("vendorId", query.vendorId);
+  if (query.paymentMethod) params.set("paymentMethod", query.paymentMethod);
   return params.toString();
 };
 

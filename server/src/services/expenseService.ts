@@ -163,6 +163,7 @@ const toPublicExpense = (
   occurredOn: toDateOnly(row.occurredOn),
   amount: row.amount.toFixed(2),
   notes: row.notes,
+  paymentMethod: row.paymentMethod,
   customValues: filterCustomValues(asRecord(row.customValues), visibleFields),
   categoryId: row.categoryId,
   departmentId: row.departmentId,
@@ -252,6 +253,9 @@ const buildListWhere = (
   }
   if (query.vendorId) {
     where.vendorId = query.vendorId;
+  }
+  if (query.paymentMethod) {
+    where.paymentMethod = query.paymentMethod;
   }
 
   const search = query.q?.trim();
@@ -348,6 +352,7 @@ export const createExpense = async (
       occurredOn: parseDateOnly(input.occurredOn),
       amount: new Prisma.Decimal(input.amount),
       notes: input.notes?.trim() ? input.notes.trim() : null,
+      paymentMethod: input.paymentMethod ?? null,
       customValues: customValues as Prisma.InputJsonValue,
       categoryId: supportIds.categoryId ?? null,
       departmentId: supportIds.departmentId ?? null,
@@ -409,6 +414,9 @@ export const updateExpense = async (
         : {}),
       ...(input.notes !== undefined
         ? { notes: input.notes?.trim() ? input.notes.trim() : null }
+        : {}),
+      ...(input.paymentMethod !== undefined
+        ? { paymentMethod: input.paymentMethod }
         : {}),
       ...(customValues !== undefined
         ? { customValues: customValues as Prisma.InputJsonValue }

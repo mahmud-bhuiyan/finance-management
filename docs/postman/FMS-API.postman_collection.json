@@ -1390,7 +1390,7 @@
     },
     {
       "name": "Dashboard",
-      "description": "Step 11 thin dashboard aggregation. Requires company tenant + `reports:read` or `finance:write`. Run **Auth \u2192 Login (company admin)** or login as normal user first.",
+      "description": "Steps 11–12 dashboard aggregation (full charts + paymentMethod filter). Requires company tenant + `reports:read` or `finance:write`. Run **Auth \u2192 Login (company admin)** or login as normal user first.",
       "item": [
         {
           "name": "Summary (this month)",
@@ -1410,6 +1410,11 @@
                   "  pm.expect(json.kpis).to.have.property('totalExpense');",
                   "  pm.expect(json.charts).to.be.an('object');",
                   "  pm.expect(json.charts.expenseByDay).to.be.an('array');",
+                  "  pm.expect(json.charts.expenseByDepartment).to.be.an('array');",
+                  "  pm.expect(json.charts.expenseByPaymentMethod).to.be.an('array');",
+                  "  pm.expect(json.charts.expenseByMonth).to.be.an('array');",
+                  "  pm.expect(json.charts.incomeVsExpenseByMonth).to.be.an('array');",
+                  "  pm.expect(json.charts.expenseStackedByMonthCategory).to.be.an('array');",
                   "  pm.expect(json.filters).to.be.an('object');",
                   "});"
                 ]
@@ -1420,7 +1425,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/dashboard/summary?preset=this_month",
-            "description": "KPI totals + chart series for the current month (UTC). Optional filters: categoryId, departmentId, vendorId."
+            "description": "KPI totals + full chart series for the current month (UTC). Optional filters: categoryId, departmentId, vendorId, paymentMethod (CASH|CARD|BANK_TRANSFER|CHECK|OTHER)."
           },
           "response": []
         },
@@ -1449,8 +1454,31 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/dashboard/summary?preset=custom&from=2026-08-01&to=2026-08-31&categoryId={{categoryId}}&departmentId={{departmentId}}&vendorId={{vendorId}}",
-            "description": "Custom date range. Presets: this_month, last_month, this_year, last_30_days, custom (requires from + to)."
+            "url": "{{baseUrl}}/dashboard/summary?preset=custom&from=2026-08-01&to=2026-08-31&categoryId={{categoryId}}&departmentId={{departmentId}}&vendorId={{vendorId}}&paymentMethod=CARD",
+            "description": "Custom date range + optional dimension filters including paymentMethod. Presets: this_month, last_month, this_year, last_30_days, custom (requires from + to)."
+          },
+          "response": []
+        },
+        {
+          "name": "Summary (invalid paymentMethod \u2192 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/summary?preset=this_month&paymentMethod=FOO",
+            "description": "Negative: unknown paymentMethod enum value should fail validation."
           },
           "response": []
         },
@@ -1510,8 +1538,8 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/expenses?year=2026&month=8&page=1&pageSize=20&sortBy=occurredOn&sortDir=desc&q=",
-            "description": "Lists non-deleted expenses with pagination. Optional: year/month, q (notes search), categoryId, departmentId, vendorId, page, pageSize, sortBy (occurredOn|amount|createdAt), sortDir (asc|desc). Response includes `meta` and `attachmentCount` per row."
+            "url": "{{baseUrl}}/expenses?year=2026&month=8&page=1&pageSize=20&sortBy=occurredOn&sortDir=desc&q=&paymentMethod=",
+            "description": "Lists non-deleted expenses with pagination. Optional: year/month, q (notes search), categoryId, departmentId, vendorId, paymentMethod (Step 12), page, pageSize, sortBy (occurredOn|amount|createdAt), sortDir (asc|desc). Response includes `meta` and `attachmentCount` per row."
           },
           "response": []
         },
@@ -1549,10 +1577,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"20.00\",\n  \"notes\": \"Taxi\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"vendorId\": \"{{vendorId}}\",\n  \"customValues\": {}\n}"
+              "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"20.00\",\n  \"notes\": \"Taxi\",\n  \"paymentMethod\": \"CARD\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"vendorId\": \"{{vendorId}}\",\n  \"customValues\": {}\n}"
             },
             "url": "{{baseUrl}}/expenses",
-            "description": "Creates an expense. Optional `categoryId` / `departmentId` / `vendorId` from Step 09. `amount` is a decimal string. Saves `expenseId` for later requests."
+            "description": "Creates an expense. Optional `categoryId` / `departmentId` / `vendorId` (Step 09) and `paymentMethod` (CASH|CARD|BANK_TRANSFER|CHECK|OTHER, Step 12). `amount` is a decimal string. Saves `expenseId` for later requests."
           },
           "response": []
         },
