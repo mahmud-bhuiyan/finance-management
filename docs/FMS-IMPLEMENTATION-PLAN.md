@@ -1,6 +1,6 @@
 # Finance Management System — Implementation Plan
 
-> Status: **In progress** — Steps **01–17** implemented (MVP Phases 1–6 + tenant users + admin shell). Remaining: automated tests and storage hardening.  
+> Status: **In progress** — Steps **01–18** implemented (MVP Phases 1–6 + tenant users + admin shell + automated API tests). Remaining: storage hardening (FMS-23).  
 > Notion: [Finance Management System — Implementation Plan](https://app.notion.com/p/3c29e349548f81c8875ecbcf877eb2b0)
 
 ---
@@ -227,6 +227,7 @@ Export the same MD to **PDF in the same folder** (required — see §8 manual te
 | **15** | Report Excel/PDF | `.xlsx` + PDF exports (same filters/roles as CSV) | Phase 5 |
 | **16** | Tenant users | Invite / role / deactivate within company (`users:manage`) | Phase 1 |
 | **17** | Admin shell | Shared sidebar, role-aware nav, guest auth screens | Phase 1 |
+| **18** | Automated tests | Vitest API tests: auth/tenant isolation, fields, expenses, income + net balance | Phases 1–6 |
 
 ### Manual test rule
 
@@ -253,6 +254,7 @@ Step 14 guide: `finance-management/docs/manual-test-guides/step-14-income-module
 Step 15 guide: `finance-management/docs/manual-test-guides/step-15-report-excel-pdf.md`  
 Step 16 guide: `finance-management/docs/manual-test-guides/step-16-tenant-users.md`  
 Step 17 guide: `finance-management/docs/manual-test-guides/step-17-admin-shell.md`  
+Step 18 guide: `finance-management/docs/manual-test-guides/step-18-automated-tests.md`  
 Create each next guide when that step starts.
 
 ---
@@ -306,18 +308,15 @@ For every major step, record briefly:
 
 ## 13. Current next step
 
-1. Manually verify **Step 17** (`docs/manual-test-guides/step-17-admin-shell.md`).  
-2. Remaining open product items: automated tests (FMS-10, 19, 29, 52) and secure storage hardening (FMS-23). Mark related Notion tasks Done after their checklists pass (FMS-8, FMS-9, Steps 13–15 role UI).
+1. Manually verify **Step 18** (`docs/manual-test-guides/step-18-automated-tests.md`) — `cd server && npm test`.  
+2. Remaining open product item: secure storage hardening (FMS-23). Mark related Notion tasks Done after their checklists pass (FMS-8, FMS-9, Steps 13–15 role UI).
 
 ### Remaining / follow-up
 
 | Step | Name | Status |
 |------|------|--------|
-| **13** | Reporting | Implemented — finish normal-user UI after Step 16 users exist |
-| **14** | Income module | Implemented — finish UI role checklist after Step 16 |
-| **15** | Report Excel/PDF | Implemented — finish UI download role checklist after Step 16 |
-| **16** | Tenant users | Implemented — APIs + `/users` UI (FMS-8) |
-| **17** | Admin shell | Implemented — shared sidebar + role-aware nav (FMS-9); pending manual test |
+| **18** | Automated tests | Implemented — FMS-10, FMS-19, FMS-29, FMS-52 (`cd server && npm test`) |
+| **19** | Storage hardening | Not started — secure receipt/attachment storage (FMS-23) |
 
 ---
 

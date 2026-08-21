@@ -36,8 +36,10 @@ export const createApp = () => {
 
 const app = createApp();
 
-void ensureSuperAdmin().catch((error) => {
-  console.error("Super Admin bootstrap failed:", error);
-});
+if (env.NODE_ENV !== "test") {
+  void ensureSuperAdmin().catch((error) => {
+    console.error("Super Admin bootstrap failed:", error);
+  });
+}
 
 export default app;
