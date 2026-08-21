@@ -57,6 +57,7 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 08: [`docs/manual-test-guides/step-08-expense-core.md`](docs/manual-test-guides/step-08-expense-core.md) · [PDF](docs/manual-test-guides/step-08-expense-core.pdf)
 - Step 09: [`docs/manual-test-guides/step-09-expense-support-data.md`](docs/manual-test-guides/step-09-expense-support-data.md) · [PDF](docs/manual-test-guides/step-09-expense-support-data.pdf)
 - Step 10: [`docs/manual-test-guides/step-10-attachments-list-ux.md`](docs/manual-test-guides/step-10-attachments-list-ux.md) · [PDF](docs/manual-test-guides/step-10-attachments-list-ux.pdf)
+- Step 11: [`docs/manual-test-guides/step-11-thin-dashboard.md`](docs/manual-test-guides/step-11-thin-dashboard.md) · [PDF](docs/manual-test-guides/step-11-thin-dashboard.pdf)
 
 ## Postman (API)
 

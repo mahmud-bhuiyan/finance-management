@@ -26,3 +26,4 @@ Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:40
 
 - **Step 09** updated git collection with Categories / Departments / Vendors folders and expense FK body fields. Postman MCP was not connected at implement time — push to UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0` when MCP is available (or re-import the JSON).
 - **Step 10** updated git collection: expense list query (`meta`, filters/sort/page) + attachment upload/list/download/delete requests. Postman MCP still not connected — re-import or sync cloud when available.
+- **Step 11** updated git collection: **Dashboard** folder (`GET /dashboard/summary` with presets + custom range + dimension filters). Postman MCP still not connected — re-import or sync cloud when available.

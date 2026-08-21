@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { AccessPage } from "./pages/access/AccessPage";
 import { AuditPage } from "./pages/audit/AuditPage";
+import { DashboardPage } from "./pages/dashboard/DashboardPage";
 import { ExpenseSupportPage } from "./pages/expense-support/ExpenseSupportPage";
 import { ExpensesPage } from "./pages/expenses/ExpensesPage";
 import { FieldsPage } from "./pages/fields/FieldsPage";
@@ -17,6 +18,7 @@ const App = () => (
     <Route path="/tenants" element={<TenantsPage />} />
     <Route path="/access" element={<AccessPage />} />
     <Route path="/audit" element={<AuditPage />} />
+    <Route path="/dashboard" element={<DashboardPage />} />
     <Route path="/expenses" element={<ExpensesPage />} />
     <Route path="/expense-support" element={<ExpenseSupportPage />} />
     <Route path="/fields" element={<FieldsPage />} />

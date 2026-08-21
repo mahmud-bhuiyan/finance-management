@@ -21,11 +21,11 @@ export const HomePage = () => {
           Finance Management System
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-          Step 08 Expense core is running
+          Step 11 Thin dashboard is running
         </h1>
         <p className="text-lg text-slate-600">
-          Company admins can record expenses with date, amount, and custom
-          fields. Normal users can view the same month’s list as read-only.
+          Company admins and normal users can open KPI cards and expense charts
+          with date and dimension filters. Income stays at zero until Step 14.
         </p>
 
         <UserSessionCard user={user} onLogout={() => void logout()} />
