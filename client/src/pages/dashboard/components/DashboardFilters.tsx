@@ -1,5 +1,9 @@
 import type { SupportItem } from "../../../lib/supportData";
 import type { DashboardFilters, DashboardPreset } from "../../../lib/dashboard";
+import {
+  PAYMENT_METHODS,
+  PAYMENT_METHOD_LABELS,
+} from "../../../lib/paymentMethods";
 
 const PRESETS: { value: DashboardPreset; label: string }[] = [
   { value: "this_month", label: "This month" },
@@ -110,6 +114,22 @@ export const DashboardFiltersPanel = ({
           {vendors.map((item) => (
             <option key={item.id} value={item.id}>
               {item.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm text-slate-700">
+        Payment method
+        <select
+          className="rounded-lg border border-slate-300 px-3 py-2"
+          value={filters.paymentMethod}
+          onChange={(event) => onChange({ paymentMethod: event.target.value })}
+        >
+          <option value="">All methods</option>
+          {PAYMENT_METHODS.map((method) => (
+            <option key={method} value={method}>
+              {PAYMENT_METHOD_LABELS[method]}
             </option>
           ))}
         </select>

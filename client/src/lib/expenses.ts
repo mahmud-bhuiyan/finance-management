@@ -1,4 +1,5 @@
 import type { FieldDefinition } from "./fields";
+import type { PaymentMethod } from "./paymentMethods";
 import type { SupportRef } from "./supportData";
 
 export type Expense = {
@@ -8,6 +9,7 @@ export type Expense = {
   occurredOn: string;
   amount: string;
   notes: string | null;
+  paymentMethod: PaymentMethod | null;
   customValues: Record<string, unknown>;
   categoryId: string | null;
   departmentId: string | null;
@@ -36,6 +38,7 @@ export type CreateExpensePayload = {
   occurredOn: string;
   amount: string;
   notes?: string;
+  paymentMethod?: PaymentMethod | null;
   customValues?: Record<string, unknown>;
   categoryId?: string | null;
   departmentId?: string | null;
@@ -46,6 +49,7 @@ export type UpdateExpensePayload = {
   occurredOn?: string;
   amount?: string;
   notes?: string | null;
+  paymentMethod?: PaymentMethod | null;
   customValues?: Record<string, unknown>;
   categoryId?: string | null;
   departmentId?: string | null;
@@ -68,6 +72,7 @@ export type ExpenseListFilters = {
   categoryId: string;
   departmentId: string;
   vendorId: string;
+  paymentMethod: string;
   page: number;
   pageSize: number;
   sortBy: ExpenseListMeta["sortBy"];
@@ -121,6 +126,9 @@ export const buildExpenseListQuery = (filters: ExpenseListFilters) => {
   }
   if (filters.vendorId) {
     params.set("vendorId", filters.vendorId);
+  }
+  if (filters.paymentMethod) {
+    params.set("paymentMethod", filters.paymentMethod);
   }
 
   return params.toString();

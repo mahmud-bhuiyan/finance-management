@@ -35,6 +35,7 @@ export const ExpensesPage = () => {
     categoryId: "",
     departmentId: "",
     vendorId: "",
+    paymentMethod: "",
     page: 1,
     pageSize: 20,
     sortBy: "occurredOn",

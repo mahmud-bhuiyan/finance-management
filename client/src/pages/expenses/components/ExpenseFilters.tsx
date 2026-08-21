@@ -1,4 +1,8 @@
 import type { ExpenseListFilters } from "../../../lib/expenses";
+import {
+  PAYMENT_METHODS,
+  PAYMENT_METHOD_LABELS,
+} from "../../../lib/paymentMethods";
 import type { SupportItem } from "../../../lib/supportData";
 
 type ExpenseFiltersProps = {
@@ -77,6 +81,23 @@ export const ExpenseFilters = ({
         options={vendors}
         onChange={(vendorId) => onChange({ vendorId, page: 1 })}
       />
+      <label className="block space-y-1 text-sm text-slate-700">
+        <span className="font-medium text-slate-800">Payment method</span>
+        <select
+          value={filters.paymentMethod}
+          onChange={(event) =>
+            onChange({ paymentMethod: event.target.value, page: 1 })
+          }
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-teal-700/30 focus:ring-2"
+        >
+          <option value="">All</option>
+          {PAYMENT_METHODS.map((method) => (
+            <option key={method} value={method}>
+              {PAYMENT_METHOD_LABELS[method]}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="block space-y-1 text-sm text-slate-700">
         <span className="font-medium text-slate-800">Sort by</span>
         <select

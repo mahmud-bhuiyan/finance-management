@@ -56,6 +56,7 @@ export const useDashboard = (enabled: boolean, query: DashboardQuery) => {
     query.categoryId,
     query.departmentId,
     query.vendorId,
+    query.paymentMethod,
   ]);
 
   return { data, loading, error, setError };

@@ -36,6 +36,7 @@ export const DashboardPage = () => {
     categoryId: "",
     departmentId: "",
     vendorId: "",
+    paymentMethod: "",
   }));
   const [categories, setCategories] = useState<SupportItem[]>([]);
   const [departments, setDepartments] = useState<SupportItem[]>([]);
@@ -49,6 +50,7 @@ export const DashboardPage = () => {
       categoryId: filters.categoryId || undefined,
       departmentId: filters.departmentId || undefined,
       vendorId: filters.vendorId || undefined,
+      paymentMethod: filters.paymentMethod || undefined,
     }),
     [filters],
   );
@@ -102,8 +104,9 @@ export const DashboardPage = () => {
             Dashboard
           </h1>
           <p className="mt-2 text-slate-600">
-            KPI cards and a few charts for the filtered expense range. Income
-            and net balance stay at zero until the income module (Step 14).
+            KPI cards plus line, area, pie, doughnut, bar, and stacked charts.
+            Filter by period, category, department, vendor, or payment method.
+            Income stays at zero until the income module (Step 14).
           </p>
           <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium">
             <Link to="/" className="text-teal-800 hover:underline">

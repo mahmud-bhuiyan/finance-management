@@ -1,5 +1,6 @@
 import { Prisma, TransactionType } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
+import { paymentMethodLabel } from "../constants/paymentMethods.js";
 import type { DashboardSummaryQuery } from "../validators/dashboardValidators.js";
 
 const parseDateOnly = (value: string) => {
@@ -8,6 +9,8 @@ const parseDateOnly = (value: string) => {
 };
 
 const toDateOnly = (value: Date) => value.toISOString().slice(0, 10);
+
+const toMonthKey = (value: Date) => toDateOnly(value).slice(0, 7);
 
 const money = (value: Prisma.Decimal | number | null | undefined) =>
   new Prisma.Decimal(value ?? 0).toFixed(2);
@@ -76,7 +79,22 @@ const buildWhere = (
   ...(query.categoryId ? { categoryId: query.categoryId } : {}),
   ...(query.departmentId ? { departmentId: query.departmentId } : {}),
   ...(query.vendorId ? { vendorId: query.vendorId } : {}),
+  ...(query.paymentMethod ? { paymentMethod: query.paymentMethod } : {}),
 });
+
+const rollupByMonth = (
+  rows: { occurredOn: Date; _sum: { amount: Prisma.Decimal | null } }[],
+) => {
+  const totals = new Map<string, Prisma.Decimal>();
+  for (const row of rows) {
+    const key = toMonthKey(row.occurredOn);
+    const amount = new Prisma.Decimal(row._sum.amount ?? 0);
+    totals.set(key, (totals.get(key) ?? new Prisma.Decimal(0)).plus(amount));
+  }
+  return [...totals.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, total]) => ({ month, total: money(total) }));
+};
 
 export const getDashboardSummary = async (
   tenantId: string,
@@ -104,8 +122,13 @@ export const getDashboardSummary = async (
     highest,
     byDay,
     byCategory,
+    byDepartment,
     byVendor,
+    byPaymentMethod,
+    incomeByDayForMonth,
+    stackedRaw,
     categories,
+    departments,
     vendors,
   ] = await Promise.all([
     prisma.financialTransaction.aggregate({
@@ -141,12 +164,40 @@ export const getDashboardSummary = async (
       orderBy: { _sum: { amount: "desc" } },
     }),
     prisma.financialTransaction.groupBy({
+      by: ["departmentId"],
+      where: expenseWhere,
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+    }),
+    prisma.financialTransaction.groupBy({
       by: ["vendorId"],
       where: expenseWhere,
       _sum: { amount: true },
       orderBy: { _sum: { amount: "desc" } },
     }),
+    prisma.financialTransaction.groupBy({
+      by: ["paymentMethod"],
+      where: expenseWhere,
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+    }),
+    prisma.financialTransaction.groupBy({
+      by: ["occurredOn"],
+      where: incomeWhere,
+      _sum: { amount: true },
+      orderBy: { occurredOn: "asc" },
+    }),
+    prisma.financialTransaction.groupBy({
+      by: ["occurredOn", "categoryId"],
+      where: expenseWhere,
+      _sum: { amount: true },
+      orderBy: [{ occurredOn: "asc" }, { categoryId: "asc" }],
+    }),
     prisma.expenseCategory.findMany({
+      where: { tenantId },
+      select: { id: true, name: true },
+    }),
+    prisma.department.findMany({
       where: { tenantId },
       select: { id: true, name: true },
     }),
@@ -157,6 +208,7 @@ export const getDashboardSummary = async (
   ]);
 
   const categoryName = new Map(categories.map((row) => [row.id, row.name]));
+  const departmentName = new Map(departments.map((row) => [row.id, row.name]));
   const vendorName = new Map(vendors.map((row) => [row.id, row.name]));
 
   const totalExpense = new Prisma.Decimal(expenseAgg._sum.amount ?? 0);
@@ -166,6 +218,44 @@ export const getDashboardSummary = async (
   const avgDailyExpense =
     days > 0 ? totalExpense.div(days) : new Prisma.Decimal(0);
 
+  const expenseByMonth = rollupByMonth(byDay);
+  const incomeByMonth = rollupByMonth(incomeByDayForMonth);
+  const monthKeys = [
+    ...new Set([
+      ...expenseByMonth.map((row) => row.month),
+      ...incomeByMonth.map((row) => row.month),
+    ]),
+  ].sort();
+  const expenseMonthMap = new Map(
+    expenseByMonth.map((row) => [row.month, row.total]),
+  );
+  const incomeMonthMap = new Map(
+    incomeByMonth.map((row) => [row.month, row.total]),
+  );
+
+  const stackedTotals = new Map<
+    string,
+    { categoryId: string | null; categoryName: string; total: Prisma.Decimal }
+  >();
+  for (const row of stackedRaw) {
+    const month = toMonthKey(row.occurredOn);
+    const categoryId = row.categoryId;
+    const key = `${month}::${categoryId ?? "uncategorized"}`;
+    const amount = new Prisma.Decimal(row._sum.amount ?? 0);
+    const existing = stackedTotals.get(key);
+    if (existing) {
+      existing.total = existing.total.plus(amount);
+    } else {
+      stackedTotals.set(key, {
+        categoryId,
+        categoryName: categoryId
+          ? (categoryName.get(categoryId) ?? "Unknown")
+          : "Uncategorized",
+        total: amount,
+      });
+    }
+  }
+
   return {
     filters: {
       preset: query.preset,
@@ -174,6 +264,7 @@ export const getDashboardSummary = async (
       categoryId: query.categoryId ?? null,
       departmentId: query.departmentId ?? null,
       vendorId: query.vendorId ?? null,
+      paymentMethod: query.paymentMethod ?? null,
     },
     kpis: {
       totalExpense: money(totalExpense),
@@ -203,6 +294,13 @@ export const getDashboardSummary = async (
           : "Uncategorized",
         total: money(row._sum.amount),
       })),
+      expenseByDepartment: byDepartment.map((row) => ({
+        id: row.departmentId,
+        name: row.departmentId
+          ? (departmentName.get(row.departmentId) ?? "Unknown")
+          : "No department",
+        total: money(row._sum.amount),
+      })),
       expenseByVendor: byVendor.map((row) => ({
         id: row.vendorId,
         name: row.vendorId
@@ -210,6 +308,32 @@ export const getDashboardSummary = async (
           : "No vendor",
         total: money(row._sum.amount),
       })),
+      expenseByPaymentMethod: byPaymentMethod.map((row) => ({
+        id: row.paymentMethod,
+        name: paymentMethodLabel(row.paymentMethod),
+        total: money(row._sum.amount),
+      })),
+      expenseByMonth,
+      incomeVsExpenseByMonth: monthKeys.map((month) => ({
+        month,
+        expense: expenseMonthMap.get(month) ?? "0.00",
+        income: incomeMonthMap.get(month) ?? "0.00",
+      })),
+      expenseStackedByMonthCategory: [...stackedTotals.entries()]
+        .map(([composite, row]) => {
+          const month = composite.split("::")[0]!;
+          return {
+            month,
+            categoryId: row.categoryId,
+            categoryName: row.categoryName,
+            total: money(row.total),
+          };
+        })
+        .sort((a, b) =>
+          a.month === b.month
+            ? a.categoryName.localeCompare(b.categoryName)
+            : a.month.localeCompare(b.month),
+        ),
     },
   };
 };

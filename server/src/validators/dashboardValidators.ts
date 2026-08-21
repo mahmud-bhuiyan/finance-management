@@ -1,3 +1,4 @@
+import { PaymentMethod } from "@prisma/client";
 import { z } from "zod";
 
 const dateOnlySchema = z
@@ -8,6 +9,11 @@ const dateOnlySchema = z
 const optionalIdQuerySchema = z.preprocess(
   (value) => (value === "" || value === undefined ? undefined : value),
   z.string().trim().min(1).optional(),
+);
+
+const optionalPaymentMethodQuerySchema = z.preprocess(
+  (value) => (value === "" || value === undefined ? undefined : value),
+  z.nativeEnum(PaymentMethod).optional(),
 );
 
 export const dashboardPresetSchema = z.enum([
@@ -26,6 +32,7 @@ export const dashboardSummaryQuerySchema = z
     categoryId: optionalIdQuerySchema,
     departmentId: optionalIdQuerySchema,
     vendorId: optionalIdQuerySchema,
+    paymentMethod: optionalPaymentMethodQuerySchema,
   })
   .superRefine((data, ctx) => {
     if (data.preset === "custom") {

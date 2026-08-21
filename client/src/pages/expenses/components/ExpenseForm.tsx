@@ -7,6 +7,11 @@ import type {
   Expense,
 } from "../../../lib/expenses";
 import type { FieldDefinition } from "../../../lib/fields";
+import {
+  PAYMENT_METHODS,
+  PAYMENT_METHOD_LABELS,
+  type PaymentMethod,
+} from "../../../lib/paymentMethods";
 import type { SupportItem } from "../../../lib/supportData";
 
 type ExpenseFormProps = {
@@ -68,6 +73,7 @@ export const ExpenseForm = ({
   const [occurredOn, setOccurredOn] = useState(defaultDate || todayDate());
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [vendorId, setVendorId] = useState("");
@@ -78,6 +84,7 @@ export const ExpenseForm = ({
       setOccurredOn(editing.occurredOn);
       setAmount(editing.amount);
       setNotes(editing.notes ?? "");
+      setPaymentMethod(editing.paymentMethod ?? "");
       setCategoryId(editing.categoryId ?? "");
       setDepartmentId(editing.departmentId ?? "");
       setVendorId(editing.vendorId ?? "");
@@ -88,6 +95,7 @@ export const ExpenseForm = ({
     setOccurredOn(defaultDate || todayDate());
     setAmount("");
     setNotes("");
+    setPaymentMethod("");
     setCategoryId("");
     setDepartmentId("");
     setVendorId("");
@@ -100,6 +108,7 @@ export const ExpenseForm = ({
       occurredOn,
       amount,
       ...(notes.trim() ? { notes: notes.trim() } : { notes: "" }),
+      paymentMethod: (paymentMethod || null) as PaymentMethod | null,
       categoryId: categoryId || null,
       departmentId: departmentId || null,
       vendorId: vendorId || null,
@@ -109,6 +118,7 @@ export const ExpenseForm = ({
     if (!editing) {
       setAmount("");
       setNotes("");
+      setPaymentMethod("");
       setCategoryId("");
       setDepartmentId("");
       setVendorId("");
@@ -164,6 +174,24 @@ export const ExpenseForm = ({
           disabled={submitting}
           onChange={setVendorId}
         />
+        <label className="block space-y-1.5 text-sm text-slate-700">
+          <span className="font-medium text-slate-800">
+            Payment method (optional)
+          </span>
+          <select
+            value={paymentMethod}
+            onChange={(event) => setPaymentMethod(event.target.value)}
+            disabled={submitting}
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-teal-700/30 focus:ring-2 disabled:opacity-60"
+          >
+            <option value="">— None —</option>
+            {PAYMENT_METHODS.map((method) => (
+              <option key={method} value={method}>
+                {PAYMENT_METHOD_LABELS[method]}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       <label className="mt-4 block space-y-1.5 text-sm text-slate-700">
         <span className="font-medium text-slate-800">Notes (optional)</span>

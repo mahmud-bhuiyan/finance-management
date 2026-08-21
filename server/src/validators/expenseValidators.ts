@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PaymentMethod } from "@prisma/client";
 
 const dateOnlySchema = z
   .string()
@@ -13,6 +14,16 @@ const optionalSupportIdSchema = z.preprocess(
 const optionalIdQuerySchema = z.preprocess(
   (value) => (value === "" || value === undefined ? undefined : value),
   z.string().trim().min(1).optional(),
+);
+
+const optionalPaymentMethodSchema = z.preprocess(
+  (value) => (value === "" ? null : value),
+  z.union([z.nativeEnum(PaymentMethod), z.null()]).optional(),
+);
+
+const optionalPaymentMethodQuerySchema = z.preprocess(
+  (value) => (value === "" || value === undefined ? undefined : value),
+  z.nativeEnum(PaymentMethod).optional(),
 );
 
 export const amountSchema = z
@@ -51,6 +62,7 @@ export const listExpensesQuerySchema = z
     categoryId: optionalIdQuerySchema,
     departmentId: optionalIdQuerySchema,
     vendorId: optionalIdQuerySchema,
+    paymentMethod: optionalPaymentMethodQuerySchema,
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(20),
     sortBy: z
@@ -72,6 +84,7 @@ export const createExpenseSchema = z.object({
   occurredOn: dateOnlySchema,
   amount: amountSchema,
   notes: z.string().trim().max(500).optional(),
+  paymentMethod: optionalPaymentMethodSchema,
   customValues: z.record(z.string(), z.unknown()).optional(),
   categoryId: optionalSupportIdSchema,
   departmentId: optionalSupportIdSchema,
@@ -83,6 +96,7 @@ export const updateExpenseSchema = z
     occurredOn: dateOnlySchema.optional(),
     amount: amountSchema.optional(),
     notes: z.string().trim().max(500).nullable().optional(),
+    paymentMethod: optionalPaymentMethodSchema,
     customValues: z.record(z.string(), z.unknown()).optional(),
     categoryId: optionalSupportIdSchema,
     departmentId: optionalSupportIdSchema,
