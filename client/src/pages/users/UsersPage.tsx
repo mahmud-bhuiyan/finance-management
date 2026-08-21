@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { PageFrame } from "../../components/layout/PageFrame";
+import { PageHeader } from "../../components/layout/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
@@ -77,28 +79,12 @@ export const UsersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-12">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
-            Company admin
-          </p>
-          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">
-            Users
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Invite company members, change roles, and deactivate accounts for{" "}
-            {user.tenant?.name ?? "your company"}.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-medium">
-            <Link to="/" className="text-teal-800 hover:underline">
-              ← Back home
-            </Link>
-            <Link to="/access" className="text-teal-800 hover:underline">
-              Role & access
-            </Link>
-          </div>
-        </div>
+    <PageFrame>
+      <PageHeader
+        kicker="Company admin"
+        title="Users"
+        description={`Invite company members, change roles, and deactivate accounts for ${user.tenant?.name ?? "your company"}.`}
+      />
 
         {usersApi.error && <ErrorBanner message={usersApi.error} />}
 
@@ -115,7 +101,6 @@ export const UsersPage = () => {
             onChangeStatus={handleChangeStatus}
           />
         )}
-      </main>
-    </div>
+    </PageFrame>
   );
 };

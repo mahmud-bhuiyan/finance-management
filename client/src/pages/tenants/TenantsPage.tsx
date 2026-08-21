@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { PageFrame } from "../../components/layout/PageFrame";
+import { PageHeader } from "../../components/layout/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
 import { CreateTenantForm } from "./components/CreateTenantForm";
@@ -43,26 +45,12 @@ export const TenantsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-12">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
-            Super Admin
-          </p>
-          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">
-            Companies
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Create tenants and assign company admins. Inactive companies cannot
-            sign in.
-          </p>
-          <Link
-            to="/"
-            className="mt-3 inline-block text-sm font-medium text-teal-800 hover:underline"
-          >
-            ← Back home
-          </Link>
-        </div>
+    <PageFrame maxWidth="max-w-3xl">
+      <PageHeader
+        kicker="Super Admin"
+        title="Companies"
+        description="Create tenants and assign company admins. Inactive companies cannot sign in."
+      />
 
         {tenants.error && <ErrorBanner message={tenants.error} />}
 
@@ -90,7 +78,6 @@ export const TenantsPage = () => {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </PageFrame>
   );
 };

@@ -10,7 +10,7 @@ export const LoginPage = () => {
     <AuthScreen
       icon={<LockIcon />}
       title="Welcome back"
-      subtitle="Log in to access your developer notes."
+      subtitle="Sign in to your finance workspace."
       footer={
         <>
           Don’t have an account?{" "}

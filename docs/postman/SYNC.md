@@ -24,11 +24,5 @@ Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:40
 
 ## Pending cloud sync
 
-- **Step 09** updated git collection with Categories / Departments / Vendors folders and expense FK body fields. Postman MCP was not connected at implement time — push to UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0` when MCP is available (or re-import the JSON).
-- **Step 10** updated git collection: expense list query (`meta`, filters/sort/page) + attachment upload/list/download/delete requests. Postman MCP still not connected — re-import or sync cloud when available.
-- **Step 11** updated git collection: **Dashboard** folder (`GET /dashboard/summary` with presets + custom range + dimension filters). Postman MCP still not connected — re-import or sync cloud when available.
-- **Step 12** updated git collection: Dashboard full chart assertions + `paymentMethod` filter (incl. invalid enum → 400). Expense create/list bodies include optional `paymentMethod`. Postman MCP still not connected — re-import or sync cloud when available.
-- **Step 13** updated git collection: **Reports** folder (`GET /reports/summary`, `GET /reports/export.csv`, filter negatives). Postman MCP still not connected — re-import or sync cloud when available.
-- **Step 14** updated git collection: **Incomes** folder (`/incomes` CRUD + attachments list + soft-delete negatives) and `incomeId` variable. Postman MCP still not connected — re-import or sync cloud when available.
-- **Step 15** updated git collection: Reports **Export Excel** (`/reports/export.xlsx`) and **Export PDF** (`/reports/export.pdf`). Postman MCP still not connected — re-import or sync cloud when available.
-- **Step 16** updated git collection: **Users** folder (`GET/POST /users`, `PATCH /users/:id`) plus `normalUser*` / `tenantUserId` variables. Postman MCP still not connected — re-import or sync cloud when available.
+- **Steps 09–17:** git collection is the source of truth (`docs/postman/FMS-API.postman_collection.json`). Postman MCP is listed as ready but cloud API calls return **Invalid API Key** (re-auth the Postman MCP / API key, then `putCollection` to UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`, or re-import the JSON).
+- **Step 17 git updates:** Users negatives (`403` / `401`) + create second company admin; Incomes attachment upload/download/delete (+ `403`); `incomeAttachmentId` variable.

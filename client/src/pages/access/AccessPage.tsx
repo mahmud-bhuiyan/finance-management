@@ -1,6 +1,8 @@
 import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { PageFrame } from "../../components/layout/PageFrame";
+import { PageHeader } from "../../components/layout/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 import { permissionsForRole, roleLabel } from "../../lib/permissions";
 import { AccessProbeCard } from "./components/AccessProbeCard";
@@ -21,20 +23,12 @@ export const AccessPage = () => {
   const permissions = rbac.profile?.permissions ?? permissionsForRole(user.role);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-6 py-12">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
-            Finance Management System
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-            Role & access
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Step 04 RBAC maps roles to permissions and enforces them on the
-            server.
-          </p>
-        </div>
+    <PageFrame maxWidth="max-w-3xl">
+      <PageHeader
+        kicker="Account"
+        title="Role & access"
+        description="RBAC maps roles to permissions and enforces them on the server."
+      />
 
         {rbac.error && <ErrorBanner message={rbac.error} />}
 
@@ -71,7 +65,6 @@ export const AccessPage = () => {
         </section>
 
         <AccessProbeCard user={user} />
-      </main>
-    </div>
+    </PageFrame>
   );
 };

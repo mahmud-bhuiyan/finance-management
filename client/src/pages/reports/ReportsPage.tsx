@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { PageFrame } from "../../components/layout/PageFrame";
+import { PageHeader } from "../../components/layout/PageHeader";
 import { Button } from "../../components/ui/Button";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
@@ -135,29 +137,13 @@ export const ReportsPage = () => {
   const busy = exporting !== null || report.loading;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
-            {canWrite ? "Company admin" : "Read only"}
-          </p>
-          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">
-            Reports
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Monthly and dimension breakdowns for the selected period, plus CSV,
-            Excel, and PDF export of matching data.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-medium">
-            <Link to="/" className="text-teal-800 hover:underline">
-              ← Back home
-            </Link>
-            <Link to="/dashboard" className="text-teal-800 hover:underline">
-              Dashboard
-            </Link>
-            <Link to="/expenses" className="text-teal-800 hover:underline">
-              Expenses
-            </Link>
+    <PageFrame maxWidth="max-w-6xl">
+      <PageHeader
+        kicker={canWrite ? "Company admin" : "Read only"}
+        title="Reports"
+        description="Monthly and dimension breakdowns for the selected period, plus CSV, Excel, and PDF export of matching data."
+        actions={
+          <>
             <Button
               type="button"
               disabled={busy}
@@ -179,13 +165,15 @@ export const ReportsPage = () => {
             >
               {exporting === "pdf" ? "Downloading…" : "Download PDF"}
             </Button>
-          </div>
-          {report.data && (
-            <p className="mt-2 text-xs text-slate-500">
-              Showing {report.data.filters.from} → {report.data.filters.to}
-            </p>
-          )}
-        </div>
+          </>
+        }
+      >
+        {report.data ? (
+          <p className="mt-2 text-xs text-slate-500">
+            Showing {report.data.filters.from} → {report.data.filters.to}
+          </p>
+        ) : null}
+      </PageHeader>
 
         <ReportFiltersPanel
           filters={filters}
@@ -207,7 +195,6 @@ export const ReportsPage = () => {
             <ReportTables data={report.data} />
           </>
         ) : null}
-      </main>
-    </div>
+    </PageFrame>
   );
 };
