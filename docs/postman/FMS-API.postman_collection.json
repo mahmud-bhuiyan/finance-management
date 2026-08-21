@@ -79,6 +79,10 @@
       "value": ""
     },
     {
+      "key": "incomeAttachmentId",
+      "value": ""
+    },
+    {
       "key": "tenantUserId",
       "value": ""
     },
@@ -533,7 +537,7 @@
     },
     {
       "name": "Users",
-      "description": "Tenant user management (Step 16 / FMS-8). Requires company admin cookie (`users:manage`). Create normal users here before role checks on reports/dashboard.",
+      "description": "Tenant user management (Step 16 / FMS-8). Requires company admin cookie (`users:manage`). Create normal or company-admin users here before role checks on reports/dashboard. Includes 403/401 negatives.",
       "item": [
         {
           "name": "List users",
@@ -705,6 +709,109 @@
             },
             "url": "{{baseUrl}}/users/{{tenantUserId}}",
             "description": "Restore an inactive user."
+          },
+          "response": []
+        },
+        {
+          "name": "Create company admin user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('User is COMPANY_ADMIN ACTIVE', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.user.role).to.eql('COMPANY_ADMIN');",
+                  "  pm.expect(json.user.status).to.eql('ACTIVE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin2@acme.example\",\n  \"password\": \"{{companyAdminPassword}}\",\n  \"name\": \"Second Admin\",\n  \"role\": \"COMPANY_ADMIN\"\n}"
+            },
+            "url": "{{baseUrl}}/users",
+            "description": "Invite another company admin into the signed-in admin's tenant. Use a unique email if this already exists."
+          },
+          "response": []
+        },
+        {
+          "name": "Create user (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"blocked@acme.example\",\n  \"password\": \"password123\",\n  \"role\": \"NORMAL_USER\"\n}"
+            },
+            "url": "{{baseUrl}}/users",
+            "description": "Negative check: login as a normal user first (`users:manage` required)."
+          },
+          "response": []
+        },
+        {
+          "name": "List users (unauthenticated — expect 401)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jar = pm.cookies.jar();",
+                  "jar.clear(pm.collectionVariables.get('baseUrl').replace(/\\/api\\/v1$/, ''), function () {});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users",
+            "description": "Negative check: no session cookie → 401. Clears cookies for the API host first."
           },
           "response": []
         }
@@ -2281,7 +2388,7 @@
     },
     {
       "name": "Incomes",
-      "description": "Income CRUD (Step 14). Same shape as Expenses on `financial_transactions` with `type=INCOME`. Income custom fields (`target=INCOME`). Reuses categories/departments/vendors (vendor = customer/payor). Attachments supported. Soft delete + audit. Run **Auth → Login (company admin)** first.",
+      "description": "Income CRUD (Step 14). Same shape as Expenses on `financial_transactions` with `type=INCOME`. Income custom fields (`target=INCOME`). Reuses categories/departments/vendors (vendor = customer/payor). Attachments: list / upload / download / delete. Soft delete + audit. Run **Auth → Login (company admin)** first.",
       "item": [
         {
           "name": "List incomes",
@@ -2421,6 +2528,116 @@
             "header": [],
             "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments",
             "description": "Lists non-deleted attachments for an income."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload income attachment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns attachment metadata', function () {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.attachment).to.have.property(\"id\");",
+                  "  pm.expect(json.attachment).to.have.property(\"originalName\");",
+                  "});",
+                  "if (json.attachment && json.attachment.id) {",
+                  "  pm.collectionVariables.set('incomeAttachmentId', json.attachment.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "JPEG / PNG / WebP / PDF only. Field name must be `file`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments",
+            "description": "Multipart upload for an income. Select a local file for `file`. Saves `incomeAttachmentId`."
+          },
+          "response": []
+        },
+        {
+          "name": "Download income attachment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments/{{incomeAttachmentId}}/download",
+            "description": "Authenticated binary download. Run **Upload income attachment** first."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete income attachment (soft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments/{{incomeAttachmentId}}",
+            "description": "Soft-deletes the income attachment and removes the stored file."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload income attachment (normal user — expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 403 for normal user', function () {",
+                  "  pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "JPEG / PNG / WebP / PDF only. Field name must be `file`."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments",
+            "description": "Negative check: login as a normal user first."
           },
           "response": []
         },

@@ -11,7 +11,7 @@ export const RegisterPage = () => {
       icon={<UserPlusIcon />}
       tone="pink"
       title="Create account"
-      subtitle="Sign up to access your developer notes."
+      subtitle="Register to join a company workspace."
       footer={
         <>
           Already have an account?{" "}

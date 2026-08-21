@@ -1,4 +1,6 @@
 import { Route, Routes } from "react-router-dom";
+import { AppShell } from "./components/layout/AppShell";
+import { GuestOnly } from "./components/layout/GuestOnly";
 import { AccessPage } from "./pages/access/AccessPage";
 import { AuditPage } from "./pages/audit/AuditPage";
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
@@ -15,19 +17,35 @@ import { UsersPage } from "./pages/users/UsersPage";
 
 const App = () => (
   <Routes>
-    <Route path="/" element={<HomePage />} />
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/register" element={<RegisterPage />} />
-    <Route path="/tenants" element={<TenantsPage />} />
-    <Route path="/users" element={<UsersPage />} />
-    <Route path="/access" element={<AccessPage />} />
-    <Route path="/audit" element={<AuditPage />} />
-    <Route path="/dashboard" element={<DashboardPage />} />
-    <Route path="/reports" element={<ReportsPage />} />
-    <Route path="/expenses" element={<ExpensesPage />} />
-    <Route path="/incomes" element={<IncomesPage />} />
-    <Route path="/expense-support" element={<ExpenseSupportPage />} />
-    <Route path="/fields" element={<FieldsPage />} />
+    <Route
+      path="/login"
+      element={
+        <GuestOnly>
+          <LoginPage />
+        </GuestOnly>
+      }
+    />
+    <Route
+      path="/register"
+      element={
+        <GuestOnly>
+          <RegisterPage />
+        </GuestOnly>
+      }
+    />
+    <Route element={<AppShell />}>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/tenants" element={<TenantsPage />} />
+      <Route path="/users" element={<UsersPage />} />
+      <Route path="/access" element={<AccessPage />} />
+      <Route path="/audit" element={<AuditPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/reports" element={<ReportsPage />} />
+      <Route path="/expenses" element={<ExpensesPage />} />
+      <Route path="/incomes" element={<IncomesPage />} />
+      <Route path="/expense-support" element={<ExpenseSupportPage />} />
+      <Route path="/fields" element={<FieldsPage />} />
+    </Route>
   </Routes>
 );
 

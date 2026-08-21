@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { PageFrame } from "../../components/layout/PageFrame";
+import { PageHeader } from "../../components/layout/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
@@ -77,28 +79,12 @@ export const ExpenseSupportPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto flex max-w-4xl flex-col gap-6 px-6 py-12">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
-            Company admin
-          </p>
-          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">
-            Expense support data
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Manage categories, departments, and vendors used when recording
-            expenses. Soft-deleted items leave expense history intact.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium">
-            <Link to="/" className="text-teal-800 hover:underline">
-              ← Back home
-            </Link>
-            <Link to="/expenses" className="text-teal-800 hover:underline">
-              Expenses
-            </Link>
-          </div>
-        </div>
+    <PageFrame maxWidth="max-w-4xl">
+      <PageHeader
+        kicker="Company admin"
+        title="Categories & vendors"
+        description="Manage categories, departments, and vendors used when recording expenses and income. Soft-deleted items leave history intact."
+      />
 
         <div className="flex flex-wrap gap-2">
           {SUPPORT_KINDS.map((item) => (
@@ -158,7 +144,6 @@ export const ExpenseSupportPage = () => {
             />
           </section>
         )}
-      </main>
-    </div>
+    </PageFrame>
   );
 };

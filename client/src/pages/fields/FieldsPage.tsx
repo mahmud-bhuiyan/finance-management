@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { PageFrame } from "../../components/layout/PageFrame";
+import { PageHeader } from "../../components/layout/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
 import type { CreateFieldPayload, FieldTarget } from "../../lib/fields";
@@ -63,26 +65,12 @@ export const FieldsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto flex max-w-4xl flex-col gap-6 px-6 py-12">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
-            Company admin
-          </p>
-          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">
-            Custom fields
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Configure dynamic fields for expenses and income without schema
-            changes. Changes are tenant-scoped and audited on the server.
-          </p>
-          <Link
-            to="/"
-            className="mt-3 inline-block text-sm font-medium text-teal-800 hover:underline"
-          >
-            ← Back home
-          </Link>
-        </div>
+    <PageFrame maxWidth="max-w-4xl">
+      <PageHeader
+        kicker="Company admin"
+        title="Custom fields"
+        description="Configure dynamic fields for expenses and income without schema changes. Changes are tenant-scoped and audited on the server."
+      />
 
         <div className="flex flex-wrap gap-2">
           {FIELD_TARGETS.map((item) => (
@@ -138,7 +126,6 @@ export const FieldsPage = () => {
             <FieldPreviewPanel fields={fieldsApi.fields} />
           </>
         )}
-      </main>
-    </div>
+    </PageFrame>
   );
 };

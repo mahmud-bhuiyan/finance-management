@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
+import { PageFrame } from "../../components/layout/PageFrame";
+import { PageHeader } from "../../components/layout/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
 import type {
@@ -157,40 +159,12 @@ export const ExpensesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-12">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
-            {canWrite ? "Company admin" : "Read only"}
-          </p>
-          <h1 className="mt-1 text-4xl font-semibold tracking-tight text-slate-950">
-            Expenses
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Filter and page the list, then attach receipts while editing an
-            expense. Uploads stay on the server and download only through the
-            API.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium">
-            <Link to="/" className="text-teal-800 hover:underline">
-              ← Back home
-            </Link>
-            <Link to="/dashboard" className="text-teal-800 hover:underline">
-              Dashboard
-            </Link>
-            <Link to="/reports" className="text-teal-800 hover:underline">
-              Reports
-            </Link>
-            <Link to="/incomes" className="text-teal-800 hover:underline">
-              Income
-            </Link>
-            {canWrite && (
-              <Link to="/expense-support" className="text-teal-800 hover:underline">
-                Manage categories / vendors
-              </Link>
-            )}
-          </div>
-        </div>
+    <PageFrame>
+      <PageHeader
+        kicker={canWrite ? "Company admin" : "Read only"}
+        title="Expenses"
+        description="Filter and page the list, then attach receipts while editing an expense. Uploads stay on the server and download only through the API."
+      />
 
         <ExpenseMonthPicker
           year={filters.year}
@@ -250,7 +224,6 @@ export const ExpensesPage = () => {
             onPageChange={(page) => patchFilters({ page })}
           />
         )}
-      </main>
-    </div>
+    </PageFrame>
   );
 };
