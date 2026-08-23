@@ -14,44 +14,44 @@ describe("FMS-29 expense CRUD, soft delete, tenant isolation, validation", () =>
       notes: "Office tea",
     });
     expect(created.status).toBe(201);
-    expect(created.body.expense.amount).toBe("25.50");
-    expect(created.body.expense.type).toBe("EXPENSE");
-    expect(created.body.expense.tenantId).toBe(company.tenant.id);
+    expect(created.body.data.expense.amount).toBe("25.50");
+    expect(created.body.data.expense.type).toBe("EXPENSE");
+    expect(created.body.data.expense.tenantId).toBe(company.tenant.id);
 
-    const id = created.body.expense.id as string;
+    const id = created.body.data.expense.id as string;
     const fetched = await company.agent.get(api(`/expenses/${id}`));
     expect(fetched.status).toBe(200);
-    expect(fetched.body.expense.notes).toBe("Office tea");
+    expect(fetched.body.data.expense.notes).toBe("Office tea");
 
     const updated = await company.agent.patch(api(`/expenses/${id}`)).send({
       notes: "Office tea (updated)",
       amount: "26.00",
     });
     expect(updated.status).toBe(200);
-    expect(updated.body.expense.notes).toBe("Office tea (updated)");
-    expect(updated.body.expense.amount).toBe("26.00");
+    expect(updated.body.data.expense.notes).toBe("Office tea (updated)");
+    expect(updated.body.data.expense.amount).toBe("26.00");
 
     const list = await company.agent.get(api("/expenses"));
     expect(list.status).toBe(200);
-    expect(list.body.expenses).toHaveLength(1);
+    expect(list.body.data.expenses).toHaveLength(1);
   });
 
   it("soft-deletes an expense so it is hidden from get and list", async () => {
     const company = await createCompanyWithAdmin();
     const created = await createExpense(company.agent);
     expect(created.status).toBe(201);
-    const id = created.body.expense.id as string;
+    const id = created.body.data.expense.id as string;
 
     const removed = await company.agent.delete(api(`/expenses/${id}`));
     expect(removed.status).toBe(200);
-    expect(removed.body.ok).toBe(true);
+    expect(removed.body.success).toBe(true);
 
     const fetched = await company.agent.get(api(`/expenses/${id}`));
     expect(fetched.status).toBe(404);
-    expect(fetched.body.code).toBe("EXPENSE_NOT_FOUND");
+    expect(fetched.body.error.code).toBe("EXPENSE_NOT_FOUND");
 
     const list = await company.agent.get(api("/expenses"));
-    expect(list.body.expenses).toHaveLength(0);
+    expect(list.body.data.expenses).toHaveLength(0);
 
     const updateGone = await company.agent.patch(api(`/expenses/${id}`)).send({
       notes: "should fail",
@@ -63,7 +63,7 @@ describe("FMS-29 expense CRUD, soft delete, tenant isolation, validation", () =>
     const companyA = await createCompanyWithAdmin();
     const companyB = await createCompanyWithAdmin();
     const created = await createExpense(companyA.agent);
-    const id = created.body.expense.id as string;
+    const id = created.body.data.expense.id as string;
 
     const getB = await companyB.agent.get(api(`/expenses/${id}`));
     expect(getB.status).toBe(404);
@@ -85,7 +85,7 @@ describe("FMS-29 expense CRUD, soft delete, tenant isolation, validation", () =>
 
     const zero = await createExpense(company.agent, { amount: "0" });
     expect(zero.status).toBe(400);
-    expect(zero.body.code).toBe("VALIDATION_ERROR");
+    expect(zero.body.error.code).toBe("VALIDATION_ERROR");
 
     const negative = await createExpense(company.agent, { amount: "-5" });
     expect(negative.status).toBe(400);

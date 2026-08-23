@@ -5,6 +5,7 @@ import {
   buildReportPdf,
   getReportSummary,
 } from "../services/reportService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import {
   reportExportQuerySchema,
   reportSummaryQuerySchema,
@@ -14,7 +15,7 @@ export const summary: RequestHandler = async (req, res, next) => {
   try {
     const query = reportSummaryQuerySchema.parse(req.query);
     const result = await getReportSummary(req.user!.tenantId!, query);
-    res.status(200).json({ ok: true, ...result });
+    sendSuccess(res, 200, result);
   } catch (error) {
     next(error);
   }

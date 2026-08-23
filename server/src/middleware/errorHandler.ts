@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import { sendError } from "../utils/apiResponse.js";
 import { AppError } from "../utils/AppError.js";
 
 export const errorHandler = (
@@ -9,24 +10,17 @@ export const errorHandler = (
   _next: NextFunction,
 ) => {
   if (err instanceof ZodError) {
-    res.status(400).json({
-      ok: false,
-      message: "Validation failed",
-      code: "VALIDATION_ERROR",
-      errors: err.issues.map((issue) => ({
+    sendError(res, 400, "Validation failed", "VALIDATION_ERROR", err.issues.map(
+      (issue) => ({
         path: issue.path.join("."),
         message: issue.message,
-      })),
-    });
+      }),
+    ));
     return;
   }
 
   if (err instanceof AppError) {
-    res.status(err.statusCode).json({
-      ok: false,
-      message: err.message,
-      code: err.code,
-    });
+    sendError(res, err.statusCode, err.message, err.code);
     return;
   }
 
@@ -35,8 +29,5 @@ export const errorHandler = (
   const message =
     err instanceof Error ? err.message : "Unexpected server error";
 
-  res.status(500).json({
-    ok: false,
-    message,
-  });
+  sendError(res, 500, message);
 };

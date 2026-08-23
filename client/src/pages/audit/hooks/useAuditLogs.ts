@@ -34,7 +34,7 @@ export const useAuditLogs = (enabled: boolean) => {
     setError(null);
 
     try {
-      const data = await apiFetch<{ ok: boolean; logs: AuditLogEntry[] }>(
+      const data = await apiFetch<{ logs: AuditLogEntry[] }>(
         "/audit/logs?limit=50",
       );
       setLogs(data.logs);

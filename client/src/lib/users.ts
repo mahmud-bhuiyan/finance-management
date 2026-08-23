@@ -28,10 +28,10 @@ export type UpdateTenantUserPayload = {
 };
 
 export const listTenantUsers = () =>
-  apiFetch<{ ok: boolean; users: TenantUser[] }>("/users");
+  apiFetch<{ users: TenantUser[] }>("/users");
 
 export const createTenantUser = (payload: CreateTenantUserPayload) =>
-  apiFetch<{ ok: boolean; user: TenantUser }>("/users", {
+  apiFetch<{ user: TenantUser }>("/users", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -40,7 +40,7 @@ export const updateTenantUser = (
   id: string,
   payload: UpdateTenantUserPayload,
 ) =>
-  apiFetch<{ ok: boolean; user: TenantUser }>(`/users/${id}`, {
+  apiFetch<{ user: TenantUser }>(`/users/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });

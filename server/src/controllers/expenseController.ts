@@ -6,6 +6,7 @@ import {
   listExpenses,
   updateExpense,
 } from "../services/expenseService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import {
   createExpenseSchema,
   expenseIdParamSchema,
@@ -21,7 +22,7 @@ export const list: RequestHandler = async (req, res, next) => {
       query,
       req.user!.role,
     );
-    res.status(200).json({ ok: true, ...result });
+    sendSuccess(res, 200, result);
   } catch (error) {
     next(error);
   }
@@ -35,7 +36,7 @@ export const getById: RequestHandler = async (req, res, next) => {
       id,
       req.user!.role,
     );
-    res.status(200).json({ ok: true, ...result });
+    sendSuccess(res, 200, result);
   } catch (error) {
     next(error);
   }
@@ -49,7 +50,7 @@ export const create: RequestHandler = async (req, res, next) => {
       body,
       req.user!.id,
     );
-    res.status(201).json({ ok: true, ...result });
+    sendSuccess(res, 201, result);
   } catch (error) {
     next(error);
   }
@@ -65,7 +66,7 @@ export const update: RequestHandler = async (req, res, next) => {
       body,
       req.user!.id,
     );
-    res.status(200).json({ ok: true, ...result });
+    sendSuccess(res, 200, result);
   } catch (error) {
     next(error);
   }
@@ -75,7 +76,7 @@ export const remove: RequestHandler = async (req, res, next) => {
   try {
     const { id } = expenseIdParamSchema.parse(req.params);
     await deleteExpense(req.user!.tenantId!, id, req.user!.id);
-    res.status(200).json({ ok: true });
+    sendSuccess(res, 200, {});
   } catch (error) {
     next(error);
   }

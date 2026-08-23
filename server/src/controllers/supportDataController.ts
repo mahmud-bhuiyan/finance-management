@@ -6,6 +6,7 @@ import {
   listSupportItems,
   updateSupportItem,
 } from "../services/supportDataService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import type { SupportDataKind } from "../validators/supportDataValidators.js";
 import {
   createSupportDataSchema,
@@ -31,7 +32,7 @@ export const createSupportDataHandlers = (kind: SupportDataKind) => {
     try {
       const query = listSupportDataQuerySchema.parse(req.query);
       const items = await listSupportItems(kind, req.user!.tenantId!, query);
-      res.status(200).json({ ok: true, [responseKey[kind]]: items });
+      sendSuccess(res, 200, { [responseKey[kind]]: items });
     } catch (error) {
       next(error);
     }
@@ -41,7 +42,7 @@ export const createSupportDataHandlers = (kind: SupportDataKind) => {
     try {
       const { id } = supportDataIdParamSchema.parse(req.params);
       const item = await getSupportItem(kind, req.user!.tenantId!, id);
-      res.status(200).json({ ok: true, [itemKey[kind]]: item });
+      sendSuccess(res, 200, { [itemKey[kind]]: item });
     } catch (error) {
       next(error);
     }
@@ -56,7 +57,7 @@ export const createSupportDataHandlers = (kind: SupportDataKind) => {
         body,
         req.user!.id,
       );
-      res.status(201).json({ ok: true, [itemKey[kind]]: item });
+      sendSuccess(res, 201, { [itemKey[kind]]: item });
     } catch (error) {
       next(error);
     }
@@ -73,7 +74,7 @@ export const createSupportDataHandlers = (kind: SupportDataKind) => {
         body,
         req.user!.id,
       );
-      res.status(200).json({ ok: true, [itemKey[kind]]: item });
+      sendSuccess(res, 200, { [itemKey[kind]]: item });
     } catch (error) {
       next(error);
     }
@@ -83,7 +84,7 @@ export const createSupportDataHandlers = (kind: SupportDataKind) => {
     try {
       const { id } = supportDataIdParamSchema.parse(req.params);
       await deleteSupportItem(kind, req.user!.tenantId!, id, req.user!.id);
-      res.status(200).json({ ok: true });
+      sendSuccess(res, 200, {});
     } catch (error) {
       next(error);
     }

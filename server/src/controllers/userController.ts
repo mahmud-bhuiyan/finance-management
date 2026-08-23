@@ -4,6 +4,7 @@ import {
   listTenantUsers,
   updateTenantUser,
 } from "../services/userService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import {
   createTenantUserSchema,
   updateTenantUserSchema,
@@ -13,7 +14,7 @@ import {
 export const list: RequestHandler = async (req, res, next) => {
   try {
     const users = await listTenantUsers(req.user!.tenantId!);
-    res.status(200).json({ ok: true, users });
+    sendSuccess(res, 200, { users });
   } catch (error) {
     next(error);
   }
@@ -27,7 +28,7 @@ export const create: RequestHandler = async (req, res, next) => {
       body,
       req.user!.id,
     );
-    res.status(201).json({ ok: true, user });
+    sendSuccess(res, 201, { user });
   } catch (error) {
     next(error);
   }
@@ -43,7 +44,7 @@ export const update: RequestHandler = async (req, res, next) => {
       body,
       req.user!.id,
     );
-    res.status(200).json({ ok: true, user });
+    sendSuccess(res, 200, { user });
   } catch (error) {
     next(error);
   }

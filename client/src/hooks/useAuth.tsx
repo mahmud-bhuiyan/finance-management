@@ -22,12 +22,13 @@ export type AuthUser = {
     status: string;
   } | null;
   createdAt: string;
+  updatedAt: string;
 };
 
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (input: {
     email: string;
     password: string;
@@ -45,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refresh = useCallback(async () => {
     try {
-      const data = await apiFetch<{ ok: boolean; user: AuthUser }>("/auth/me");
+      const data = await apiFetch<{ user: AuthUser }>("/auth/me");
       setUser(data.user);
     } catch {
       setUser(null);
@@ -59,12 +60,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     })();
   }, [refresh]);
 
-  const login = async (email: string, password: string) => {
-    const data = await apiFetch<{ ok: boolean; user: AuthUser }>(
+  const login = async (
+    email: string,
+    password: string,
+    rememberMe = false,
+  ) => {
+    const data = await apiFetch<{ user: AuthUser }>(
       "/auth/login",
       {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, rememberMe }),
       },
     );
     setUser(data.user);
@@ -75,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string;
     name?: string;
   }) => {
-    const data = await apiFetch<{ ok: boolean; user: AuthUser }>(
+    const data = await apiFetch<{ user: AuthUser }>(
       "/auth/register",
       {
         method: "POST",

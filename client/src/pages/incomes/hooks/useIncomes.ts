@@ -59,7 +59,7 @@ export const useIncomes = (enabled: boolean, filters: IncomeListFilters) => {
   }, [enabled, refresh]);
 
   const createIncome = async (payload: CreateIncomePayload) => {
-    const data = await apiFetch<{ ok: boolean; income: Income }>(
+    const data = await apiFetch<{ income: Income }>(
       "/incomes",
       {
         method: "POST",
@@ -71,7 +71,7 @@ export const useIncomes = (enabled: boolean, filters: IncomeListFilters) => {
   };
 
   const updateIncome = async (id: string, payload: UpdateIncomePayload) => {
-    const data = await apiFetch<{ ok: boolean; income: Income }>(
+    const data = await apiFetch<{ income: Income }>(
       `/incomes/${id}`,
       {
         method: "PATCH",
@@ -83,13 +83,12 @@ export const useIncomes = (enabled: boolean, filters: IncomeListFilters) => {
   };
 
   const deleteIncome = async (id: string) => {
-    await apiFetch<{ ok: boolean }>(`/incomes/${id}`, { method: "DELETE" });
+    await apiFetch(`/incomes/${id}`, { method: "DELETE" });
     await refresh();
   };
 
   const listAttachments = useCallback(async (incomeId: string) => {
     const data = await apiFetch<{
-      ok: boolean;
       attachments: IncomeAttachment[];
     }>(`/incomes/${incomeId}/attachments`);
     return data.attachments;
@@ -100,7 +99,6 @@ export const useIncomes = (enabled: boolean, filters: IncomeListFilters) => {
       const formData = new FormData();
       formData.append("file", file);
       const data = await apiUpload<{
-        ok: boolean;
         attachment: IncomeAttachment;
       }>(`/incomes/${incomeId}/attachments`, formData);
       await refresh();
@@ -111,7 +109,7 @@ export const useIncomes = (enabled: boolean, filters: IncomeListFilters) => {
 
   const deleteAttachment = useCallback(
     async (incomeId: string, attachmentId: string) => {
-      await apiFetch<{ ok: boolean }>(
+      await apiFetch(
         `/incomes/${incomeId}/attachments/${attachmentId}`,
         { method: "DELETE" },
       );

@@ -10,23 +10,74 @@ const toApiPath = (path: string) => {
   return withSlash.replace(/^\/api(?:\/v\d+)?(?=\/|$)/, "") || "/";
 };
 
-type ApiErrorBody = {
-  ok?: boolean;
-  message?: string;
+export type ApiErrorDetail = {
+  path: string;
+  message: string;
+};
+
+export type ApiErrorBody = {
+  message: string;
   code?: string;
+  details?: ApiErrorDetail[];
+};
+
+export type ApiSuccessEnvelope<T> = {
+  success: true;
+  message: string;
+  data: T;
+};
+
+export type ApiErrorEnvelope = {
+  success: false;
+  error: ApiErrorBody;
 };
 
 export class ApiError extends Error {
   status: number;
   code?: string;
+  details?: ApiErrorDetail[];
 
-  constructor(message: string, status: number, code?: string) {
+  constructor(
+    message: string,
+    status: number,
+    code?: string,
+    details?: ApiErrorDetail[],
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
+
+const parseErrorBody = (body: unknown): ApiErrorBody => {
+  if (body && typeof body === "object") {
+    const record = body as Record<string, unknown>;
+
+    if (record.success === false && record.error && typeof record.error === "object") {
+      const error = record.error as ApiErrorBody;
+      return {
+        message: error.message ?? "Request failed",
+        code: error.code,
+        details: error.details,
+      };
+    }
+  }
+
+  return { message: "Request failed" };
+};
+
+const unwrapSuccess = <T>(body: unknown): T => {
+  if (body && typeof body === "object" && "success" in body) {
+    const record = body as ApiSuccessEnvelope<T>;
+    if (record.success === true) {
+      return record.data;
+    }
+  }
+
+  return body as T;
+};
 
 export const apiFetch = async <T>(
   path: string,
@@ -41,17 +92,19 @@ export const apiFetch = async <T>(
     },
   });
 
-  const data = (await response.json().catch(() => ({}))) as ApiErrorBody & T;
+  const body = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    const error = parseErrorBody(body);
     throw new ApiError(
-      data.message ?? "Request failed",
+      error.message,
       response.status,
-      data.code,
+      error.code,
+      error.details,
     );
   }
 
-  return data;
+  return unwrapSuccess<T>(body);
 };
 
 /** Multipart upload — do not set Content-Type (browser sets boundary). */
@@ -65,17 +118,19 @@ export const apiUpload = async <T>(
     body: formData,
   });
 
-  const data = (await response.json().catch(() => ({}))) as ApiErrorBody & T;
+  const body = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    const error = parseErrorBody(body);
     throw new ApiError(
-      data.message ?? "Upload failed",
+      error.message,
       response.status,
-      data.code,
+      error.code,
+      error.details,
     );
   }
 
-  return data;
+  return unwrapSuccess<T>(body);
 };
 
 export const apiDownloadBlob = async (path: string): Promise<Blob> => {
@@ -84,11 +139,13 @@ export const apiDownloadBlob = async (path: string): Promise<Blob> => {
   });
 
   if (!response.ok) {
-    const data = (await response.json().catch(() => ({}))) as ApiErrorBody;
+    const body = await response.json().catch(() => ({}));
+    const error = parseErrorBody(body);
     throw new ApiError(
-      data.message ?? "Download failed",
+      error.message,
       response.status,
-      data.code,
+      error.code,
+      error.details,
     );
   }
 

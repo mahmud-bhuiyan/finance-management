@@ -22,16 +22,16 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
       name: "Registered",
     });
     expect(registered.status).toBe(201);
-    expect(registered.body.ok).toBe(true);
-    expect(registered.body.user.email).toBe(email);
-    expect(registered.body.user.role).toBe("NORMAL_USER");
-    expect(registered.body.user.tenantId).toBeNull();
+    expect(registered.body.success).toBe(true);
+    expect(registered.body.data.user.email).toBe(email);
+    expect(registered.body.data.user.role).toBe("NORMAL_USER");
+    expect(registered.body.data.user.tenantId).toBeNull();
     expect(registered.headers["set-cookie"]).toBeTruthy();
 
     const agent = await login(email, password);
     const me = await agent.get(api("/auth/me"));
     expect(me.status).toBe(200);
-    expect(me.body.user.email).toBe(email);
+    expect(me.body.data.user.email).toBe(email);
   });
 
   it("rejects invalid credentials and missing sessions", async () => {
@@ -46,11 +46,11 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
       password: "wrong-password",
     });
     expect(wrong.status).toBe(401);
-    expect(wrong.body.code).toBe("INVALID_CREDENTIALS");
+    expect(wrong.body.error.code).toBe("INVALID_CREDENTIALS");
 
     const me = await request(app).get(api("/auth/me"));
     expect(me.status).toBe(401);
-    expect(me.body.code).toBe("UNAUTHORIZED");
+    expect(me.body.error.code).toBe("UNAUTHORIZED");
   });
 
   it("rejects duplicate emails and short passwords", async () => {
@@ -66,14 +66,14 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
       password: "password123",
     });
     expect(duplicate.status).toBe(409);
-    expect(duplicate.body.code).toBe("EMAIL_TAKEN");
+    expect(duplicate.body.error.code).toBe("EMAIL_TAKEN");
 
     const short = await request(app).post(api("/auth/register")).send({
       email: `${unique("pw")}@test.local`,
       password: "short",
     });
     expect(short.status).toBe(400);
-    expect(short.body.code).toBe("VALIDATION_ERROR");
+    expect(short.body.error.code).toBe("VALIDATION_ERROR");
   });
 
   it("blocks inactive users from logging in", async () => {
@@ -90,7 +90,7 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
       password: normal.password,
     });
     expect(loginRes.status).toBe(403);
-    expect(loginRes.body.code).toBe("USER_INACTIVE");
+    expect(loginRes.body.error.code).toBe("USER_INACTIVE");
   });
 
   it("keeps expenses isolated between tenants", async () => {
@@ -99,15 +99,15 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
 
     const created = await createExpense(companyA.agent, { notes: "A only" });
     expect(created.status).toBe(201);
-    const expenseId = created.body.expense.id as string;
+    const expenseId = created.body.data.expense.id as string;
 
     const stolen = await companyB.agent.get(api(`/expenses/${expenseId}`));
     expect(stolen.status).toBe(404);
-    expect(stolen.body.code).toBe("EXPENSE_NOT_FOUND");
+    expect(stolen.body.error.code).toBe("EXPENSE_NOT_FOUND");
 
     const listB = await companyB.agent.get(api("/expenses"));
     expect(listB.status).toBe(200);
-    expect(listB.body.expenses).toHaveLength(0);
+    expect(listB.body.data.expenses).toHaveLength(0);
   });
 
   it("denies finance writes for normal users and guest callers", async () => {
@@ -119,11 +119,11 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
       amount: "10.00",
     });
     expect(guest.status).toBe(401);
-    expect(guest.body.code).toBe("UNAUTHORIZED");
+    expect(guest.body.error.code).toBe("UNAUTHORIZED");
 
     const denied = await createExpense(normal.agent);
     expect(denied.status).toBe(403);
-    expect(denied.body.code).toBe("FORBIDDEN");
+    expect(denied.body.error.code).toBe("FORBIDDEN");
 
     const readable = await normal.agent.get(api("/expenses"));
     expect(readable.status).toBe(200);
@@ -133,13 +133,13 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
     const superAgent = await loginAsSuperAdmin();
     const asSuper = await superAgent.get(api("/expenses"));
     expect(asSuper.status).toBe(403);
-    expect(asSuper.body.code).toBe("TENANT_REQUIRED");
+    expect(asSuper.body.error.code).toBe("TENANT_REQUIRED");
 
     const company = await createCompanyWithAdmin();
     const asAdmin = await company.agent.post(api("/tenants")).send({
       name: "Should fail",
     });
     expect(asAdmin.status).toBe(403);
-    expect(asAdmin.body.code).toBe("FORBIDDEN");
+    expect(asAdmin.body.error.code).toBe("FORBIDDEN");
   });
 });

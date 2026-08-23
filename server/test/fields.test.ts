@@ -16,19 +16,19 @@ describe("FMS-19 dynamic fields: no migration, validation, tenant scope", () => 
       required: true,
     });
     expect(created.status).toBe(201);
-    expect(created.body.field.key).toBe("project_code");
-    expect(created.body.field.required).toBe(true);
-    expect(created.body.field.tenantId).toBe(company.tenant.id);
+    expect(created.body.data.field.key).toBe("project_code");
+    expect(created.body.data.field.required).toBe(true);
+    expect(created.body.data.field.tenantId).toBe(company.tenant.id);
 
     const missing = await createExpense(company.agent);
     expect(missing.status).toBe(400);
-    expect(missing.body.code).toBe("FIELD_REQUIRED");
+    expect(missing.body.error.code).toBe("FIELD_REQUIRED");
 
     const ok = await createExpense(company.agent, {
       customValues: { project_code: "ALPHA" },
     });
     expect(ok.status).toBe(201);
-    expect(ok.body.expense.customValues.project_code).toBe("ALPHA");
+    expect(ok.body.data.expense.customValues.project_code).toBe("ALPHA");
   });
 
   it("keeps field definitions scoped to the tenant", async () => {
@@ -41,15 +41,15 @@ describe("FMS-19 dynamic fields: no migration, validation, tenant scope", () => 
       fieldType: "TEXT",
     });
     expect(created.status).toBe(201);
-    const fieldId = created.body.field.id as string;
+    const fieldId = created.body.data.field.id as string;
 
     const listB = await companyB.agent.get(api("/fields"));
     expect(listB.status).toBe(200);
-    expect(listB.body.fields).toHaveLength(0);
+    expect(listB.body.data.fields).toHaveLength(0);
 
     const stolen = await companyB.agent.get(api(`/fields/${fieldId}`));
     expect(stolen.status).toBe(404);
-    expect(stolen.body.code).toBe("FIELD_NOT_FOUND");
+    expect(stolen.body.error.code).toBe("FIELD_NOT_FOUND");
   });
 
   it("validates field keys and dropdown options", async () => {
@@ -62,7 +62,7 @@ describe("FMS-19 dynamic fields: no migration, validation, tenant scope", () => 
       fieldType: "TEXT",
     });
     expect(badKey.status).toBe(400);
-    expect(badKey.body.code).toBe("VALIDATION_ERROR");
+    expect(badKey.body.error.code).toBe("VALIDATION_ERROR");
 
     const dropdown = await company.agent.post(api("/fields")).send({
       target: "EXPENSE",
@@ -70,7 +70,7 @@ describe("FMS-19 dynamic fields: no migration, validation, tenant scope", () => 
       fieldType: "DROPDOWN",
     });
     expect(dropdown.status).toBe(400);
-    expect(dropdown.body.code).toBe("VALIDATION_ERROR");
+    expect(dropdown.body.error.code).toBe("VALIDATION_ERROR");
 
     const ok = await company.agent.post(api("/fields")).send({
       target: "EXPENSE",
@@ -79,6 +79,6 @@ describe("FMS-19 dynamic fields: no migration, validation, tenant scope", () => 
       options: { choices: ["Open", "Closed"] },
     });
     expect(ok.status).toBe(201);
-    expect(ok.body.field.options.choices).toEqual(["Open", "Closed"]);
+    expect(ok.body.data.field.options.choices).toEqual(["Open", "Closed"]);
   });
 });

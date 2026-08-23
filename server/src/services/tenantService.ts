@@ -18,6 +18,7 @@ const toPublicAdmin = (user: User) => ({
   status: user.status,
   tenantId: user.tenantId,
   createdAt: user.createdAt.toISOString(),
+  updatedAt: user.updatedAt.toISOString(),
 });
 
 const toPublicTenant = (

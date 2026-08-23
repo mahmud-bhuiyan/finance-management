@@ -80,7 +80,6 @@ export type ExpenseListFilters = {
 };
 
 export type ExpenseListResponse = {
-  ok: boolean;
   expenses: Expense[];
   fields: FieldDefinition[];
   meta: ExpenseListMeta;

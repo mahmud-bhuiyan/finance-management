@@ -40,7 +40,6 @@ export type ChartSlice = {
 };
 
 export type DashboardSummary = {
-  ok: boolean;
   filters: {
     preset: DashboardPreset;
     from: string;

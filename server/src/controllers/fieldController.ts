@@ -6,6 +6,7 @@ import {
   listFieldDefinitions,
   updateFieldDefinition,
 } from "../services/fieldService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import {
   createFieldSchema,
   fieldIdParamSchema,
@@ -17,7 +18,7 @@ export const list: RequestHandler = async (req, res, next) => {
   try {
     const query = listFieldsQuerySchema.parse(req.query);
     const fields = await listFieldDefinitions(req.user!.tenantId!, query);
-    res.status(200).json({ ok: true, fields });
+    sendSuccess(res, 200, { fields });
   } catch (error) {
     next(error);
   }
@@ -27,7 +28,7 @@ export const getById: RequestHandler = async (req, res, next) => {
   try {
     const { id } = fieldIdParamSchema.parse(req.params);
     const field = await getFieldDefinition(req.user!.tenantId!, id);
-    res.status(200).json({ ok: true, field });
+    sendSuccess(res, 200, { field });
   } catch (error) {
     next(error);
   }
@@ -41,7 +42,7 @@ export const create: RequestHandler = async (req, res, next) => {
       body,
       req.user!.id,
     );
-    res.status(201).json({ ok: true, field });
+    sendSuccess(res, 201, { field });
   } catch (error) {
     next(error);
   }
@@ -57,7 +58,7 @@ export const update: RequestHandler = async (req, res, next) => {
       body,
       req.user!.id,
     );
-    res.status(200).json({ ok: true, field });
+    sendSuccess(res, 200, { field });
   } catch (error) {
     next(error);
   }
@@ -67,7 +68,7 @@ export const remove: RequestHandler = async (req, res, next) => {
   try {
     const { id } = fieldIdParamSchema.parse(req.params);
     await deleteFieldDefinition(req.user!.tenantId!, id, req.user!.id);
-    res.status(200).json({ ok: true });
+    sendSuccess(res, 200, {});
   } catch (error) {
     next(error);
   }

@@ -14,7 +14,7 @@ export const useFieldDefinitions = (enabled: boolean, target: FieldTarget) => {
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const data = await apiFetch<{ ok: boolean; fields: FieldDefinition[] }>(
+    const data = await apiFetch<{ fields: FieldDefinition[] }>(
       `/fields?target=${target}`,
     );
     setFields(sortFields(data.fields));
@@ -41,7 +41,7 @@ export const useFieldDefinitions = (enabled: boolean, target: FieldTarget) => {
   }, [enabled, refresh]);
 
   const createField = async (payload: CreateFieldPayload) => {
-    const data = await apiFetch<{ ok: boolean; field: FieldDefinition }>(
+    const data = await apiFetch<{ field: FieldDefinition }>(
       "/fields",
       {
         method: "POST",
@@ -53,7 +53,7 @@ export const useFieldDefinitions = (enabled: boolean, target: FieldTarget) => {
   };
 
   const updateField = async (id: string, payload: UpdateFieldPayload) => {
-    const data = await apiFetch<{ ok: boolean; field: FieldDefinition }>(
+    const data = await apiFetch<{ field: FieldDefinition }>(
       `/fields/${id}`,
       {
         method: "PATCH",
@@ -69,7 +69,7 @@ export const useFieldDefinitions = (enabled: boolean, target: FieldTarget) => {
   };
 
   const deleteField = async (id: string) => {
-    await apiFetch<{ ok: boolean }>(`/fields/${id}`, { method: "DELETE" });
+    await apiFetch(`/fields/${id}`, { method: "DELETE" });
     setFields((current) => current.filter((field) => field.id !== id));
   };
 

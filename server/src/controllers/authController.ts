@@ -5,6 +5,8 @@ import {
   loginUser,
   registerUser,
 } from "../services/authService.js";
+import { AppError } from "../utils/AppError.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import {
   loginSchema,
   registerSchema,
@@ -13,12 +15,12 @@ import {
 const isProduction =
   env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
 
-const cookieOptions = (): CookieOptions => ({
+const cookieOptions = (rememberMe = true): CookieOptions => ({
   httpOnly: true,
   secure: isProduction,
   // Cross-origin client ↔ API in production requires SameSite=None + Secure.
   sameSite: isProduction ? "none" : "lax",
-  maxAge: env.JWT_COOKIE_MAX_AGE_MS,
+  ...(rememberMe ? { maxAge: env.JWT_COOKIE_MAX_AGE_MS } : {}),
   path: "/",
 });
 
@@ -28,9 +30,8 @@ export const register: RequestHandler = async (req, res, next) => {
     const result = await registerUser(body);
 
     res
-      .cookie(env.JWT_COOKIE_NAME, result.accessToken, cookieOptions())
-      .status(201)
-      .json({ ok: true, user: result.user });
+      .cookie(env.JWT_COOKIE_NAME, result.accessToken, cookieOptions(true));
+    sendSuccess(res, 201, { user: result.user }, "Account registered successfully");
   } catch (error) {
     next(error);
   }
@@ -41,31 +42,30 @@ export const login: RequestHandler = async (req, res, next) => {
     const body = loginSchema.parse(req.body);
     const result = await loginUser(body);
 
-    res
-      .cookie(env.JWT_COOKIE_NAME, result.accessToken, cookieOptions())
-      .status(200)
-      .json({ ok: true, user: result.user });
+    res.cookie(
+      env.JWT_COOKIE_NAME,
+      result.accessToken,
+      cookieOptions(result.rememberMe),
+    );
+    sendSuccess(res, 200, { user: result.user }, "Logged in successfully");
   } catch (error) {
     next(error);
   }
 };
 
 export const logout: RequestHandler = (_req, res) => {
-  res
-    .clearCookie(env.JWT_COOKIE_NAME, cookieOptions())
-    .status(200)
-    .json({ ok: true });
+  res.clearCookie(env.JWT_COOKIE_NAME, cookieOptions(true));
+  sendSuccess(res, 200, {}, "Logged out successfully");
 };
 
 export const me: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
-      res.status(401).json({ ok: false, message: "Unauthorized" });
-      return;
+      throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     }
 
     const user = await getUserById(req.user.id);
-    res.status(200).json({ ok: true, user });
+    sendSuccess(res, 200, { user }, "Current user loaded");
   } catch (error) {
     next(error);
   }
