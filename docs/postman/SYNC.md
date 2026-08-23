@@ -20,8 +20,8 @@ Keep **git** and **Postman cloud** aligned. Do not create a second collection.
 
 ## Auth reminder
 
-Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:4000/api/v1`.
+Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:4000` (versioned routes: `{{baseUrl}}/api/v1/...`).
 
 ## Pending cloud sync
 
-- **2026-08-23** — Add **Auth → Update theme** (`PATCH /auth/me/theme`) after login in Postman cloud (git JSON updated; Postman MCP returned 401).
+- None — cloud collection UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0` re-aligned with git on 2026-08-24 (`baseUrl` = server origin; API routes `{{baseUrl}}/api/v1/...`; health `{{baseUrl}}/health`).

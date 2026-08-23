@@ -54,7 +54,7 @@ export const LoginForm = ({
           name="rememberMe"
           checked={rememberMe}
           onChange={(e) => onRememberMeChange(e.target.checked)}
-          className="h-4 w-4 shrink-0 rounded-sm border-(--fms-border-strong) accent-(--fms-accent)"
+          className="h-4 w-4 shrink-0 rounded-sm border border-(--fms-border-strong) text-(--fms-accent) accent-(--fms-accent)"
         />
         Remember me
       </label>
