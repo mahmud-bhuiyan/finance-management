@@ -9,9 +9,9 @@ export const AccessProbeCard = ({ user }: AccessProbeCardProps) => {
   const { probes, running, runProbes } = useAccessProbes(user);
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-3 text-lg font-medium text-slate-900">Access probes</h2>
-      <p className="mb-4 text-sm text-slate-600">
+    <section className="surface p-6">
+      <h2 className="font-display text-2xl font-medium italic text-(--fms-ink)">Access probes</h2>
+      <p className="mb-4 text-sm text-(--fms-muted)">
         Calls protected RBAC endpoints for this signed-in user. Expected results
         depend on role and company membership.
       </p>
@@ -20,7 +20,7 @@ export const AccessProbeCard = ({ user }: AccessProbeCardProps) => {
         {probes.map((probe) => (
           <li
             key={probe.label}
-            className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
+            className="rounded-xl border border-(--fms-border) bg-[color-mix(in_srgb,var(--fms-accent)_6%,transparent)] px-4 py-3"
           >
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-medium text-slate-900">
@@ -49,7 +49,7 @@ export const AccessProbeCard = ({ user }: AccessProbeCardProps) => {
         type="button"
         onClick={() => void runProbes()}
         disabled={running}
-        className="mt-4 rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-60"
+        className="mt-4 rounded-xl bg-[linear-gradient(180deg,var(--fms-accent-soft),var(--fms-accent))] px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 dark:text-[#04110f]"
       >
         {running ? "Running probes…" : "Run access probes"}
       </button>

@@ -48,7 +48,7 @@ export const IncomeFilters = ({
   vendors,
   onChange,
 }: IncomeFiltersProps) => (
-  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+  <div className="surface p-4">
     <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
       Filters
     </h2>

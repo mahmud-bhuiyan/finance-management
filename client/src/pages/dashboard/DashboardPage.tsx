@@ -74,7 +74,7 @@ export const DashboardPage = () => {
   };
 
   return (
-    <PageFrame maxWidth="max-w-6xl">
+    <PageFrame>
       <PageHeader
         kicker={canWrite ? "Company admin" : "Read only"}
         title="Dashboard"

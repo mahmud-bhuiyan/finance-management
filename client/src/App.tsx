@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { AppShell } from "./components/layout/AppShell";
+import { AppLayout } from "./components/layout/AppLayout";
 import { GuestOnly } from "./components/layout/GuestOnly";
 import { AccessPage } from "./pages/access/AccessPage";
 import { AuditPage } from "./pages/audit/AuditPage";
@@ -10,6 +10,7 @@ import { FieldsPage } from "./pages/fields/FieldsPage";
 import { HomePage } from "./pages/home/HomePage";
 import { IncomesPage } from "./pages/incomes/IncomesPage";
 import { LoginPage } from "./pages/login/LoginPage";
+import { NotFoundPage } from "./pages/not-found/NotFoundPage";
 import { RegisterPage } from "./pages/register/RegisterPage";
 import { ReportsPage } from "./pages/reports/ReportsPage";
 import { TenantsPage } from "./pages/tenants/TenantsPage";
@@ -33,7 +34,7 @@ const App = () => (
         </GuestOnly>
       }
     />
-    <Route element={<AppShell />}>
+    <Route element={<AppLayout />}>
       <Route path="/" element={<HomePage />} />
       <Route path="/tenants" element={<TenantsPage />} />
       <Route path="/users" element={<UsersPage />} />
@@ -45,6 +46,7 @@ const App = () => (
       <Route path="/incomes" element={<IncomesPage />} />
       <Route path="/expense-support" element={<ExpenseSupportPage />} />
       <Route path="/fields" element={<FieldsPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Route>
   </Routes>
 );

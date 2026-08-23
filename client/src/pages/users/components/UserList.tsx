@@ -23,14 +23,14 @@ export const UserList = ({
 }: UserListProps) => {
   if (users.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+      <p className="surface-dashed p-6 text-sm text-slate-600">
         No users in this company yet.
       </p>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="surface overflow-x-auto">
       <table className="min-w-full text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
           <tr>

@@ -40,7 +40,7 @@ export const FieldDefinitionCard = ({
   };
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <article className="surface p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           {editing ? (
@@ -106,40 +106,40 @@ export const FieldDefinitionCard = ({
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"
+            variant="ghost"
             disabled={busy}
-            className="bg-slate-700 hover:bg-slate-800"
             onClick={() => setEditing(true)}
           >
             Rename
           </Button>
           <Button
             type="button"
+            variant="ghost"
             disabled={busy}
-            className="bg-amber-700 hover:bg-amber-800"
             onClick={() => void onToggleEnabled(field.id, !field.enabled)}
           >
             {field.enabled ? "Disable" : "Enable"}
           </Button>
           <Button
             type="button"
+            variant="ghost"
             disabled={busy || index === 0}
-            className="bg-slate-600 hover:bg-slate-700"
             onClick={() => void onMove(field.id, "up")}
           >
             ↑
           </Button>
           <Button
             type="button"
+            variant="ghost"
             disabled={busy || index === total - 1}
-            className="bg-slate-600 hover:bg-slate-700"
             onClick={() => void onMove(field.id, "down")}
           >
             ↓
           </Button>
           <Button
             type="button"
+            variant="danger"
             disabled={busy}
-            className="bg-red-700 hover:bg-red-800"
             onClick={() => void onDelete(field.id)}
           >
             Delete

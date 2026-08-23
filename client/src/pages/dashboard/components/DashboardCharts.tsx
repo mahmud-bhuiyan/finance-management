@@ -5,7 +5,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Legend,
   Line,
   LineChart,
@@ -16,9 +15,25 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTheme } from "../../../hooks/useTheme";
 import type { DashboardSummary } from "../../../lib/dashboard";
 
-const COLORS = ["#0f766e", "#0369a1", "#b45309", "#7c3aed", "#be123c", "#475569"];
+const LIGHT_COLORS = [
+  "#0b6d5e",
+  "#b8892d",
+  "#6b5ce0",
+  "#c45c5c",
+  "#1d6f9a",
+  "#8a6a3a",
+];
+const DARK_COLORS = [
+  "#3ee0c0",
+  "#e8c97a",
+  "#b8a8ff",
+  "#f08a8a",
+  "#7ec8e8",
+  "#d4b48a",
+];
 
 type DashboardChartsProps = {
   charts: DashboardSummary["charts"];
@@ -33,10 +48,12 @@ const ChartShell = ({
   empty: boolean;
   children: ReactNode;
 }) => (
-  <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-    <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+  <section className="surface p-5">
+    <h2 className="text-sm font-semibold tracking-wide text-(--fms-ink)">
+      {title}
+    </h2>
     {empty ? (
-      <p className="mt-8 text-center text-sm text-slate-500">
+      <p className="mt-8 text-center text-sm text-(--fms-muted)">
         No expense data for this filter range.
       </p>
     ) : (
@@ -73,17 +90,35 @@ const buildStackedRows = (
 };
 
 export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
+  const { themePreference } = useTheme();
+  const isDark = themePreference === "DARK";
+  const colors = isDark ? DARK_COLORS : LIGHT_COLORS;
+  const grid = isDark ? "rgba(62,224,192,0.12)" : "rgba(18,33,28,0.08)";
+  const tick = { fontSize: 11, fill: isDark ? "#93aea5" : "#5d6f68" };
+  const tooltipStyle = {
+    background: isDark ? "#0c2622" : "#fffaf2",
+    border: `1px solid ${isDark ? "rgba(62,224,192,0.18)" : "rgba(18,33,28,0.1)"}`,
+    borderRadius: 12,
+    color: isDark ? "#e8f5f0" : "#12211c",
+    fontSize: 12,
+  };
+  const accent = isDark ? "#3ee0c0" : "#0b6d5e";
+  const gold = isDark ? "#e8c97a" : "#b8892d";
+  const rose = isDark ? "#f08a8a" : "#c45c5c";
+
   const byDay = charts.expenseByDay.map((row) => ({
     date: row.date.slice(5),
     total: Number(row.total),
   }));
-  const byCategory = charts.expenseByCategory.map((row) => ({
+  const byCategory = charts.expenseByCategory.map((row, index) => ({
     name: row.name,
     total: Number(row.total),
+    fill: colors[index % colors.length],
   }));
-  const byDepartment = charts.expenseByDepartment.map((row) => ({
+  const byDepartment = charts.expenseByDepartment.map((row, index) => ({
     name: row.name,
     total: Number(row.total),
+    fill: colors[index % colors.length],
   }));
   const byVendor = charts.expenseByVendor.slice(0, 8).map((row) => ({
     name: row.name,
@@ -109,15 +144,15 @@ export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
       <ChartShell title="Expense by day (line)" empty={byDay.length === 0}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={byDay}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={grid} />
+            <XAxis dataKey="date" tick={tick} />
+            <YAxis tick={tick} />
+            <Tooltip contentStyle={tooltipStyle} />
             <Line
               type="monotone"
               dataKey="total"
-              stroke="#0f766e"
-              strokeWidth={2}
+              stroke={accent}
+              strokeWidth={2.4}
               dot={false}
               name="Expense"
             />
@@ -128,15 +163,15 @@ export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
       <ChartShell title="Monthly expense trend (area)" empty={byMonth.length === 0}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={byMonth}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={grid} />
+            <XAxis dataKey="month" tick={tick} />
+            <YAxis tick={tick} />
+            <Tooltip contentStyle={tooltipStyle} />
             <Area
               type="monotone"
               dataKey="total"
-              stroke="#0f766e"
-              fill="#99f6e4"
+              stroke={accent}
+              fill={isDark ? "rgba(62,224,192,0.22)" : "rgba(11,109,94,0.18)"}
               name="Expense"
             />
           </AreaChart>
@@ -153,15 +188,8 @@ export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
               innerRadius={50}
               outerRadius={85}
               paddingAngle={2}
-            >
-              {byCategory.map((_, index) => (
-                <Cell
-                  key={`cat-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
+            />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
           </PieChart>
         </ResponsiveContainer>
@@ -176,15 +204,8 @@ export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
               nameKey="name"
               outerRadius={85}
               paddingAngle={1}
-            >
-              {byDepartment.map((_, index) => (
-                <Cell
-                  key={`dept-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
+            />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
           </PieChart>
         </ResponsiveContainer>
@@ -193,20 +214,20 @@ export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
       <ChartShell title="Expense by vendor (bar)" empty={byVendor.length === 0}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={byVendor} layout="vertical" margin={{ left: 24 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis type="number" tick={{ fontSize: 11 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke={grid} />
+            <XAxis type="number" tick={tick} />
             <YAxis
               type="category"
               dataKey="name"
               width={100}
-              tick={{ fontSize: 11 }}
+              tick={tick}
             />
-            <Tooltip />
+            <Tooltip contentStyle={tooltipStyle} />
             <Bar
               dataKey="total"
-              fill="#0369a1"
+              fill={isDark ? "#7ec8e8" : "#1d6f9a"}
               name="Expense"
-              radius={[0, 4, 4, 0]}
+              radius={[0, 6, 6, 0]}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -218,11 +239,11 @@ export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
       >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={byPayment}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
-            <Tooltip />
-            <Bar dataKey="total" fill="#b45309" name="Expense" radius={[4, 4, 0, 0]} />
+            <CartesianGrid strokeDasharray="3 3" stroke={grid} />
+            <XAxis dataKey="name" tick={tick} />
+            <YAxis tick={tick} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Bar dataKey="total" fill={gold} name="Expense" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartShell>
@@ -233,17 +254,17 @@ export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
       >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={stacked.data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={grid} />
+            <XAxis dataKey="month" tick={tick} />
+            <YAxis tick={tick} />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             {stacked.categoryNames.map((name, index) => (
               <Bar
                 key={name}
                 dataKey={name}
                 stackId="expense"
-                fill={COLORS[index % COLORS.length]}
+                fill={colors[index % colors.length]}
               />
             ))}
           </BarChart>
@@ -256,13 +277,13 @@ export const DashboardCharts = ({ charts }: DashboardChartsProps) => {
       >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={incomeVsExpense}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={grid} />
+            <XAxis dataKey="month" tick={tick} />
+            <YAxis tick={tick} />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="expense" fill="#be123c" name="Expense" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="income" fill="#0f766e" name="Income" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="expense" fill={rose} name="Expense" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="income" fill={accent} name="Income" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartShell>

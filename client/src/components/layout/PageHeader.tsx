@@ -17,17 +17,19 @@ export const PageHeader = ({
 }: PageHeaderProps) => (
   <div>
     {kicker ? (
-      <p className="text-sm font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-300">
+      <p className="text-[0.7rem] font-semibold tracking-[0.2em] text-(--fms-accent) uppercase">
         {kicker}
       </p>
     ) : null}
-    <div className="mt-1 flex flex-wrap items-start justify-between gap-4">
+    <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-slate-50 lg:text-4xl">
+        <h1 className="font-display text-4xl font-medium tracking-tight text-(--fms-ink) italic lg:text-5xl">
           {title}
         </h1>
         {description ? (
-          <p className="mt-2 max-w-3xl text-slate-600 dark:text-slate-300">{description}</p>
+          <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-(--fms-muted)">
+            {description}
+          </p>
         ) : null}
       </div>
       {actions ? (

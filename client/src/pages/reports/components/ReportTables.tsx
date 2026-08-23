@@ -13,7 +13,7 @@ const SliceTable = ({
   rows: ReportSlice[];
   emptyLabel: string;
 }) => (
-  <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+  <section className="surface p-4">
     <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
     {rows.length === 0 ? (
       <p className="mt-3 text-sm text-slate-500">{emptyLabel}</p>
@@ -49,7 +49,7 @@ const SliceTable = ({
 
 export const ReportTables = ({ data }: ReportTablesProps) => (
   <div className="flex flex-col gap-4">
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="surface p-4">
       <h2 className="text-sm font-semibold text-slate-900">
         Monthly (expense vs income)
       </h2>

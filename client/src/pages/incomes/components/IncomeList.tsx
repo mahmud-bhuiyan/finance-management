@@ -37,7 +37,7 @@ export const IncomeList = ({
 }: IncomeListProps) => {
   if (incomes.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
+      <p className="surface-dashed p-6 text-sm text-slate-500">
         No incomes match these filters.
       </p>
     );
@@ -45,7 +45,7 @@ export const IncomeList = ({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="surface overflow-x-auto">
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
             <tr>
@@ -116,7 +116,8 @@ export const IncomeList = ({
                       <Button
                         disabled={busyId === income.id}
                         onClick={() => void onDelete(income.id)}
-                        className="bg-red-700 px-3 py-1 hover:bg-red-800"
+                        variant="danger"
+                        className="px-3 py-1"
                       >
                         {busyId === income.id ? "…" : "Delete"}
                       </Button>

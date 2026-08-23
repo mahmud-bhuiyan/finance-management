@@ -102,9 +102,10 @@ export const ExpenseAttachments = ({
                 </button>
                 {canWrite && (
                   <Button
+                    variant="danger"
                     disabled={busy}
                     onClick={() => void handleDelete(attachment.id)}
-                    className="bg-red-700 px-3 py-1 hover:bg-red-800"
+                    className="px-3 py-1"
                   >
                     Remove
                   </Button>

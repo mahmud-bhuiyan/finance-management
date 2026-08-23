@@ -37,7 +37,7 @@ export const CreateUserForm = ({
   return (
     <form
       onSubmit={(event) => void handleSubmit(event)}
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="surface p-5"
     >
       <h2 className="text-lg font-medium text-slate-900">Invite user</h2>
       <p className="mt-1 text-sm text-slate-600">

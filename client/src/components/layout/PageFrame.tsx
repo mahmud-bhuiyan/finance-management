@@ -2,16 +2,10 @@ import type { ReactNode } from "react";
 
 type PageFrameProps = {
   children: ReactNode;
-  maxWidth?: "max-w-3xl" | "max-w-4xl" | "max-w-5xl" | "max-w-6xl";
 };
 
-export const PageFrame = ({
-  children,
-  maxWidth = "max-w-5xl",
-}: PageFrameProps) => (
-  <main
-    className={`mx-auto flex w-full ${maxWidth} flex-col gap-6 px-6 py-8 lg:py-10`}
-  >
+export const PageFrame = ({ children }: PageFrameProps) => (
+  <main className="page-frame mx-auto flex w-full max-w-6xl flex-col gap-7 px-6 py-8 lg:px-8 lg:py-12">
     {children}
   </main>
 );

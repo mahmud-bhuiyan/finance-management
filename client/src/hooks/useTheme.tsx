@@ -8,7 +8,7 @@ import {
 } from "react";
 import { apiFetch } from "../lib/api";
 import { applyThemePreference, type ThemePreference } from "../lib/theme";
-import { authQueryKeys, type AuthUser } from "./useAuth";
+import { authQueryKeys, useAuth, type AuthUser } from "./useAuth";
 
 type ThemeContextValue = {
   themePreference: ThemePreference;
@@ -19,18 +19,17 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-type ThemeProviderProps = {
-  children: ReactNode;
-  user: AuthUser | null;
-};
-
-export const ThemeProvider = ({ children, user }: ThemeProviderProps) => {
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  const { user, loading } = useAuth();
   const queryClient = useQueryClient();
   const themePreference = user?.themePreference ?? "LIGHT";
 
   useEffect(() => {
-    applyThemePreference(user?.themePreference ?? "LIGHT");
-  }, [user?.themePreference]);
+    if (loading) {
+      return;
+    }
+    applyThemePreference(themePreference);
+  }, [loading, themePreference]);
 
   const updateMutation = useMutation({
     mutationFn: (nextTheme: ThemePreference) =>

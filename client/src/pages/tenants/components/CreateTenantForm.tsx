@@ -18,7 +18,7 @@ export const CreateTenantForm = ({
   return (
     <form
       onSubmit={onSubmit}
-      className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-end"
+      className="surface flex flex-col gap-3 p-5 sm:flex-row sm:items-end"
     >
       <div className="flex-1">
         <Input

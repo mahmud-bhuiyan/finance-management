@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { AuthScreen, LockIcon } from "../../components/layout/AuthScreen";
+import { AuthScreen } from "../../components/layout/AuthScreen";
 import { LoginForm } from "./components/LoginForm";
 import { useLoginForm } from "./hooks/useLoginForm";
 
@@ -8,13 +8,15 @@ export const LoginPage = () => {
 
   return (
     <AuthScreen
-      icon={<LockIcon />}
       title="Welcome back"
       subtitle="Sign in to your finance workspace."
       footer={
         <>
           Don’t have an account?{" "}
-          <Link className="font-bold underline" to="/register">
+          <Link
+            className="font-semibold text-(--fms-accent) hover:underline"
+            to="/register"
+          >
             Sign up free
           </Link>
         </>

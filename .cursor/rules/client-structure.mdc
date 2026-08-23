@@ -38,7 +38,7 @@ pages/
 components/
   ui/         # Button, Input, Select, Modal, Table, …
   feedback/   # LoadingState, EmptyState, ErrorBanner, …
-  layout/     # AppShell, Sidebar, PageHeader, …
+  layout/     # AppLayout, Sidebar, PageHeader, …
   forms/      # shared form helpers used by multiple pages
 ```
 
@@ -52,7 +52,7 @@ components/
 
 ## App shell (SPA — no full page reloads)
 
-- **`main.tsx`** — mount the app and wrap it with global providers only (`QueryClientProvider`, `BrowserRouter`, `AuthProvider`, future contexts). Providers stay mounted so session state survives route changes.
+- **`main.tsx`** — mount the app and wrap it with **all** global providers. Do not put providers in `App.tsx`, layouts, or pages. Current stack (outer → inner): `QueryClientProvider` → `BrowserRouter` → `AuthProvider` → `ThemeProvider` → `App`. Keep `ThemeProvider` inside `AuthProvider` so it can read the session. Providers stay mounted so session and theme survive route changes.
 - **`App.tsx`** — route table only (`Routes` / `Route`). No providers here.
 - Navigate with **`Link`** or **`useNavigate`** from `react-router-dom` — never plain `<a href="/…">` for in-app links (that triggers a full reload).
 
@@ -64,3 +64,9 @@ components/
 - **Auth** — `useAuth` loads `/auth/me` via `useQuery`; login/register call `setQueryData`, logout clears the cache, `refresh()` invalidates.
 - **Defaults** (`queryClient.ts`): `retry: 1`, `refetchOnWindowFocus: false`. Override per hook when needed (e.g. auth `retry: false`).
 - Do **not** fetch API data with raw `useEffect` + `useState` — use React Query.
+
+## Theme preference
+
+- **`src/lib/theme.ts`** — `ThemePreference`, `applyThemePreference()`, and localStorage helpers (`readStoredThemePreference`, `persistThemePreference`). `main.tsx` applies the stored theme before React mounts to avoid a flash.
+- **`ThemeProvider`** (`src/hooks/useTheme.tsx`) — local-first UI: toggle updates localStorage and the DOM immediately; `PATCH /auth/me/theme` runs in the background. Store `fms-theme-user-id` with the preference so a different signed-in user gets their server preference on login.
+- On session load for the same user, use the stored preference and backfill the API if the DB drifted. On login as a different user, apply the server preference and refresh localStorage.

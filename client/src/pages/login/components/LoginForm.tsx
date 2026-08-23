@@ -1,7 +1,7 @@
 import type { FormEvent } from "react";
-import { AuthButton } from "../../../components/forms/AuthButton";
-import { AuthInput } from "../../../components/forms/AuthInput";
 import { ErrorBanner } from "../../../components/feedback/ErrorBanner";
+import { AuthInput } from "../../../components/forms/AuthInput";
+import { Button } from "../../../components/ui/Button";
 
 type LoginFormProps = {
   email: string;
@@ -48,21 +48,21 @@ export const LoginForm = ({
         value={password}
         onChange={(e) => onPasswordChange(e.target.value)}
       />
-      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-black">
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-(--fms-ink)">
         <input
           type="checkbox"
           name="rememberMe"
           checked={rememberMe}
           onChange={(e) => onRememberMeChange(e.target.checked)}
-          className="h-4 w-4 shrink-0 border-2 border-black accent-black"
+          className="h-4 w-4 shrink-0 rounded-sm border-(--fms-border-strong) accent-(--fms-accent)"
         />
         Remember me
       </label>
       {error && <ErrorBanner message={error} />}
       <div className="pt-1">
-        <AuthButton type="submit" disabled={submitting}>
+        <Button type="submit" className="w-full py-3" disabled={submitting}>
           {submitting ? "Logging in…" : "Log in"}
-        </AuthButton>
+        </Button>
       </div>
     </form>
   );

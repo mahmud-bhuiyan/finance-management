@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { AuthScreen, UserPlusIcon } from "../../components/layout/AuthScreen";
+import { AuthScreen } from "../../components/layout/AuthScreen";
 import { RegisterForm } from "./components/RegisterForm";
 import { useRegisterForm } from "./hooks/useRegisterForm";
 
@@ -8,14 +8,15 @@ export const RegisterPage = () => {
 
   return (
     <AuthScreen
-      icon={<UserPlusIcon />}
-      tone="pink"
       title="Create account"
       subtitle="Register to join a company workspace."
       footer={
         <>
           Already have an account?{" "}
-          <Link className="font-bold underline" to="/login">
+          <Link
+            className="font-semibold text-(--fms-accent) hover:underline"
+            to="/login"
+          >
             Log in
           </Link>
         </>

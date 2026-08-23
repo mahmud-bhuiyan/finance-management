@@ -22,7 +22,7 @@ export const AuditLogList = ({ logs }: AuditLogListProps) => {
       {logs.map((log) => (
         <li
           key={log.id}
-          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+          className="surface p-4"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-medium text-slate-900">

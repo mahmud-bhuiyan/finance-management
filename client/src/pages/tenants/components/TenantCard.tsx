@@ -63,7 +63,7 @@ export const TenantCard = ({
   };
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="surface p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-medium text-slate-900">{tenant.name}</h2>

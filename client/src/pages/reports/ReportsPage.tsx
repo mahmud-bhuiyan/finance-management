@@ -103,7 +103,7 @@ export const ReportsPage = () => {
   const busy = exporting !== null || report.loading;
 
   return (
-    <PageFrame maxWidth="max-w-6xl">
+    <PageFrame>
       <PageHeader
         kicker={canWrite ? "Company admin" : "Read only"}
         title="Reports"
@@ -112,6 +112,7 @@ export const ReportsPage = () => {
           <>
             <Button
               type="button"
+              variant="ghost"
               disabled={busy}
               onClick={() => void handleExport("csv")}
             >
@@ -119,6 +120,7 @@ export const ReportsPage = () => {
             </Button>
             <Button
               type="button"
+              variant="ghost"
               disabled={busy}
               onClick={() => void handleExport("xlsx")}
             >

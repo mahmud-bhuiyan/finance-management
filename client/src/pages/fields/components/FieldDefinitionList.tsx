@@ -20,7 +20,7 @@ export const FieldDefinitionList = ({
 }: FieldDefinitionListProps) => {
   if (fields.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
+      <p className="surface-dashed p-6 text-sm text-slate-500">
         No fields yet for this target. Add one above.
       </p>
     );
