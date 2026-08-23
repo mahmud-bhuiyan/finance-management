@@ -1,59 +1,71 @@
-import { useCallback, useEffect, useState } from "react";
-import { ApiError } from "../../../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { toQueryErrorMessage } from "../../../lib/queryClient";
 import {
   createTenantUser,
   listTenantUsers,
   updateTenantUser,
   type CreateTenantUserPayload,
-  type TenantUser,
   type UpdateTenantUserPayload,
 } from "../../../lib/users";
 
+export const tenantUserQueryKeys = {
+  all: ["tenant-users"] as const,
+  list: () => [...tenantUserQueryKeys.all, "list"] as const,
+};
+
 export const useTenantUsers = (enabled: boolean) => {
-  const [users, setUsers] = useState<TenantUser[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await listTenantUsers();
-      setUsers(data.users);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not load users");
-    } finally {
-      setLoading(false);
-    }
-  }, [enabled]);
+  const listQuery = useQuery({
+    queryKey: tenantUserQueryKeys.list(),
+    queryFn: () => listTenantUsers().then((data) => data.users),
+    enabled,
+  });
 
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  const invalidateList = useCallback(
+    () =>
+      queryClient.invalidateQueries({ queryKey: tenantUserQueryKeys.list() }),
+    [queryClient],
+  );
+
+  const createMutation = useMutation({
+    mutationFn: (payload: CreateTenantUserPayload) => createTenantUser(payload),
+    onSuccess: invalidateList,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateTenantUserPayload;
+    }) => updateTenantUser(id, payload),
+    onSuccess: invalidateList,
+  });
 
   const createUser = async (payload: CreateTenantUserPayload) => {
-    const data = await createTenantUser(payload);
-    setUsers((current) => [...current, data.user]);
+    const data = await createMutation.mutateAsync(payload);
     return data.user;
   };
 
   const updateUser = async (id: string, payload: UpdateTenantUserPayload) => {
-    const data = await updateTenantUser(id, payload);
-    setUsers((current) =>
-      current.map((user) => (user.id === id ? data.user : user)),
-    );
+    const data = await updateMutation.mutateAsync({ id, payload });
     return data.user;
   };
 
+  const queryError = listQuery.error
+    ? toQueryErrorMessage(listQuery.error, "Could not load users")
+    : null;
+
   return {
-    users,
-    loading,
-    error,
-    setError,
-    refresh,
+    users: listQuery.data ?? [],
+    loading: listQuery.isPending,
+    error: mutationError ?? queryError,
+    setError: setMutationError,
+    refresh: listQuery.refetch,
     createUser,
     updateUser,
   };

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../../lib/api";
+import { toQueryErrorMessage } from "../../../lib/queryClient";
 
 export type AuditLogEntry = {
   id: string;
@@ -18,37 +19,31 @@ export type AuditLogEntry = {
   };
 };
 
+export const auditQueryKeys = {
+  all: ["audit"] as const,
+  logs: () => [...auditQueryKeys.all, "logs"] as const,
+};
+
+const fetchAuditLogs = () =>
+  apiFetch<{ logs: AuditLogEntry[] }>("/audit/logs?limit=50").then(
+    (data) => data.logs,
+  );
+
 export const useAuditLogs = (enabled: boolean) => {
-  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
-  const [loading, setLoading] = useState(enabled);
-  const [error, setError] = useState<string | null>(null);
+  const logsQuery = useQuery({
+    queryKey: auditQueryKeys.logs(),
+    queryFn: fetchAuditLogs,
+    enabled,
+  });
 
-  const refresh = useCallback(async () => {
-    if (!enabled) {
-      setLogs([]);
-      setLoading(false);
-      return;
-    }
+  const error = logsQuery.error
+    ? toQueryErrorMessage(logsQuery.error, "Failed to load audit logs")
+    : null;
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await apiFetch<{ logs: AuditLogEntry[] }>(
-        "/audit/logs?limit=50",
-      );
-      setLogs(data.logs);
-    } catch (err) {
-      setLogs([]);
-      setError(err instanceof Error ? err.message : "Failed to load audit logs");
-    } finally {
-      setLoading(false);
-    }
-  }, [enabled]);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  return { logs, loading, error, refresh };
+  return {
+    logs: logsQuery.data ?? [],
+    loading: logsQuery.isPending,
+    error,
+    refresh: logsQuery.refetch,
+  };
 };

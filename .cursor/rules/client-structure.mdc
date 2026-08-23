@@ -52,6 +52,15 @@ components/
 
 ## App shell (SPA — no full page reloads)
 
-- **`main.tsx`** — mount the app and wrap it with global providers only (`BrowserRouter`, `AuthProvider`, future contexts). Providers stay mounted so session state survives route changes.
+- **`main.tsx`** — mount the app and wrap it with global providers only (`QueryClientProvider`, `BrowserRouter`, `AuthProvider`, future contexts). Providers stay mounted so session state survives route changes.
 - **`App.tsx`** — route table only (`Routes` / `Route`). No providers here.
 - Navigate with **`Link`** or **`useNavigate`** from `react-router-dom` — never plain `<a href="/…">` for in-app links (that triggers a full reload).
+
+## Server state (TanStack Query)
+
+- **Library:** `@tanstack/react-query` for all API reads/writes from page hooks and shared auth.
+- **`src/lib/queryClient.ts`** — shared `queryClient` instance and `toQueryErrorMessage()` (maps `ApiError` to user-facing strings).
+- **Page hooks** — use `useQuery` for reads and `useMutation` for writes. Export a `*QueryKeys` object per domain (e.g. `expenseQueryKeys`) for cache keys and invalidation.
+- **Auth** — `useAuth` loads `/auth/me` via `useQuery`; login/register call `setQueryData`, logout clears the cache, `refresh()` invalidates.
+- **Defaults** (`queryClient.ts`): `retry: 1`, `refetchOnWindowFocus: false`. Override per hook when needed (e.g. auth `retry: false`).
+- Do **not** fetch API data with raw `useEffect` + `useState` — use React Query.

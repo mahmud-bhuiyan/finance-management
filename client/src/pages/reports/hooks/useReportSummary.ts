@@ -1,63 +1,38 @@
-import { useEffect, useState } from "react";
-import { ApiError } from "../../../lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { toQueryErrorMessage } from "../../../lib/queryClient";
 import {
   fetchReportSummary,
   type ReportQuery,
   type ReportSummary,
 } from "../../../lib/reports";
 
+export const reportQueryKeys = {
+  all: ["reports"] as const,
+  summary: (query: ReportQuery) =>
+    [...reportQueryKeys.all, "summary", query] as const,
+};
+
+const canFetchReport = (enabled: boolean, query: ReportQuery) =>
+  enabled && !(query.preset === "custom" && (!query.from || !query.to));
+
 export const useReportSummary = (enabled: boolean, query: ReportQuery) => {
-  const [data, setData] = useState<ReportSummary | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [manualError, setManualError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
+  const summaryQuery = useQuery({
+    queryKey: reportQueryKeys.summary(query),
+    queryFn: () => fetchReportSummary(query),
+    enabled: canFetchReport(enabled, query),
+  });
 
-    if (query.preset === "custom" && (!query.from || !query.to)) {
-      return;
-    }
+  const queryError = summaryQuery.error
+    ? toQueryErrorMessage(summaryQuery.error, "Could not load report")
+    : null;
 
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    void (async () => {
-      try {
-        const next = await fetchReportSummary(query);
-        if (!cancelled) {
-          setData(next);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof ApiError
-              ? err.message
-              : "Could not load report",
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    enabled,
-    query.preset,
-    query.from,
-    query.to,
-    query.categoryId,
-    query.departmentId,
-    query.vendorId,
-    query.paymentMethod,
-  ]);
-
-  return { data, loading, error, setError };
+  return {
+    data: (summaryQuery.data ?? null) as ReportSummary | null,
+    loading: summaryQuery.isPending,
+    error: manualError ?? queryError,
+    setError: setManualError,
+  };
 };

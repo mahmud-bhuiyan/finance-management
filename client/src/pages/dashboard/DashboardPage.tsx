@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { useActiveSupportPickers } from "../../hooks/useActiveSupportPickers";
 import { useAuth } from "../../hooks/useAuth";
 import type { DashboardFilters } from "../../lib/dashboard";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
-import { listSupportItems, type SupportItem } from "../../lib/supportData";
 import { DashboardCharts } from "./components/DashboardCharts";
 import { DashboardFiltersPanel } from "./components/DashboardFilters";
 import { KpiCards } from "./components/KpiCards";
@@ -40,9 +40,7 @@ export const DashboardPage = () => {
     vendorId: "",
     paymentMethod: "",
   }));
-  const [categories, setCategories] = useState<SupportItem[]>([]);
-  const [departments, setDepartments] = useState<SupportItem[]>([]);
-  const [vendors, setVendors] = useState<SupportItem[]>([]);
+  const supportPickers = useActiveSupportPickers(!authLoading && canRead);
 
   const query = useMemo(
     () => ({
@@ -58,26 +56,6 @@ export const DashboardPage = () => {
   );
 
   const dashboard = useDashboard(!authLoading && canRead, query);
-
-  useEffect(() => {
-    if (!canRead) {
-      return;
-    }
-    void (async () => {
-      try {
-        const [nextCategories, nextDepartments, nextVendors] = await Promise.all([
-          listSupportItems("category", { active: true }),
-          listSupportItems("department", { active: true }),
-          listSupportItems("vendor", { active: true }),
-        ]);
-        setCategories(nextCategories);
-        setDepartments(nextDepartments);
-        setVendors(nextVendors);
-      } catch {
-        // Charts still work without dimension pickers.
-      }
-    })();
-  }, [canRead]);
 
   if (authLoading) {
     return <LoadingState message="Loading session…" />;
@@ -111,9 +89,9 @@ export const DashboardPage = () => {
 
         <DashboardFiltersPanel
           filters={filters}
-          categories={categories}
-          departments={departments}
-          vendors={vendors}
+          categories={supportPickers.categories}
+          departments={supportPickers.departments}
+          vendors={supportPickers.vendors}
           onChange={patchFilters}
         />
 

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../../lib/api";
+import { toQueryErrorMessage } from "../../../lib/queryClient";
 
 export type RbacProfile = {
   role: string;
@@ -7,39 +8,31 @@ export type RbacProfile = {
   permissions: string[];
 };
 
+export const rbacQueryKeys = {
+  all: ["rbac"] as const,
+  me: () => [...rbacQueryKeys.all, "me"] as const,
+};
+
+const fetchRbacProfile = () =>
+  apiFetch<{ rbac: RbacProfile }>("/rbac/me").then((data) => data.rbac);
+
 export const useRbacProfile = (enabled: boolean) => {
-  const [profile, setProfile] = useState<RbacProfile | null>(null);
-  const [loading, setLoading] = useState(enabled);
-  const [error, setError] = useState<string | null>(null);
+  const profileQuery = useQuery({
+    queryKey: rbacQueryKeys.me(),
+    queryFn: fetchRbacProfile,
+    enabled,
+  });
 
-  const refresh = useCallback(async () => {
-    if (!enabled) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
+  const error = profileQuery.error
+    ? toQueryErrorMessage(profileQuery.error, "Failed to load access")
+    : null;
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await apiFetch<{ rbac: RbacProfile }>(
-        "/rbac/me",
-      );
-      setProfile(data.rbac);
-    } catch (err) {
-      setProfile(null);
-      setError(err instanceof Error ? err.message : "Failed to load access");
-    } finally {
-      setLoading(false);
-    }
-  }, [enabled]);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  return { profile, loading, error, refresh };
+  return {
+    profile: profileQuery.data ?? null,
+    loading: profileQuery.isPending,
+    error,
+    refresh: profileQuery.refetch,
+  };
 };
 
 export const probeAccess = (path: string) =>

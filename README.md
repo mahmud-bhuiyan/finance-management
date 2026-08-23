@@ -7,7 +7,7 @@ See plan: [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md)
 
 - **PostgreSQL** + **Prisma**
 - **Express** (TypeScript) in `server/` — `routes` / `controllers` / `services` / `middleware`
-- **React** + **Vite** + **Tailwind CSS** in `client/`
+- **React** + **Vite** + **Tailwind CSS** + **TanStack React Query** in `client/`
 - HTTP API prefix: `/api/v1/`
 
 ## Quick start
@@ -107,7 +107,7 @@ finance-management/
     pages/<page>/{Page.tsx,components/,hooks/}   # page-owned UI + hooks
     components/{ui,feedback,layout,forms}/       # shared, sorted by role
     hooks/                                       # shared hooks only
-    lib/
+    lib/                                         # api client, queryClient, helpers
   docs/manual-test-guides/                       # MD + PDF per step
   docs/postman/                                  # Importable Postman collection
 ```

@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
-import { ApiError, apiFetch, apiUpload } from "../../../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { apiFetch } from "../../../lib/api";
+import type { FieldDefinition } from "../../../lib/fields";
 import type {
   CreateIncomePayload,
   Income,
-  IncomeAttachment,
   IncomeListFilters,
   IncomeListMeta,
   IncomeListResponse,
   UpdateIncomePayload,
 } from "../../../lib/incomes";
 import { buildIncomeListQuery } from "../../../lib/incomes";
-import type { FieldDefinition } from "../../../lib/fields";
+import { toQueryErrorMessage } from "../../../lib/queryClient";
 
 const defaultMeta = (filters: IncomeListFilters): IncomeListMeta => ({
   page: filters.page,
@@ -21,116 +22,91 @@ const defaultMeta = (filters: IncomeListFilters): IncomeListMeta => ({
   sortDir: filters.sortDir,
 });
 
+export const incomeQueryKeys = {
+  all: ["incomes"] as const,
+  lists: () => [...incomeQueryKeys.all, "list"] as const,
+  list: (filters: IncomeListFilters) =>
+    [...incomeQueryKeys.lists(), filters] as const,
+  attachments: (incomeId: string) =>
+    [...incomeQueryKeys.all, "attachments", incomeId] as const,
+};
+
+const fetchIncomeList = (filters: IncomeListFilters) =>
+  apiFetch<IncomeListResponse>(`/incomes?${buildIncomeListQuery(filters)}`);
+
 export const useIncomes = (enabled: boolean, filters: IncomeListFilters) => {
-  const [incomes, setIncomes] = useState<Income[]>([]);
-  const [fields, setFields] = useState<FieldDefinition[]>([]);
-  const [meta, setMeta] = useState<IncomeListMeta>(() => defaultMeta(filters));
-  const [loading, setLoading] = useState(enabled);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    const data = await apiFetch<IncomeListResponse>(
-      `/incomes?${buildIncomeListQuery(filters)}`,
-    );
-    setIncomes(data.incomes);
-    setFields(data.fields);
-    setMeta(data.meta);
-  }, [filters]);
+  const listQuery = useQuery({
+    queryKey: incomeQueryKeys.list(filters),
+    queryFn: () => fetchIncomeList(filters),
+    enabled,
+  });
 
-  useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
-      return;
-    }
+  const invalidateLists = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: incomeQueryKeys.lists() }),
+    [queryClient],
+  );
 
-    setLoading(true);
-    void (async () => {
-      try {
-        setError(null);
-        await refresh();
-      } catch (err) {
-        setError(
-          err instanceof ApiError ? err.message : "Failed to load incomes",
-        );
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [enabled, refresh]);
-
-  const createIncome = async (payload: CreateIncomePayload) => {
-    const data = await apiFetch<{ income: Income }>(
-      "/incomes",
-      {
+  const createMutation = useMutation({
+    mutationFn: (payload: CreateIncomePayload) =>
+      apiFetch<{ income: Income }>("/incomes", {
         method: "POST",
         body: JSON.stringify(payload),
-      },
-    );
-    await refresh();
+      }),
+    onSuccess: invalidateLists,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateIncomePayload;
+    }) =>
+      apiFetch<{ income: Income }>(`/incomes/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: invalidateLists,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/incomes/${id}`, { method: "DELETE" }),
+    onSuccess: invalidateLists,
+  });
+
+  const createIncome = async (payload: CreateIncomePayload) => {
+    const data = await createMutation.mutateAsync(payload);
     return data.income;
   };
 
   const updateIncome = async (id: string, payload: UpdateIncomePayload) => {
-    const data = await apiFetch<{ income: Income }>(
-      `/incomes/${id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      },
-    );
-    await refresh();
+    const data = await updateMutation.mutateAsync({ id, payload });
     return data.income;
   };
 
   const deleteIncome = async (id: string) => {
-    await apiFetch(`/incomes/${id}`, { method: "DELETE" });
-    await refresh();
+    await deleteMutation.mutateAsync(id);
   };
 
-  const listAttachments = useCallback(async (incomeId: string) => {
-    const data = await apiFetch<{
-      attachments: IncomeAttachment[];
-    }>(`/incomes/${incomeId}/attachments`);
-    return data.attachments;
-  }, []);
-
-  const uploadAttachment = useCallback(
-    async (incomeId: string, file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      const data = await apiUpload<{
-        attachment: IncomeAttachment;
-      }>(`/incomes/${incomeId}/attachments`, formData);
-      await refresh();
-      return data.attachment;
-    },
-    [refresh],
-  );
-
-  const deleteAttachment = useCallback(
-    async (incomeId: string, attachmentId: string) => {
-      await apiFetch(
-        `/incomes/${incomeId}/attachments/${attachmentId}`,
-        { method: "DELETE" },
-      );
-      await refresh();
-    },
-    [refresh],
-  );
+  const queryError = listQuery.error
+    ? toQueryErrorMessage(listQuery.error, "Failed to load incomes")
+    : null;
 
   return {
-    incomes,
-    fields,
-    meta,
-    loading,
-    error,
-    setError,
-    refresh,
+    incomes: listQuery.data?.incomes ?? [],
+    fields: (listQuery.data?.fields ?? []) as FieldDefinition[],
+    meta: listQuery.data?.meta ?? defaultMeta(filters),
+    loading: listQuery.isPending,
+    error: mutationError ?? queryError,
+    setError: setMutationError,
+    refresh: listQuery.refetch,
     createIncome,
     updateIncome,
     deleteIncome,
-    listAttachments,
-    uploadAttachment,
-    deleteAttachment,
   };
 };

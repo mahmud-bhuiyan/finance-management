@@ -1,14 +1,10 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import type { ChangeEvent } from "react";
 import { Button } from "../../../components/ui/Button";
-import { ApiError, apiDownloadBlob } from "../../../lib/api";
-import type { IncomeAttachment } from "../../../lib/incomes";
+import { useIncomeAttachments } from "../hooks/useIncomeAttachments";
 
 type IncomeAttachmentsProps = {
   incomeId: string;
   canWrite: boolean;
-  listAttachments: (incomeId: string) => Promise<IncomeAttachment[]>;
-  uploadAttachment: (incomeId: string, file: File) => Promise<IncomeAttachment>;
-  deleteAttachment: (incomeId: string, attachmentId: string) => Promise<void>;
 };
 
 const formatBytes = (size: number) => {
@@ -24,48 +20,9 @@ const formatBytes = (size: number) => {
 export const IncomeAttachments = ({
   incomeId,
   canWrite,
-  listAttachments,
-  uploadAttachment,
-  deleteAttachment,
 }: IncomeAttachmentsProps) => {
-  const [attachments, setAttachments] = useState<IncomeAttachment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const refresh = async () => {
-    const rows = await listAttachments(incomeId);
-    setAttachments(rows);
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    void (async () => {
-      try {
-        const rows = await listAttachments(incomeId);
-        if (!cancelled) {
-          setAttachments(rows);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof ApiError
-              ? err.message
-              : "Failed to load attachments",
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [incomeId, listAttachments]);
+  const { attachments, loading, busy, error, upload, remove, download } =
+    useIncomeAttachments(incomeId);
 
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -74,15 +31,10 @@ export const IncomeAttachments = ({
       return;
     }
 
-    setBusy(true);
-    setError(null);
     try {
-      await uploadAttachment(incomeId, file);
-      await refresh();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Upload failed");
-    } finally {
-      setBusy(false);
+      await upload(file);
+    } catch {
+      // Error message is shown from hook state.
     }
   };
 
@@ -90,32 +42,11 @@ export const IncomeAttachments = ({
     if (!window.confirm("Remove this attachment?")) {
       return;
     }
-    setBusy(true);
-    setError(null);
-    try {
-      await deleteAttachment(incomeId, attachmentId);
-      await refresh();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Delete failed");
-    } finally {
-      setBusy(false);
-    }
-  };
 
-  const handleDownload = async (attachment: IncomeAttachment) => {
-    setError(null);
     try {
-      const blob = await apiDownloadBlob(
-        `/incomes/${incomeId}/attachments/${attachment.id}/download`,
-      );
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = attachment.originalName;
-      anchor.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Download failed");
+      await remove(attachmentId);
+    } catch {
+      // Error message is shown from hook state.
     }
   };
 
@@ -164,7 +95,7 @@ export const IncomeAttachments = ({
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => void handleDownload(attachment)}
+                  onClick={() => void download(attachment)}
                   className="font-medium text-teal-800 hover:underline"
                 >
                   Download

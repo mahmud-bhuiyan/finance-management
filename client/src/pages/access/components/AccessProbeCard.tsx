@@ -1,95 +1,12 @@
-import { useState } from "react";
-import { ApiError } from "../../../lib/api";
-import { PERMISSIONS, roleCan } from "../../../lib/permissions";
+import { useAccessProbes } from "../hooks/useAccessProbes";
 import type { AuthUser } from "../../../hooks/useAuth";
-import { probeAccess } from "../hooks/useRbacProfile";
-
-type ProbeResult = {
-  label: string;
-  status: "idle" | "ok" | "denied" | "error";
-  detail: string;
-};
 
 type AccessProbeCardProps = {
   user: AuthUser;
 };
 
-const initialProbes = (): ProbeResult[] => [
-  {
-    label: "Tenant management (Super Admin)",
-    status: "idle",
-    detail: "Not tested yet",
-  },
-  {
-    label: "Finance write (Company Admin)",
-    status: "idle",
-    detail: "Not tested yet",
-  },
-  {
-    label: "Reports read (tenant users)",
-    status: "idle",
-    detail: "Not tested yet",
-  },
-];
-
 export const AccessProbeCard = ({ user }: AccessProbeCardProps) => {
-  const [probes, setProbes] = useState(initialProbes);
-  const [running, setRunning] = useState(false);
-
-  const runProbes = async () => {
-    setRunning(true);
-
-    const next = initialProbes();
-
-    const runOne = async (
-      index: number,
-      path: string,
-      expectedAllowed: boolean,
-    ) => {
-      try {
-        const data = await probeAccess(path);
-        next[index] = {
-          label: next[index].label,
-          status: expectedAllowed ? "ok" : "error",
-          detail: data.message,
-        };
-      } catch (err) {
-        if (err instanceof ApiError && err.status === 403) {
-          next[index] = {
-            label: next[index].label,
-            status: expectedAllowed ? "denied" : "ok",
-            detail: err.message,
-          };
-          return;
-        }
-
-        next[index] = {
-          label: next[index].label,
-          status: "error",
-          detail: err instanceof Error ? err.message : "Request failed",
-        };
-      }
-    };
-
-    await runOne(
-      0,
-      "/rbac/probes/tenants-manage",
-      roleCan(user.role, PERMISSIONS.TENANTS_MANAGE),
-    );
-    await runOne(
-      1,
-      "/rbac/probes/finance-write",
-      roleCan(user.role, PERMISSIONS.FINANCE_WRITE),
-    );
-    await runOne(
-      2,
-      "/rbac/probes/reports-read",
-      roleCan(user.role, PERMISSIONS.REPORTS_READ),
-    );
-
-    setProbes(next);
-    setRunning(false);
-  };
+  const { probes, running, runProbes } = useAccessProbes(user);
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -25,6 +25,7 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 |--------|--------|
 | Server | **Node.js + Express** (TypeScript) — folder `server/` |
 | Client | **React + Vite** — folder `client/` |
+| Client data | **TanStack React Query** (`@tanstack/react-query`) |
 | CSS | **Tailwind CSS** |
 | Database | **PostgreSQL** |
 | ORM | **Prisma** |
@@ -73,7 +74,8 @@ Build a **multi-tenant, configurable Finance Management SaaS** so companies can 
 5. **Shared components are sorted by role** under `components/`: `ui/`, `feedback/`, `layout/`, `forms/` — so pieces are easy to find.  
 6. Shared hooks (e.g. `useAuth`) stay in `src/hooks/`; page-only hooks stay next to the page.  
 7. Prefer composition over prop-heavy mega-components.  
-8. **SPA shell:** `main.tsx` wraps the app with global contexts (`BrowserRouter`, `AuthProvider`, …); `App.tsx` holds the route table only. Use `Link` / `useNavigate` for in-app navigation — no full page reloads.
+8. **SPA shell:** `main.tsx` wraps the app with global providers (`QueryClientProvider`, `BrowserRouter`, `AuthProvider`, …); `App.tsx` holds the route table only. Use `Link` / `useNavigate` for in-app navigation — no full page reloads.  
+9. **Server state:** use **TanStack React Query** for API reads/writes. Shared config in `src/lib/queryClient.ts`. Page hooks use `useQuery` / `useMutation` with exported `*QueryKeys` objects. Map `ApiError` via `toQueryErrorMessage()`. Do not fetch API data with raw `useEffect` + `useState`.
 
 ### Server (Express — organized & findable)
 
@@ -146,8 +148,8 @@ finance-management/
         layout/              # AppShell, Sidebar, …
         forms/               # shared form helpers (multi-page)
       hooks/                 # shared only (e.g. useAuth)
-      lib/                   # api client, helpers
-      main.tsx               # mount + global providers (router, auth, …)
+      lib/                   # api client, queryClient, helpers
+      main.tsx               # mount + global providers (query, router, auth, …)
       App.tsx                # route table only (Routes / Route)
   docs/
     manual-test-guides/      # Step 01…N checklists (Markdown + PDF)
@@ -318,6 +320,8 @@ For every major step, record briefly:
 | **18** | Automated tests | Implemented — FMS-10, FMS-19, FMS-29, FMS-52 (`cd server && npm test`) |
 | **19** | Storage hardening | Not started — secure receipt/attachment storage (FMS-23) |
 
+**Client refactor (done):** page hooks and `useAuth` now use **TanStack React Query** (`client/src/lib/queryClient.ts`, `QueryClientProvider` in `main.tsx`). See `.cursor/rules/client-structure.mdc` and §3 client rules.
+
 ---
 
 ## Decision log
@@ -327,6 +331,7 @@ For every major step, record briefly:
 | Primary DB | PostgreSQL |
 | Start server | Express (TypeScript) in `server/` |
 | Client | React + Vite + **Tailwind CSS** in `client/` |
+| Client data | **TanStack React Query** (`@tanstack/react-query`) |
 | NestJS | Later, optional |
 | MERN/Mongo | Rejected as primary |
 | Style | Arrow functions; reusable UI primitives early |
