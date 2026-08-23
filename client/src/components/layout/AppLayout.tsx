@@ -48,13 +48,11 @@ export const AppLayout = () => {
         </aside>
 
         <div className="lg:pl-68">
-          <div className="sticky top-2 z-20 p-2">
-            <AppTopbar
-              user={user}
-              onLogout={() => void logout()}
-              onMenuClick={() => setMobileOpen(true)}
-            />
-          </div>
+          <AppTopbar
+            user={user}
+            onLogout={() => void logout()}
+            onMenuClick={() => setMobileOpen(true)}
+          />
           <Outlet />
         </div>
       </div>

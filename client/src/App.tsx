@@ -11,6 +11,7 @@ import { HomePage } from "./pages/home/HomePage";
 import { IncomesPage } from "./pages/incomes/IncomesPage";
 import { LoginPage } from "./pages/login/LoginPage";
 import { NotFoundPage } from "./pages/not-found/NotFoundPage";
+import { ProfilePage } from "./pages/profile/ProfilePage";
 import { RegisterPage } from "./pages/register/RegisterPage";
 import { ReportsPage } from "./pages/reports/ReportsPage";
 import { TenantsPage } from "./pages/tenants/TenantsPage";
@@ -36,6 +37,7 @@ const App = () => (
     />
     <Route element={<AppLayout />}>
       <Route path="/" element={<HomePage />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/tenants" element={<TenantsPage />} />
       <Route path="/users" element={<UsersPage />} />
       <Route path="/access" element={<AccessPage />} />

@@ -28,7 +28,7 @@ npm run dev
 ```
 
 API: http://localhost:4000  
-Health: http://localhost:4000/api/v1/health
+Health: http://localhost:4000/health
 
 ### 3. Client
 

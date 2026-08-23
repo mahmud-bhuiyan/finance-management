@@ -1,36 +1,65 @@
-import { themeLabel } from "../../lib/theme";
 import { useTheme } from "../../hooks/useTheme";
 
-type ThemeToggleProps = {
-  inline?: boolean;
+const iconProps = {
+  width: 18,
+  height: 18,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.8,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
 };
 
-export const ThemeToggle = ({ inline = false }: ThemeToggleProps) => {
-  const { themePreference, toggleTheme } = useTheme();
+const SunIcon = () => (
+  <svg {...iconProps} aria-hidden="true">
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M18.52 18.52l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M18.52 5.48l1.41-1.41" />
+  </svg>
+);
+
+const MoonIcon = () => (
+  <svg {...iconProps} aria-hidden="true">
+    <path d="M20 14.5A7.5 7.5 0 0 1 9.5 4 7.5 7.5 0 1 0 20 14.5Z" />
+  </svg>
+);
+
+const iconButtonClass = (active: boolean) =>
+  [
+    "grid h-8 w-8 place-items-center rounded-lg transition-colors",
+    active
+      ? "bg-[color-mix(in_srgb,var(--fms-accent)_18%,transparent)] text-(--fms-accent)"
+      : "text-(--fms-muted) hover:text-(--fms-ink)",
+  ].join(" ");
+
+export const ThemeToggle = () => {
+  const { themePreference, setThemePreference } = useTheme();
   const isDark = themePreference === "DARK";
 
   return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      className={[
-        "flex items-center rounded-xl px-1 py-1 text-sm font-medium text-(--fms-muted)",
-        inline ? "gap-2 shrink-0" : "w-full justify-between",
-      ].join(" ")}
-      aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
+    <div
+      className="flex items-center gap-0.5 rounded-xl border border-(--fms-border) p-0.5"
+      role="group"
+      aria-label="Theme"
     >
-      <span className={inline ? "" : "pl-1"}>Theme</span>
-      <span className="relative inline-flex h-7 w-[3.4rem] items-center rounded-full bg-[color-mix(in_srgb,var(--fms-accent)_16%,transparent)] p-0.5">
-        <span
-          className={[
-            "grid h-6 w-6 place-items-center rounded-full bg-(--fms-accent) text-[0.55rem] font-bold text-white shadow-sm transition-transform dark:text-[#04110f]",
-            isDark ? "translate-x-[1.55rem]" : "translate-x-0",
-          ].join(" ")}
-        >
-          {isDark ? "D" : "L"}
-        </span>
-      </span>
-      <span className="sr-only">{themeLabel(themePreference)}</span>
-    </button>
+      <button
+        type="button"
+        className={iconButtonClass(!isDark)}
+        onClick={() => setThemePreference("LIGHT")}
+        aria-label="Light theme"
+        aria-pressed={!isDark}
+      >
+        <SunIcon />
+      </button>
+      <button
+        type="button"
+        className={iconButtonClass(isDark)}
+        onClick={() => setThemePreference("DARK")}
+        aria-label="Dark theme"
+        aria-pressed={isDark}
+      >
+        <MoonIcon />
+      </button>
+    </div>
   );
 };

@@ -1,5 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { PageFrame } from "../../components/layout/PageFrame";
+import { PageHeader } from "../../components/layout/PageHeader";
 import { navIconFor } from "../../components/layout/NavIcons";
 import { useAuth } from "../../hooks/useAuth";
 import { navSectionsForUser } from "../../lib/nav";
@@ -34,30 +35,27 @@ export const HomePage = () => {
 
   return (
     <PageFrame>
-      <div className="surface relative overflow-hidden p-7 lg:p-9">
-        <p className="text-[0.7rem] font-semibold tracking-[0.22em] text-(--fms-accent) uppercase">
-          Finance Management System
-        </p>
-        <h1 className="font-display mt-3 text-4xl font-medium tracking-tight text-(--fms-ink) italic lg:text-6xl">
-          Welcome{firstName ? `, ${firstName}` : ""}
-        </h1>
-        <p className="mt-4 text-[0.98rem] leading-relaxed text-(--fms-muted)">
-          {homeCopy(user.role)}
-        </p>
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-[color-mix(in_srgb,var(--fms-accent)_14%,transparent)] px-3 py-1 text-xs font-semibold tracking-wide text-(--fms-accent)">
-            {roleLabel(user.role)}
-          </span>
-          {user.tenant ? (
-            <span className="rounded-full border border-(--fms-border) px-3 py-1 text-xs font-medium text-(--fms-muted)">
-              {user.tenant.name}
+      <div className="surface relative overflow-hidden p-5 lg:p-6">
+        <PageHeader
+          kicker="Finance Management System"
+          title={`Welcome${firstName ? `, ${firstName}` : ""}`}
+          description={homeCopy(user.role)}
+        >
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-[color-mix(in_srgb,var(--fms-accent)_14%,transparent)] px-3 py-1 text-xs font-semibold tracking-wide text-(--fms-accent)">
+              {roleLabel(user.role)}
             </span>
-          ) : (
-            <span className="rounded-full border border-(--fms-border) px-3 py-1 text-xs font-medium text-(--fms-muted)">
-              Platform
-            </span>
-          )}
-        </div>
+            {user.tenant ? (
+              <span className="rounded-full border border-(--fms-border) px-3 py-1 text-xs font-medium text-(--fms-muted)">
+                {user.tenant.name}
+              </span>
+            ) : (
+              <span className="rounded-full border border-(--fms-border) px-3 py-1 text-xs font-medium text-(--fms-muted)">
+                Platform
+              </span>
+            )}
+          </div>
+        </PageHeader>
       </div>
 
       {shortcuts.length > 0 ? (

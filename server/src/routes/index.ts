@@ -1,20 +1,18 @@
 import { Router } from "express";
-import { auditRouter } from "./auditRoutes.js";
 import { authRouter } from "./authRoutes.js";
+import { auditRouter } from "./auditRoutes.js";
 import { dashboardRouter } from "./dashboardRoutes.js";
-import { expenseRouter } from "./expenseRoutes.js";
-import { fieldRouter } from "./fieldRoutes.js";
-import { healthRouter } from "./healthRoutes.js";
-import { incomeRouter } from "./incomeRoutes.js";
-import { rbacRouter } from "./rbacRoutes.js";
 import { reportRouter } from "./reportRoutes.js";
+import { expenseRouter } from "./expenseRoutes.js";
+import { incomeRouter } from "./incomeRoutes.js";
+import { fieldRouter } from "./fieldRoutes.js";
 import { createSupportDataRouter } from "./supportDataRoutes.js";
-import { tenantRouter } from "./tenantRoutes.js";
 import { userRouter } from "./userRoutes.js";
+import { rbacRouter } from "./rbacRoutes.js";
+import { tenantRouter } from "./tenantRoutes.js";
 
 export const apiRouter = Router();
 
-apiRouter.use("/health", healthRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/audit", auditRouter);
 apiRouter.use("/dashboard", dashboardRouter);
