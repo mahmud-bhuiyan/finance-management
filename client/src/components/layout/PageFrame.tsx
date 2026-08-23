@@ -5,7 +5,7 @@ type PageFrameProps = {
 };
 
 export const PageFrame = ({ children }: PageFrameProps) => (
-  <main className="page-frame mx-auto flex w-full max-w-6xl flex-col gap-7 px-6 py-8 lg:px-8 lg:py-12">
+  <main className="page-frame flex w-full flex-col gap-7 px-4 pb-6 pt-4 lg:px-5 lg:pb-10 lg:pt-6">
     {children}
   </main>
 );

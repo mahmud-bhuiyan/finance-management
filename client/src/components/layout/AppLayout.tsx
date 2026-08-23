@@ -3,6 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { LoadingState } from "../feedback/LoadingState";
 import { AppAtmosphere } from "./AppAtmosphere";
+import { AppTopbar } from "./AppTopbar";
 import { Sidebar } from "./Sidebar";
 
 export const AppLayout = () => {
@@ -28,20 +29,6 @@ export const AppLayout = () => {
     <div className="app-shell min-h-screen">
       <AppAtmosphere />
       <div className="app-content">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-(--fms-border) bg-[color-mix(in_srgb,var(--fms-surface)_88%,transparent)] px-4 py-3 backdrop-blur-xl lg:hidden">
-          <button
-            type="button"
-            className="rounded-xl border border-(--fms-border) px-3 py-1.5 text-sm font-medium text-(--fms-ink)"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
-          >
-            Menu
-          </button>
-          <p className="truncate text-sm font-semibold text-(--fms-ink)">
-            {user.tenant?.name ?? "Finance Management"}
-          </p>
-        </header>
-
         {mobileOpen ? (
           <div className="fixed inset-0 z-30 lg:hidden">
             <button
@@ -51,20 +38,23 @@ export const AppLayout = () => {
               onClick={closeMobile}
             />
             <aside className="surface relative h-full w-72 max-w-[85vw] rounded-none! border-y-0 border-l-0">
-              <Sidebar
-                user={user}
-                onLogout={() => void logout()}
-                onNavigate={closeMobile}
-              />
+              <Sidebar user={user} onNavigate={closeMobile} />
             </aside>
           </div>
         ) : null}
 
-        <aside className="surface fixed inset-y-3 left-3 z-20 hidden w-66 overflow-hidden lg:block">
-          <Sidebar user={user} onLogout={() => void logout()} />
+        <aside className="surface fixed inset-y-2 left-2 z-20 hidden w-64 overflow-hidden lg:block">
+          <Sidebar user={user} />
         </aside>
 
-        <div className="lg:pl-72">
+        <div className="lg:pl-68">
+          <div className="sticky top-2 z-20 p-2">
+            <AppTopbar
+              user={user}
+              onLogout={() => void logout()}
+              onMenuClick={() => setMobileOpen(true)}
+            />
+          </div>
           <Outlet />
         </div>
       </div>

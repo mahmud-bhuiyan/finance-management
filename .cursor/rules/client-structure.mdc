@@ -67,6 +67,6 @@ components/
 
 ## Theme preference
 
-- **`src/lib/theme.ts`** — `ThemePreference`, `applyThemePreference()`, and localStorage helpers (`readStoredThemePreference`, `persistThemePreference`). `main.tsx` applies the stored theme before React mounts to avoid a flash.
-- **`ThemeProvider`** (`src/hooks/useTheme.tsx`) — local-first UI: toggle updates localStorage and the DOM immediately; `PATCH /auth/me/theme` runs in the background. Store `fms-theme-user-id` with the preference so a different signed-in user gets their server preference on login.
-- On session load for the same user, use the stored preference and backfill the API if the DB drifted. On login as a different user, apply the server preference and refresh localStorage.
+- **`src/lib/theme.ts`** — `ThemePreference`, `applyThemePreference()`, and localStorage helpers (`readStoredThemePreference`, `persistThemePreference`).
+- **`ThemeProvider`** (`src/hooks/useTheme.tsx`) — local-first during the session: toggle updates localStorage and the DOM immediately; `PATCH /auth/me/theme` runs in the background. Rapid toggles are allowed; if a stale API response does not match the current local value, ignore it (local wins).
+- **Page refresh / first session load** — when auth resolves for a user, apply the server `themePreference` once and refresh localStorage (API wins). Do not re-apply from auth cache updates during the same session.

@@ -38,10 +38,10 @@ export const HomePage = () => {
         <p className="text-[0.7rem] font-semibold tracking-[0.22em] text-(--fms-accent) uppercase">
           Finance Management System
         </p>
-        <h1 className="font-display mt-3 max-w-xl text-4xl font-medium tracking-tight text-(--fms-ink) italic lg:text-6xl">
+        <h1 className="font-display mt-3 text-4xl font-medium tracking-tight text-(--fms-ink) italic lg:text-6xl">
           Welcome{firstName ? `, ${firstName}` : ""}
         </h1>
-        <p className="mt-4 max-w-xl text-[0.98rem] leading-relaxed text-(--fms-muted)">
+        <p className="mt-4 text-[0.98rem] leading-relaxed text-(--fms-muted)">
           {homeCopy(user.role)}
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-2">

@@ -27,7 +27,7 @@ export const PageHeader = ({
           {title}
         </h1>
         {description ? (
-          <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-(--fms-muted)">
+          <p className="mt-3 text-[0.95rem] leading-relaxed text-(--fms-muted)">
             {description}
           </p>
         ) : null}

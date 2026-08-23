@@ -4,17 +4,23 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { apiFetch } from "../lib/api";
-import { applyThemePreference, type ThemePreference } from "../lib/theme";
+import {
+  persistThemePreference,
+  readStoredThemePreference,
+  type ThemePreference,
+} from "../lib/theme";
 import { authQueryKeys, useAuth, type AuthUser } from "./useAuth";
 
 type ThemeContextValue = {
   themePreference: ThemePreference;
-  setThemePreference: (themePreference: ThemePreference) => Promise<void>;
-  toggleTheme: () => Promise<void>;
-  updating: boolean;
+  setThemePreference: (themePreference: ThemePreference) => void;
+  toggleTheme: () => void;
+  syncing: boolean;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -22,14 +28,10 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
-  const themePreference = user?.themePreference ?? "LIGHT";
-
-  useEffect(() => {
-    if (loading) {
-      return;
-    }
-    applyThemePreference(themePreference);
-  }, [loading, themePreference]);
+  const initializedUserIdRef = useRef<string | null>(null);
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(
+    () => readStoredThemePreference() ?? "LIGHT",
+  );
 
   const updateMutation = useMutation({
     mutationFn: (nextTheme: ThemePreference) =>
@@ -38,25 +40,66 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify({ themePreference: nextTheme }),
       }),
     onSuccess: (data) => {
+      const localTheme = readStoredThemePreference();
+      if (!localTheme || localTheme !== data.user.themePreference) {
+        return;
+      }
       queryClient.setQueryData(authQueryKeys.me(), data.user);
     },
   });
 
-  const setThemePreference = useCallback(
-    async (nextTheme: ThemePreference) => {
-      if (!user || nextTheme === themePreference) {
-        applyThemePreference(nextTheme);
-        return;
-      }
-      await updateMutation.mutateAsync(nextTheme);
+  const applyTheme = useCallback(
+    (nextTheme: ThemePreference, userId?: string | null) => {
+      persistThemePreference(nextTheme, userId);
+      setThemePreferenceState(nextTheme);
     },
-    [themePreference, updateMutation, user],
+    [],
   );
 
-  const toggleTheme = useCallback(async () => {
+  const syncThemeToServer = useCallback(
+    (nextTheme: ThemePreference) => {
+      if (!user || nextTheme === user.themePreference) {
+        return;
+      }
+      updateMutation.mutate(nextTheme);
+    },
+    [updateMutation, user],
+  );
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    if (!user) {
+      initializedUserIdRef.current = null;
+      return;
+    }
+
+    if (initializedUserIdRef.current === user.id) {
+      return;
+    }
+
+    initializedUserIdRef.current = user.id;
+    applyTheme(user.themePreference, user.id);
+  }, [applyTheme, loading, user]);
+
+  const setThemePreference = useCallback(
+    (nextTheme: ThemePreference) => {
+      if (nextTheme === themePreference) {
+        return;
+      }
+
+      applyTheme(nextTheme, user?.id);
+      syncThemeToServer(nextTheme);
+    },
+    [applyTheme, syncThemeToServer, themePreference, user?.id],
+  );
+
+  const toggleTheme = useCallback(() => {
     const nextTheme: ThemePreference =
       themePreference === "DARK" ? "LIGHT" : "DARK";
-    await setThemePreference(nextTheme);
+    setThemePreference(nextTheme);
   }, [setThemePreference, themePreference]);
 
   return (
@@ -65,7 +108,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         themePreference,
         setThemePreference,
         toggleTheme,
-        updating: updateMutation.isPending,
+        syncing: updateMutation.isPending,
       }}
     >
       {children}

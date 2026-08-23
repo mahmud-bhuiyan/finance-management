@@ -1,7 +1,11 @@
 import { themeLabel } from "../../lib/theme";
 import { useTheme } from "../../hooks/useTheme";
 
-export const ThemeToggle = () => {
+type ThemeToggleProps = {
+  inline?: boolean;
+};
+
+export const ThemeToggle = ({ inline = false }: ThemeToggleProps) => {
   const { themePreference, toggleTheme } = useTheme();
   const isDark = themePreference === "DARK";
 
@@ -9,10 +13,13 @@ export const ThemeToggle = () => {
     <button
       type="button"
       onClick={toggleTheme}
-      className="flex w-full items-center justify-between rounded-xl px-1 py-1 text-sm font-medium text-(--fms-muted)"
+      className={[
+        "flex items-center rounded-xl px-1 py-1 text-sm font-medium text-(--fms-muted)",
+        inline ? "gap-2 shrink-0" : "w-full justify-between",
+      ].join(" ")}
       aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
     >
-      <span className="pl-1">Theme</span>
+      <span className={inline ? "" : "pl-1"}>Theme</span>
       <span className="relative inline-flex h-7 w-[3.4rem] items-center rounded-full bg-[color-mix(in_srgb,var(--fms-accent)_16%,transparent)] p-0.5">
         <span
           className={[
