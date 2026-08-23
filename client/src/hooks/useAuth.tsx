@@ -27,7 +27,7 @@ export type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (input: {
     email: string;
     password: string;
@@ -59,12 +59,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     })();
   }, [refresh]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (
+    email: string,
+    password: string,
+    rememberMe = false,
+  ) => {
     const data = await apiFetch<{ ok: boolean; user: AuthUser }>(
       "/auth/login",
       {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, rememberMe }),
       },
     );
     setUser(data.user);

@@ -9,10 +9,11 @@ export type AuthTokenPayload = {
   tenantId?: string | null;
 };
 
-export const signAccessToken = (payload: AuthTokenPayload): string => {
-  return jwt.sign(payload, env.JWT_SECRET, {
-    expiresIn: env.JWT_EXPIRES_IN as SignOptions["expiresIn"],
-  });
+export const signAccessToken = (
+  payload: AuthTokenPayload,
+  expiresIn: SignOptions["expiresIn"] = env.JWT_EXPIRES_IN as SignOptions["expiresIn"],
+): string => {
+  return jwt.sign(payload, env.JWT_SECRET, { expiresIn });
 };
 
 export const verifyAccessToken = (token: string): AuthTokenPayload => {

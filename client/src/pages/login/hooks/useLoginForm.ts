@@ -8,6 +8,7 @@ export const useLoginForm = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -16,7 +17,7 @@ export const useLoginForm = () => {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
+      await login(email, password, rememberMe);
       navigate("/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Login failed");
@@ -28,10 +29,12 @@ export const useLoginForm = () => {
   return {
     email,
     password,
+    rememberMe,
     error,
     submitting,
     setEmail,
     setPassword,
+    setRememberMe,
     onSubmit,
   };
 };

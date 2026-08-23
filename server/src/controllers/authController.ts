@@ -13,12 +13,12 @@ import {
 const isProduction =
   env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
 
-const cookieOptions = (): CookieOptions => ({
+const cookieOptions = (rememberMe = true): CookieOptions => ({
   httpOnly: true,
   secure: isProduction,
   // Cross-origin client ↔ API in production requires SameSite=None + Secure.
   sameSite: isProduction ? "none" : "lax",
-  maxAge: env.JWT_COOKIE_MAX_AGE_MS,
+  ...(rememberMe ? { maxAge: env.JWT_COOKIE_MAX_AGE_MS } : {}),
   path: "/",
 });
 
@@ -28,7 +28,7 @@ export const register: RequestHandler = async (req, res, next) => {
     const result = await registerUser(body);
 
     res
-      .cookie(env.JWT_COOKIE_NAME, result.accessToken, cookieOptions())
+      .cookie(env.JWT_COOKIE_NAME, result.accessToken, cookieOptions(true))
       .status(201)
       .json({ ok: true, user: result.user });
   } catch (error) {
@@ -42,7 +42,11 @@ export const login: RequestHandler = async (req, res, next) => {
     const result = await loginUser(body);
 
     res
-      .cookie(env.JWT_COOKIE_NAME, result.accessToken, cookieOptions())
+      .cookie(
+        env.JWT_COOKIE_NAME,
+        result.accessToken,
+        cookieOptions(result.rememberMe),
+      )
       .status(200)
       .json({ ok: true, user: result.user });
   } catch (error) {
@@ -52,7 +56,7 @@ export const login: RequestHandler = async (req, res, next) => {
 
 export const logout: RequestHandler = (_req, res) => {
   res
-    .clearCookie(env.JWT_COOKIE_NAME, cookieOptions())
+    .clearCookie(env.JWT_COOKIE_NAME, cookieOptions(true))
     .status(200)
     .json({ ok: true });
 };

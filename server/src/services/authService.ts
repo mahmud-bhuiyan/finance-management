@@ -29,15 +29,20 @@ export const toPublicUser = (user: UserWithTenant) => ({
   createdAt: user.createdAt.toISOString(),
 });
 
-const issueSession = (user: UserWithTenant) => {
-  const accessToken = signAccessToken({
-    sub: user.id,
-    email: user.email,
-    role: user.role,
-    tenantId: user.tenantId,
-  });
+const SESSION_EXPIRES_IN = "12h";
 
-  return { user: toPublicUser(user), accessToken };
+const issueSession = (user: UserWithTenant, rememberMe = true) => {
+  const accessToken = signAccessToken(
+    {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenantId,
+    },
+    rememberMe ? undefined : SESSION_EXPIRES_IN,
+  );
+
+  return { user: toPublicUser(user), accessToken, rememberMe };
 };
 
 export const registerUser = async (input: RegisterInput) => {
@@ -94,7 +99,7 @@ export const loginUser = async (input: LoginInput) => {
     throw new AppError("This company is inactive", 403, "TENANT_INACTIVE");
   }
 
-  return issueSession(user);
+  return issueSession(user, input.rememberMe);
 };
 
 export const getUserById = async (id: string) => {

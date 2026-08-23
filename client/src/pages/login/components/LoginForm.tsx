@@ -6,20 +6,24 @@ import { ErrorBanner } from "../../../components/feedback/ErrorBanner";
 type LoginFormProps = {
   email: string;
   password: string;
+  rememberMe: boolean;
   error: string | null;
   submitting: boolean;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
+  onRememberMeChange: (value: boolean) => void;
   onSubmit: (event: FormEvent) => void;
 };
 
 export const LoginForm = ({
   email,
   password,
+  rememberMe,
   error,
   submitting,
   onEmailChange,
   onPasswordChange,
+  onRememberMeChange,
   onSubmit,
 }: LoginFormProps) => {
   return (
@@ -44,6 +48,16 @@ export const LoginForm = ({
         value={password}
         onChange={(e) => onPasswordChange(e.target.value)}
       />
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-black">
+        <input
+          type="checkbox"
+          name="rememberMe"
+          checked={rememberMe}
+          onChange={(e) => onRememberMeChange(e.target.checked)}
+          className="h-4 w-4 shrink-0 border-2 border-black accent-black"
+        />
+        Remember me
+      </label>
       {error && <ErrorBanner message={error} />}
       <div className="pt-1">
         <AuthButton type="submit" disabled={submitting}>

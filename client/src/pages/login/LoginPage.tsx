@@ -23,10 +23,12 @@ export const LoginPage = () => {
       <LoginForm
         email={form.email}
         password={form.password}
+        rememberMe={form.rememberMe}
         error={form.error}
         submitting={form.submitting}
         onEmailChange={form.setEmail}
         onPasswordChange={form.setPassword}
+        onRememberMeChange={form.setRememberMe}
         onSubmit={form.onSubmit}
       />
     </AuthScreen>
