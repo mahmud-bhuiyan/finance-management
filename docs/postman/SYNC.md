@@ -5,11 +5,11 @@ Keep **git** and **Postman cloud** aligned. Do not create a second collection.
 | Field | Value |
 |--------|--------|
 | Collection name | `FMS API (v1)` |
-| Collection ID | `5914500b-3ae9-4fe4-9371-f1b01cc92ff0` |
-| Collection UID | `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0` |
+| Collection ID | `068c0ff7-f431-420e-98b5-c3283c32a9e2` |
+| Collection UID | `31395184-068c0ff7-f431-420e-98b5-c3283c32a9e2` |
 | Workspace | My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`) |
 | Repo file | `docs/postman/FMS-API.postman_collection.json` |
-| Open in Postman | [FMS API (v1)](https://mahmud-bhuiyans-team.postman.co/workspace/813764e7-b440-4bf7-8a36-74be9c4026ab/collection/31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0) |
+| Open in Postman | [FMS API (v1)](https://mahmud-bhuiyans-team.postman.co/workspace/813764e7-b440-4bf7-8a36-74be9c4026ab/collection/31395184-068c0ff7-f431-420e-98b5-c3283c32a9e2) |
 
 ## When you add or change an `/api/v1` route
 
@@ -20,8 +20,8 @@ Keep **git** and **Postman cloud** aligned. Do not create a second collection.
 
 ## Auth reminder
 
-Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:4000/api/v1`.
+Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:4000` (versioned routes: `{{baseUrl}}/api/v1/...`).
 
 ## Pending cloud sync
 
-- **2026-08-23** — Add **Auth → Update theme** (`PATCH /auth/me/theme`) after login in Postman cloud (git JSON updated; Postman MCP returned 401).
+- None — cloud collection UID `31395184-068c0ff7-f431-420e-98b5-c3283c32a9e2` matches git (`docs/postman/FMS-API.postman_collection.json`): 14 folders, 90 requests.

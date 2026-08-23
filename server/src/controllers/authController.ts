@@ -17,13 +17,17 @@ import {
 const isProduction =
   env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
 
-const cookieOptions = (rememberMe = true): CookieOptions => ({
+const baseCookieOptions = (): CookieOptions => ({
   httpOnly: true,
   secure: isProduction,
   // Cross-origin client ↔ API in production requires SameSite=None + Secure.
   sameSite: isProduction ? "none" : "lax",
-  ...(rememberMe ? { maxAge: env.JWT_COOKIE_MAX_AGE_MS } : {}),
   path: "/",
+});
+
+const cookieOptions = (rememberMe = true): CookieOptions => ({
+  ...baseCookieOptions(),
+  ...(rememberMe ? { maxAge: env.JWT_COOKIE_MAX_AGE_MS } : {}),
 });
 
 export const register: RequestHandler = async (req, res, next) => {
@@ -56,7 +60,7 @@ export const login: RequestHandler = async (req, res, next) => {
 };
 
 export const logout: RequestHandler = (_req, res) => {
-  res.clearCookie(env.JWT_COOKIE_NAME, cookieOptions(true));
+  res.clearCookie(env.JWT_COOKIE_NAME, baseCookieOptions());
   sendSuccess(res, 200, {}, "Logged out successfully");
 };
 

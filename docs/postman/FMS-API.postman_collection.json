@@ -1,18 +1,14 @@
 {
   "info": {
-    "_postman_id": "5914500b-3ae9-4fe4-9371-f1b01cc92ff0",
+    "_postman_id": "068c0ff7-f431-420e-98b5-c3283c32a9e2",
     "name": "FMS API (v1)",
-    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000/api/v1`.\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. Auth → Login (company admin)\n5. Users → List / Create normal user / role & status (Step 16)\n6. RBAC → Me / probes (switch login to company admin or normal user as needed)\n7. Fields → CRUD (company admin)\n8. Categories / Departments / Vendors → CRUD + soft delete (company admin)\n9. Expenses → CRUD + soft delete with optional support ids (company admin; normal user is read-only)\n10. Incomes → CRUD + soft delete on shared ledger (company admin; normal user is read-only)\n11. Dashboard → Summary KPIs + charts incl. Net Balance (company admin or normal user)\n12. Reports → Summary tables + CSV / Excel / PDF export (company admin or normal user)\n13. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
+    "description": "Finance Management System — `/api/v1` collection.\n\n**Synced with Postman cloud**\n- Collection UID: `31395184-068c0ff7-f431-420e-98b5-c3283c32a9e2`\n- Workspace: My Workspace (`813764e7-b440-4bf7-8a36-74be9c4026ab`)\n- Repo file (git source of truth): `docs/postman/FMS-API.postman_collection.json`\n- Sync metadata: `docs/postman/SYNC.md`\n\nWhen APIs change: update this JSON **and** the cloud collection (Postman MCP `putCollection` if connected). Add a collection comment describing the change.\n\n## Import (offline)\n1. Postman → **Import** → choose this file.\n2. Start the API: `cd server && npm run dev` (default `http://localhost:4000`).\n3. Collection variable `baseUrl` defaults to `http://localhost:4000` (API routes use `{{baseUrl}}/api/v1/...`).\n\n## Auth\nLogin/register set an **httpOnly cookie** `fms_token`. Postman’s cookie jar sends it on later requests to the same host — no Bearer header needed.\n\n**Suggested order**\n1. Health → Health check\n2. Auth → Login (Super Admin) — uses `SUPER_ADMIN_*` from `server/.env.local`\n3. Tenants → List / Create / Create admin / Update status\n4. Auth → Login (company admin)\n5. Users → List / Create normal user / role & status (Step 16)\n6. RBAC → Me / probes (switch login to company admin or normal user as needed)\n7. Fields → CRUD (company admin)\n8. Categories / Departments / Vendors → CRUD + soft delete (company admin)\n9. Expenses → CRUD + soft delete with optional support ids (company admin; normal user is read-only)\n10. Incomes → CRUD + soft delete on shared ledger (company admin; normal user is read-only)\n11. Dashboard → Summary KPIs + charts incl. Net Balance (company admin or normal user)\n12. Reports → Summary tables + CSV / Excel / PDF export (company admin or normal user)\n13. Auth → Me / Logout\n\nAfter **Create tenant**, `tenantId` is saved automatically for follow-up requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
-      "key": "serverRoot",
-      "value": "http://localhost:4000"
-    },
-    {
       "key": "baseUrl",
-      "value": "http://localhost:4000/api/v1"
+      "value": "http://localhost:4000"
     },
     {
       "key": "tenantId",
@@ -112,7 +108,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{serverRoot}}/health",
+            "url": "{{baseUrl}}/health",
             "description": "Expects HTTP 200 and `database.connected: true` when Postgres is up."
           },
           "response": []
@@ -156,7 +152,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\",\n  \"name\": \"{{userName}}\"\n}"
             },
-            "url": "{{baseUrl}}/auth/register",
+            "url": "{{baseUrl}}/api/v1/auth/register",
             "description": "Creates a normal user and sets `fms_token` cookie. Change `userEmail` if the address is already registered."
           },
           "response": []
@@ -193,7 +189,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
             },
-            "url": "{{baseUrl}}/auth/login",
+            "url": "{{baseUrl}}/api/v1/auth/login",
             "description": "Logs in as the demo user (`userEmail` / `userPassword`). Sets `fms_token` cookie."
           },
           "response": []
@@ -230,7 +226,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}"
             },
-            "url": "{{baseUrl}}/auth/login",
+            "url": "{{baseUrl}}/api/v1/auth/login",
             "description": "Logs in as the bootstrap Super Admin. Required before Tenants requests. Defaults match `server/.env.local.example`."
           },
           "response": []
@@ -258,7 +254,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/auth/me",
+            "url": "{{baseUrl}}/api/v1/auth/me",
             "description": "Requires `fms_token` cookie from Login / Register / Login (Super Admin)."
           },
           "response": []
@@ -295,7 +291,7 @@
               "mode": "raw",
               "raw": "{\n  \"themePreference\": \"DARK\"\n}"
             },
-            "url": "{{baseUrl}}/auth/me/theme",
+            "url": "{{baseUrl}}/api/v1/auth/me/theme",
             "description": "Updates the authenticated user's theme preference (`LIGHT` or `DARK`). Requires session cookie."
           },
           "response": []
@@ -318,7 +314,7 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": "{{baseUrl}}/auth/logout",
+            "url": "{{baseUrl}}/api/v1/auth/logout",
             "description": "Clears the `fms_token` cookie."
           },
           "response": []
@@ -332,7 +328,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const jar = pm.cookies.jar();",
-                  "jar.clear(pm.collectionVariables.get('baseUrl').replace(/\\/api\\/v1$/, ''), function () {});"
+                  "jar.clear(pm.collectionVariables.get('baseUrl'), function () {});"
                 ]
               }
             },
@@ -351,7 +347,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/auth/me",
+            "url": "{{baseUrl}}/api/v1/auth/me",
             "description": "Negative check: no session cookie → 401. Clears cookies for the API host first."
           },
           "response": []
@@ -385,7 +381,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tenants",
+            "url": "{{baseUrl}}/api/v1/tenants",
             "description": "Lists all companies."
           },
           "response": []
@@ -426,7 +422,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"{{tenantName}}\"\n}"
             },
-            "url": "{{baseUrl}}/tenants",
+            "url": "{{baseUrl}}/api/v1/tenants",
             "description": "Creates a company. Saves `tenantId` collection variable from the response. Optional body field: `slug`."
           },
           "response": []
@@ -464,7 +460,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{companyAdminEmail}}\",\n  \"password\": \"{{companyAdminPassword}}\",\n  \"name\": \"{{companyAdminName}}\"\n}"
             },
-            "url": "{{baseUrl}}/tenants/{{tenantId}}/admins",
+            "url": "{{baseUrl}}/api/v1/tenants/{{tenantId}}/admins",
             "description": "Creates a company admin for `{{tenantId}}`. Run Create tenant first (or set `tenantId` manually)."
           },
           "response": []
@@ -500,7 +496,7 @@
               "mode": "raw",
               "raw": "{\n  \"status\": \"INACTIVE\"\n}"
             },
-            "url": "{{baseUrl}}/tenants/{{tenantId}}",
+            "url": "{{baseUrl}}/api/v1/tenants/{{tenantId}}",
             "description": "Deactivates the company. Company-admin login should then fail with TENANT_INACTIVE."
           },
           "response": []
@@ -536,7 +532,7 @@
               "mode": "raw",
               "raw": "{\n  \"status\": \"ACTIVE\"\n}"
             },
-            "url": "{{baseUrl}}/tenants/{{tenantId}}",
+            "url": "{{baseUrl}}/api/v1/tenants/{{tenantId}}",
             "description": "Reactivates the company."
           },
           "response": []
@@ -550,7 +546,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const jar = pm.cookies.jar();",
-                  "jar.clear(pm.collectionVariables.get('baseUrl').replace(/\\/api\\/v1$/, ''), function () {});"
+                  "jar.clear(pm.collectionVariables.get('baseUrl'), function () {});"
                 ]
               }
             },
@@ -569,7 +565,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tenants",
+            "url": "{{baseUrl}}/api/v1/tenants",
             "description": "Negative check without session. Re-run Login (Super Admin) afterward."
           },
           "response": []
@@ -603,7 +599,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/users",
+            "url": "{{baseUrl}}/api/v1/users",
             "description": "Lists company users (company admin + normal user roles)."
           },
           "response": []
@@ -644,7 +640,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{normalUserEmail}}\",\n  \"password\": \"{{normalUserPassword}}\",\n  \"name\": \"{{normalUserName}}\",\n  \"role\": \"NORMAL_USER\"\n}"
             },
-            "url": "{{baseUrl}}/users",
+            "url": "{{baseUrl}}/api/v1/users",
             "description": "Invite a read-only normal user into the signed-in company admin's tenant. Saves `tenantUserId`."
           },
           "response": []
@@ -676,7 +672,7 @@
               "mode": "raw",
               "raw": "{\n  \"role\": \"NORMAL_USER\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{tenantUserId}}",
+            "url": "{{baseUrl}}/api/v1/users/{{tenantUserId}}",
             "description": "Change role between COMPANY_ADMIN and NORMAL_USER. Cannot change own role."
           },
           "response": []
@@ -712,7 +708,7 @@
               "mode": "raw",
               "raw": "{\n  \"status\": \"INACTIVE\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{tenantUserId}}",
+            "url": "{{baseUrl}}/api/v1/users/{{tenantUserId}}",
             "description": "Deactivate a teammate. Inactive users cannot log in or call authenticated APIs."
           },
           "response": []
@@ -748,7 +744,7 @@
               "mode": "raw",
               "raw": "{\n  \"status\": \"ACTIVE\"\n}"
             },
-            "url": "{{baseUrl}}/users/{{tenantUserId}}",
+            "url": "{{baseUrl}}/api/v1/users/{{tenantUserId}}",
             "description": "Restore an inactive user."
           },
           "response": []
@@ -786,7 +782,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin2@acme.example\",\n  \"password\": \"{{companyAdminPassword}}\",\n  \"name\": \"Second Admin\",\n  \"role\": \"COMPANY_ADMIN\"\n}"
             },
-            "url": "{{baseUrl}}/users",
+            "url": "{{baseUrl}}/api/v1/users",
             "description": "Invite another company admin into the signed-in admin's tenant. Use a unique email if this already exists."
           },
           "response": []
@@ -818,7 +814,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"blocked@acme.example\",\n  \"password\": \"password123\",\n  \"role\": \"NORMAL_USER\"\n}"
             },
-            "url": "{{baseUrl}}/users",
+            "url": "{{baseUrl}}/api/v1/users",
             "description": "Negative check: login as a normal user first (`users:manage` required)."
           },
           "response": []
@@ -832,7 +828,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const jar = pm.cookies.jar();",
-                  "jar.clear(pm.collectionVariables.get('baseUrl').replace(/\\/api\\/v1$/, ''), function () {});"
+                  "jar.clear(pm.collectionVariables.get('baseUrl'), function () {});"
                 ]
               }
             },
@@ -851,7 +847,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/users",
+            "url": "{{baseUrl}}/api/v1/users",
             "description": "Negative check: no session cookie → 401. Clears cookies for the API host first."
           },
           "response": []
@@ -885,7 +881,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/rbac/me",
+            "url": "{{baseUrl}}/api/v1/rbac/me",
             "description": "Returns signed-in user's role, tenantId, and permissions."
           },
           "response": []
@@ -908,7 +904,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/rbac/probes/tenants-manage",
+            "url": "{{baseUrl}}/api/v1/rbac/probes/tenants-manage",
             "description": "Requires `tenants:manage`. Run **Login (Super Admin)** first."
           },
           "response": []
@@ -931,7 +927,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/rbac/probes/finance-write",
+            "url": "{{baseUrl}}/api/v1/rbac/probes/finance-write",
             "description": "Requires company membership + `finance:write`. Login as company admin first."
           },
           "response": []
@@ -954,7 +950,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/rbac/probes/reports-read",
+            "url": "{{baseUrl}}/api/v1/rbac/probes/reports-read",
             "description": "Requires company membership + `reports:read`. Works for company admin or normal user with a tenant."
           },
           "response": []
@@ -977,7 +973,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/rbac/probes/finance-write",
+            "url": "{{baseUrl}}/api/v1/rbac/probes/finance-write",
             "description": "Negative check: login as self-registered normal user first."
           },
           "response": []
@@ -1011,7 +1007,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/audit/logs?limit=50",
+            "url": "{{baseUrl}}/api/v1/audit/logs?limit=50",
             "description": "Lists audit entries visible to the signed-in admin. Super Admin sees platform-wide logs; company admin sees tenant-scoped logs only."
           },
           "response": []
@@ -1034,7 +1030,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/audit/logs",
+            "url": "{{baseUrl}}/api/v1/audit/logs",
             "description": "Negative check: login as self-registered normal user first."
           },
           "response": []
@@ -1068,7 +1064,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/fields?target=EXPENSE",
+            "url": "{{baseUrl}}/api/v1/fields?target=EXPENSE",
             "description": "Lists expense field definitions for the signed-in company admin's tenant."
           },
           "response": []
@@ -1108,7 +1104,7 @@
               "mode": "raw",
               "raw": "{\n  \"target\": \"EXPENSE\",\n  \"label\": \"Project Code\",\n  \"fieldType\": \"TEXT\",\n  \"required\": true\n}"
             },
-            "url": "{{baseUrl}}/fields",
+            "url": "{{baseUrl}}/api/v1/fields",
             "description": "Creates a required text field. Saves `fieldId` for follow-up requests."
           },
           "response": []
@@ -1127,7 +1123,7 @@
               "mode": "raw",
               "raw": "{\n  \"target\": \"EXPENSE\",\n  \"key\": \"status\",\n  \"label\": \"Status\",\n  \"fieldType\": \"DROPDOWN\",\n  \"options\": {\n    \"choices\": [\"Draft\", \"Approved\"]\n  }\n}"
             },
-            "url": "{{baseUrl}}/fields",
+            "url": "{{baseUrl}}/api/v1/fields",
             "description": "Creates a dropdown field with choices."
           },
           "response": []
@@ -1137,7 +1133,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/fields/{{fieldId}}",
+            "url": "{{baseUrl}}/api/v1/fields/{{fieldId}}",
             "description": "Fetch a single field definition. Run **Create text field** first to set `fieldId`."
           },
           "response": []
@@ -1169,7 +1165,7 @@
               "mode": "raw",
               "raw": "{\n  \"label\": \"Project code\",\n  \"sortOrder\": 10,\n  \"visibleToNormalUser\": true\n}"
             },
-            "url": "{{baseUrl}}/fields/{{fieldId}}",
+            "url": "{{baseUrl}}/api/v1/fields/{{fieldId}}",
             "description": "Updates label, sort order, and visibility."
           },
           "response": []
@@ -1192,7 +1188,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/fields/{{fieldId}}",
+            "url": "{{baseUrl}}/api/v1/fields/{{fieldId}}",
             "description": "Permanently deletes a field definition."
           },
           "response": []
@@ -1215,7 +1211,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/fields",
+            "url": "{{baseUrl}}/api/v1/fields",
             "description": "Negative check: login as self-registered normal user first."
           },
           "response": []
@@ -1249,7 +1245,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/categories",
+            "url": "{{baseUrl}}/api/v1/categories",
             "description": "Lists active (non-deleted) categories. Use ?includeInactive=true to include inactive."
           },
           "response": []
@@ -1289,7 +1285,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Sample category\",\n  \"notes\": \"Step 09\"\n}"
             },
-            "url": "{{baseUrl}}/categories",
+            "url": "{{baseUrl}}/api/v1/categories",
             "description": "Creates a category. Saves categoryId."
           },
           "response": []
@@ -1299,7 +1295,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/categories/{{categoryId}}",
+            "url": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
             "description": "Fetch one category. Run Create first."
           },
           "response": []
@@ -1331,7 +1327,7 @@
               "mode": "raw",
               "raw": "{\n  \"notes\": \"Updated notes\",\n  \"active\": true\n}"
             },
-            "url": "{{baseUrl}}/categories/{{categoryId}}",
+            "url": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
             "description": "Updates notes/active on category."
           },
           "response": []
@@ -1354,7 +1350,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/categories/{{categoryId}}",
+            "url": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
             "description": "Soft-deletes the category."
           },
           "response": []
@@ -1386,7 +1382,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Should fail\"\n}"
             },
-            "url": "{{baseUrl}}/categories",
+            "url": "{{baseUrl}}/api/v1/categories",
             "description": "Negative check: login as normal user first."
           },
           "response": []
@@ -1420,7 +1416,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/departments",
+            "url": "{{baseUrl}}/api/v1/departments",
             "description": "Lists active (non-deleted) departments. Use ?includeInactive=true to include inactive."
           },
           "response": []
@@ -1460,7 +1456,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Sample department\",\n  \"notes\": \"Step 09\"\n}"
             },
-            "url": "{{baseUrl}}/departments",
+            "url": "{{baseUrl}}/api/v1/departments",
             "description": "Creates a department. Saves departmentId."
           },
           "response": []
@@ -1470,7 +1466,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/departments/{{departmentId}}",
+            "url": "{{baseUrl}}/api/v1/departments/{{departmentId}}",
             "description": "Fetch one department. Run Create first."
           },
           "response": []
@@ -1502,7 +1498,7 @@
               "mode": "raw",
               "raw": "{\n  \"notes\": \"Updated notes\",\n  \"active\": true\n}"
             },
-            "url": "{{baseUrl}}/departments/{{departmentId}}",
+            "url": "{{baseUrl}}/api/v1/departments/{{departmentId}}",
             "description": "Updates notes/active on department."
           },
           "response": []
@@ -1525,7 +1521,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/departments/{{departmentId}}",
+            "url": "{{baseUrl}}/api/v1/departments/{{departmentId}}",
             "description": "Soft-deletes the department."
           },
           "response": []
@@ -1557,7 +1553,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Should fail\"\n}"
             },
-            "url": "{{baseUrl}}/departments",
+            "url": "{{baseUrl}}/api/v1/departments",
             "description": "Negative check: login as normal user first."
           },
           "response": []
@@ -1591,7 +1587,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/vendors",
+            "url": "{{baseUrl}}/api/v1/vendors",
             "description": "Lists active (non-deleted) vendors. Use ?includeInactive=true to include inactive."
           },
           "response": []
@@ -1631,7 +1627,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Sample vendor\",\n  \"notes\": \"Step 09\"\n}"
             },
-            "url": "{{baseUrl}}/vendors",
+            "url": "{{baseUrl}}/api/v1/vendors",
             "description": "Creates a vendor. Saves vendorId."
           },
           "response": []
@@ -1641,7 +1637,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/vendors/{{vendorId}}",
+            "url": "{{baseUrl}}/api/v1/vendors/{{vendorId}}",
             "description": "Fetch one vendor. Run Create first."
           },
           "response": []
@@ -1673,7 +1669,7 @@
               "mode": "raw",
               "raw": "{\n  \"notes\": \"Updated notes\",\n  \"active\": true\n}"
             },
-            "url": "{{baseUrl}}/vendors/{{vendorId}}",
+            "url": "{{baseUrl}}/api/v1/vendors/{{vendorId}}",
             "description": "Updates notes/active on vendor."
           },
           "response": []
@@ -1696,7 +1692,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/vendors/{{vendorId}}",
+            "url": "{{baseUrl}}/api/v1/vendors/{{vendorId}}",
             "description": "Soft-deletes the vendor."
           },
           "response": []
@@ -1728,7 +1724,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Should fail\"\n}"
             },
-            "url": "{{baseUrl}}/vendors",
+            "url": "{{baseUrl}}/api/v1/vendors",
             "description": "Negative check: login as normal user first."
           },
           "response": []
@@ -1771,7 +1767,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/dashboard/summary?preset=this_month",
+            "url": "{{baseUrl}}/api/v1/dashboard/summary?preset=this_month",
             "description": "KPI totals + full chart series for the current month (UTC). Optional filters: categoryId, departmentId, vendorId, paymentMethod (CASH|CARD|BANK_TRANSFER|CHECK|OTHER)."
           },
           "response": []
@@ -1801,7 +1797,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/dashboard/summary?preset=custom&from=2026-08-01&to=2026-08-31&categoryId={{categoryId}}&departmentId={{departmentId}}&vendorId={{vendorId}}&paymentMethod=CARD",
+            "url": "{{baseUrl}}/api/v1/dashboard/summary?preset=custom&from=2026-08-01&to=2026-08-31&categoryId={{categoryId}}&departmentId={{departmentId}}&vendorId={{vendorId}}&paymentMethod=CARD",
             "description": "Custom date range + optional dimension filters including paymentMethod. Presets: this_month, last_month, this_year, last_30_days, custom (requires from + to)."
           },
           "response": []
@@ -1824,7 +1820,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/dashboard/summary?preset=this_month&paymentMethod=FOO",
+            "url": "{{baseUrl}}/api/v1/dashboard/summary?preset=this_month&paymentMethod=FOO",
             "description": "Negative: unknown paymentMethod enum value should fail validation."
           },
           "response": []
@@ -1847,7 +1843,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/dashboard/summary?preset=custom",
+            "url": "{{baseUrl}}/api/v1/dashboard/summary?preset=custom",
             "description": "Negative: custom preset without from/to should fail validation."
           },
           "response": []
@@ -1888,7 +1884,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/reports/summary?preset=this_month",
+            "url": "{{baseUrl}}/api/v1/reports/summary?preset=this_month",
             "description": "Report summary for the current month (UTC): totals + byMonth / byCategory / byDepartment / byVendor / byPaymentMethod. Optional filters: categoryId, departmentId, vendorId, paymentMethod."
           },
           "response": []
@@ -1918,7 +1914,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/reports/summary?preset=custom&from=2026-08-01&to=2026-08-31&categoryId={{categoryId}}&departmentId={{departmentId}}&vendorId={{vendorId}}&paymentMethod=CARD",
+            "url": "{{baseUrl}}/api/v1/reports/summary?preset=custom&from=2026-08-01&to=2026-08-31&categoryId={{categoryId}}&departmentId={{departmentId}}&vendorId={{vendorId}}&paymentMethod=CARD",
             "description": "Custom date range + optional dimension filters. Presets: this_month, last_month, this_year, last_30_days, custom (requires from + to)."
           },
           "response": []
@@ -1949,7 +1945,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/reports/export.csv?preset=this_month&type=ALL",
+            "url": "{{baseUrl}}/api/v1/reports/export.csv?preset=this_month&type=ALL",
             "description": "Downloads transaction rows as CSV (same filters as summary). Optional `type=EXPENSE|INCOME|ALL` (default ALL). Includes custom field columns where showInReports is true (role-filtered for normal users). Cap: 5000 rows."
           },
           "response": []
@@ -1972,7 +1968,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/reports/export.csv?preset=this_month&type=EXPENSE",
+            "url": "{{baseUrl}}/api/v1/reports/export.csv?preset=this_month&type=EXPENSE",
             "description": "CSV restricted to EXPENSE rows."
           },
           "response": []
@@ -2004,7 +2000,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/reports/export.xlsx?preset=this_month&type=ALL",
+            "url": "{{baseUrl}}/api/v1/reports/export.xlsx?preset=this_month&type=ALL",
             "description": "Downloads transaction rows as Excel (.xlsx). Same filters as CSV (`type`, categoryId, departmentId, vendorId, paymentMethod, preset/custom range). Cap: 5000 rows."
           },
           "response": []
@@ -2038,7 +2034,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/reports/export.pdf?preset=this_month&type=ALL",
+            "url": "{{baseUrl}}/api/v1/reports/export.pdf?preset=this_month&type=ALL",
             "description": "Downloads a printable PDF: period filters, summary KPIs, breakdown sections, and a short transaction preview. Same query filters as CSV/Excel."
           },
           "response": []
@@ -2061,7 +2057,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/reports/summary?preset=this_month&paymentMethod=FOO",
+            "url": "{{baseUrl}}/api/v1/reports/summary?preset=this_month&paymentMethod=FOO",
             "description": "Negative: unknown paymentMethod enum value should fail validation."
           },
           "response": []
@@ -2084,7 +2080,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/reports/summary?preset=custom",
+            "url": "{{baseUrl}}/api/v1/reports/summary?preset=custom",
             "description": "Negative: custom preset without from/to should fail validation."
           },
           "response": []
@@ -2122,7 +2118,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/expenses?year=2026&month=8&page=1&pageSize=20&sortBy=occurredOn&sortDir=desc&q=&paymentMethod=",
+            "url": "{{baseUrl}}/api/v1/expenses?year=2026&month=8&page=1&pageSize=20&sortBy=occurredOn&sortDir=desc&q=&paymentMethod=",
             "description": "Lists non-deleted expenses with pagination. Optional: year/month, q (notes search), categoryId, departmentId, vendorId, paymentMethod (Step 12), page, pageSize, sortBy (occurredOn|amount|createdAt), sortDir (asc|desc). Response includes `meta` and `attachmentCount` per row."
           },
           "response": []
@@ -2163,7 +2159,7 @@
               "mode": "raw",
               "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"20.00\",\n  \"notes\": \"Taxi\",\n  \"paymentMethod\": \"CARD\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"vendorId\": \"{{vendorId}}\",\n  \"customValues\": {}\n}"
             },
-            "url": "{{baseUrl}}/expenses",
+            "url": "{{baseUrl}}/api/v1/expenses",
             "description": "Creates an expense. Optional `categoryId` / `departmentId` / `vendorId` (Step 09) and `paymentMethod` (CASH|CARD|BANK_TRANSFER|CHECK|OTHER, Step 12). `amount` is a decimal string. Saves `expenseId` for later requests."
           },
           "response": []
@@ -2191,7 +2187,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}/attachments",
             "description": "Lists non-deleted attachments for an expense. Run **Create expense** first."
           },
           "response": []
@@ -2234,7 +2230,7 @@
                 }
               ]
             },
-            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}/attachments",
             "description": "Multipart upload. Select a local file for `file`. Saves `attachmentId`. Max 5 per expense."
           },
           "response": []
@@ -2244,7 +2240,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments/{{attachmentId}}/download",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}/attachments/{{attachmentId}}/download",
             "description": "Authenticated binary download. Run **Upload attachment** first."
           },
           "response": []
@@ -2267,7 +2263,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments/{{attachmentId}}",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}/attachments/{{attachmentId}}",
             "description": "Soft-deletes the attachment and removes the stored file."
           },
           "response": []
@@ -2300,7 +2296,7 @@
                 }
               ]
             },
-            "url": "{{baseUrl}}/expenses/{{expenseId}}/attachments",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}/attachments",
             "description": "Negative check: login as normal user first."
           },
           "response": []
@@ -2310,7 +2306,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}",
             "description": "Fetch a single non-deleted expense. Run **Create expense** first."
           },
           "response": []
@@ -2342,7 +2338,7 @@
               "mode": "raw",
               "raw": "{\n  \"amount\": \"25.50\",\n  \"notes\": \"Taxi (updated)\"\n}"
             },
-            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}",
             "description": "Updates amount and notes."
           },
           "response": []
@@ -2365,7 +2361,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}",
             "description": "Soft-deletes the expense (`deleted_at`). GET by id afterwards should be 404."
           },
           "response": []
@@ -2388,7 +2384,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/expenses/{{expenseId}}",
+            "url": "{{baseUrl}}/api/v1/expenses/{{expenseId}}",
             "description": "Negative check after **Delete expense (soft)**."
           },
           "response": []
@@ -2420,7 +2416,7 @@
               "mode": "raw",
               "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"10.00\"\n}"
             },
-            "url": "{{baseUrl}}/expenses",
+            "url": "{{baseUrl}}/api/v1/expenses",
             "description": "Negative check: login as a normal user first."
           },
           "response": []
@@ -2456,7 +2452,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/incomes?year=2026&month=8&page=1&pageSize=20&sortBy=occurredOn&sortDir=desc&q=&paymentMethod=",
+            "url": "{{baseUrl}}/api/v1/incomes?year=2026&month=8&page=1&pageSize=20&sortBy=occurredOn&sortDir=desc&q=&paymentMethod=",
             "description": "Lists non-deleted incomes with pagination. Optional filters match expenses. Response includes `meta` and `attachmentCount`."
           },
           "response": []
@@ -2497,7 +2493,7 @@
               "mode": "raw",
               "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"500.00\",\n  \"notes\": \"Consulting invoice\",\n  \"paymentMethod\": \"BANK_TRANSFER\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"vendorId\": \"{{vendorId}}\",\n  \"customValues\": {}\n}"
             },
-            "url": "{{baseUrl}}/incomes",
+            "url": "{{baseUrl}}/api/v1/incomes",
             "description": "Creates an income row (`type=INCOME`). Optional support ids + paymentMethod. Saves `incomeId`."
           },
           "response": []
@@ -2507,7 +2503,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/incomes/{{incomeId}}",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}",
             "description": "Fetch a single non-deleted income. Run **Create income** first."
           },
           "response": []
@@ -2539,7 +2535,7 @@
               "mode": "raw",
               "raw": "{\n  \"amount\": \"550.00\",\n  \"notes\": \"Consulting invoice (updated)\"\n}"
             },
-            "url": "{{baseUrl}}/incomes/{{incomeId}}",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}",
             "description": "Updates amount and notes."
           },
           "response": []
@@ -2567,7 +2563,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}/attachments",
             "description": "Lists non-deleted attachments for an income."
           },
           "response": []
@@ -2610,7 +2606,7 @@
                 }
               ]
             },
-            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}/attachments",
             "description": "Multipart upload for an income. Select a local file for `file`. Saves `incomeAttachmentId`."
           },
           "response": []
@@ -2620,7 +2616,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments/{{incomeAttachmentId}}/download",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}/attachments/{{incomeAttachmentId}}/download",
             "description": "Authenticated binary download. Run **Upload income attachment** first."
           },
           "response": []
@@ -2643,7 +2639,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments/{{incomeAttachmentId}}",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}/attachments/{{incomeAttachmentId}}",
             "description": "Soft-deletes the income attachment and removes the stored file."
           },
           "response": []
@@ -2677,7 +2673,7 @@
                 }
               ]
             },
-            "url": "{{baseUrl}}/incomes/{{incomeId}}/attachments",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}/attachments",
             "description": "Negative check: login as a normal user first."
           },
           "response": []
@@ -2700,7 +2696,7 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/incomes/{{incomeId}}",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}",
             "description": "Soft-deletes the income (`deleted_at`)."
           },
           "response": []
@@ -2723,7 +2719,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/incomes/{{incomeId}}",
+            "url": "{{baseUrl}}/api/v1/incomes/{{incomeId}}",
             "description": "Negative check after **Delete income (soft)**."
           },
           "response": []
@@ -2755,7 +2751,7 @@
               "mode": "raw",
               "raw": "{\n  \"occurredOn\": \"2026-08-15\",\n  \"amount\": \"10.00\"\n}"
             },
-            "url": "{{baseUrl}}/incomes",
+            "url": "{{baseUrl}}/api/v1/incomes",
             "description": "Negative check: login as a normal user first."
           },
           "response": []

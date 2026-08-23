@@ -17,7 +17,7 @@ Open **FMS API (v1)** in workspace **My Workspace** (see UID in `SYNC.md`). Star
 
 1. Postman → **Import** → select `FMS-API.postman_collection.json`
 2. Start the API: `cd server && npm run dev`
-3. Collection variables: `baseUrl` = `http://localhost:4000/api/v1`; Super Admin vars match `server/.env.local`
+3. Collection variables: `baseUrl` = `http://localhost:4000` (API routes use `{{baseUrl}}/api/v1/...`); Super Admin vars match `server/.env.local`
 4. Run **Auth → Login (Super Admin)** before tenant requests
 5. Auth uses the `fms_token` cookie (Postman cookie jar)
 

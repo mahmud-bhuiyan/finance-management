@@ -24,7 +24,7 @@ alwaysApply: true
 
 - **One** collection only — do not create parallel collections per step.
 - Git file: **`docs/postman/FMS-API.postman_collection.json`**
-- Cloud IDs / checklist: **`docs/postman/SYNC.md`** (UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0`)
+- Cloud IDs / checklist: **`docs/postman/SYNC.md`** (UID `31395184-068c0ff7-f431-420e-98b5-c3283c32a9e2`)
 - When adding or changing any `/api/v1` route, in the **same change**:
   1. Update the JSON (request, sample body, variables, short description, useful tests).
   2. If Postman MCP (`plugin-postman-postman`) is **ready**, push the same update to that cloud UID (`putCollection` / request APIs) and add a short **collection comment** describing the change.

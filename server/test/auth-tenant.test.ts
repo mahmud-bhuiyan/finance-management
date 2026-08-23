@@ -35,6 +35,35 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
     expect(me.body.data.user.email).toBe(email);
   });
 
+  it("sets a persistent cookie when rememberMe is true and a session cookie when false", async () => {
+    const email = `${unique("remember")}@test.local`;
+    const password = "password123";
+
+    await request(app).post(api("/auth/register")).send({
+      email,
+      password,
+      name: "Remember User",
+    });
+
+    const remembered = await request(app).post(api("/auth/login")).send({
+      email,
+      password,
+      rememberMe: true,
+    });
+    expect(remembered.status).toBe(200);
+    const rememberedCookie = remembered.headers["set-cookie"]?.[0] ?? "";
+    expect(rememberedCookie).toMatch(/Max-Age=/i);
+
+    const sessionOnly = await request(app).post(api("/auth/login")).send({
+      email,
+      password,
+      rememberMe: false,
+    });
+    expect(sessionOnly.status).toBe(200);
+    const sessionCookie = sessionOnly.headers["set-cookie"]?.[0] ?? "";
+    expect(sessionCookie).not.toMatch(/Max-Age=/i);
+  });
+
   it("updates and persists the current user theme preference", async () => {
     const email = `${unique("theme")}@test.local`;
     const password = "password123";

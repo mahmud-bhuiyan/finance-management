@@ -10,8 +10,21 @@
   color-scheme: dark;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
+  min-height: 100%;
+  background-color: #efe6d4;
+}
+
+html.dark,
+html.dark body,
+html.dark #root {
+  background-color: #04110f;
+}
+
+body {
   min-height: 100vh;
   font-family:
     "Segoe UI",
@@ -127,6 +140,7 @@ html {
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  background: var(--fms-canvas);
 }
 
 .app-orb {

@@ -113,7 +113,6 @@ Use cookies from the correct role for each row.
 | E1 | Permission map lives in config | `server/src/config/permissions.ts` | [ ] |
 | E2 | Middleware reused | `requireRoles`, `requirePermission`, `requireTenant` | [ ] |
 | E3 | Super Admin guard uses shared middleware | `requireSuperAdmin` → `requireRoles("SUPER_ADMIN")` | [ ] |
-| E4 | Tenant isolation helper | `server/src/utils/tenantAccess.ts` (`assertSameTenant`) | [ ] |
 
 ---
 
@@ -123,7 +122,7 @@ Use cookies from the correct role for each row.
 - [ ] B1–B7 pass  
 - [ ] C1–C3 pass  
 - [ ] D1–D6 pass  
-- [ ] E1–E4 pass  
+- [ ] E1–E3 pass  
 
 **When all required items pass:** mark Notion **Implement RBAC…** Done, then start **Step 05 — Audit foundation**.
 
