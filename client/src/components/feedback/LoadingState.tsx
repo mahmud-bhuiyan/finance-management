@@ -4,7 +4,7 @@ export const LoadingState = ({
   message?: string;
 }) => {
   return (
-    <div className="flex min-h-screen items-center justify-center text-slate-600">
+    <div className="flex min-h-screen items-center justify-center text-slate-600 dark:text-slate-300">
       {message}
     </div>
   );

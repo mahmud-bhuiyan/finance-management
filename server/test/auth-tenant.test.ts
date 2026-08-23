@@ -26,12 +26,40 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
     expect(registered.body.data.user.email).toBe(email);
     expect(registered.body.data.user.role).toBe("NORMAL_USER");
     expect(registered.body.data.user.tenantId).toBeNull();
+    expect(registered.body.data.user.themePreference).toBe("LIGHT");
     expect(registered.headers["set-cookie"]).toBeTruthy();
 
     const agent = await login(email, password);
     const me = await agent.get(api("/auth/me"));
     expect(me.status).toBe(200);
     expect(me.body.data.user.email).toBe(email);
+  });
+
+  it("updates and persists the current user theme preference", async () => {
+    const email = `${unique("theme")}@test.local`;
+    const password = "password123";
+
+    await request(app).post(api("/auth/register")).send({
+      email,
+      password,
+      name: "Theme User",
+    });
+
+    const agent = await login(email, password);
+
+    const me = await agent.get(api("/auth/me"));
+    expect(me.status).toBe(200);
+    expect(me.body.data.user.themePreference).toBe("LIGHT");
+
+    const updated = await agent
+      .patch(api("/auth/me/theme"))
+      .send({ themePreference: "DARK" });
+    expect(updated.status).toBe(200);
+    expect(updated.body.data.user.themePreference).toBe("DARK");
+
+    const meAgain = await agent.get(api("/auth/me"));
+    expect(meAgain.status).toBe(200);
+    expect(meAgain.body.data.user.themePreference).toBe("DARK");
   });
 
   it("rejects invalid credentials and missing sessions", async () => {

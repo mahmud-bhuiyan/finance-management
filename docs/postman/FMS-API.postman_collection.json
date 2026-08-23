@@ -260,6 +260,43 @@
           "response": []
         },
         {
+          "name": "Update theme",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns updated theme preference', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.user.themePreference).to.eql('DARK');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"themePreference\": \"DARK\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/me/theme",
+            "description": "Updates the authenticated user's theme preference (`LIGHT` or `DARK`). Requires session cookie."
+          },
+          "response": []
+        },
+        {
           "name": "Logout",
           "event": [
             {

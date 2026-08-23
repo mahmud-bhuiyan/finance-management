@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -8,4 +18,49 @@ body {
     system-ui,
     -apple-system,
     sans-serif;
+}
+
+/* Retrofit common page patterns for dark mode without touching every component. */
+.dark .bg-white {
+  background-color: rgb(30 41 59);
+}
+
+.dark .bg-slate-50 {
+  background-color: rgb(15 23 42);
+}
+
+.dark .bg-slate-100 {
+  background-color: rgb(51 65 85);
+}
+
+.dark .text-slate-950,
+.dark .text-slate-900 {
+  color: rgb(241 245 249);
+}
+
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-slate-600 {
+  color: rgb(203 213 225);
+}
+
+.dark .text-slate-500 {
+  color: rgb(148 163 184);
+}
+
+.dark .text-teal-800 {
+  color: rgb(94 234 212);
+}
+
+.dark .text-teal-700 {
+  color: rgb(45 212 191);
+}
+
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: rgb(51 65 85);
+}
+
+.dark .shadow-sm {
+  --tw-shadow-color: rgb(0 0 0 / 0.35);
 }

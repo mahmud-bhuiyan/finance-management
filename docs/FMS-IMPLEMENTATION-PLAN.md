@@ -257,6 +257,7 @@ Step 15 guide: `finance-management/docs/manual-test-guides/step-15-report-excel-
 Step 16 guide: `finance-management/docs/manual-test-guides/step-16-tenant-users.md`  
 Step 17 guide: `finance-management/docs/manual-test-guides/step-17-admin-shell.md`  
 Step 18 guide: `finance-management/docs/manual-test-guides/step-18-automated-tests.md`  
+Step 19 guide: `finance-management/docs/manual-test-guides/step-19-user-theme.md`  
 Create each next guide when that step starts.
 
 ---

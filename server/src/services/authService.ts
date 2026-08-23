@@ -1,4 +1,4 @@
-import type { Tenant, User } from "@prisma/client";
+import type { Tenant, User, UserTheme } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { writeAuditLog } from "./auditService.js";
 import { AppError } from "../utils/AppError.js";
@@ -24,6 +24,7 @@ export const toPublicUser = (user: UserWithTenant) => ({
   name: user.name,
   role: user.role,
   status: user.status,
+  themePreference: user.themePreference,
   tenantId: user.tenantId,
   tenant: toPublicTenant(user.tenant),
   createdAt: user.createdAt.toISOString(),
@@ -115,6 +116,38 @@ export const getUserById = async (id: string) => {
   if (user.status === "INACTIVE") {
     throw new AppError("This account is inactive", 403, "USER_INACTIVE");
   }
+
+  return toPublicUser(user);
+};
+
+export const updateUserTheme = async (userId: string, themePreference: UserTheme) => {
+  const existing = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { tenant: true },
+  });
+  if (!existing) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+
+  if (existing.status === "INACTIVE") {
+    throw new AppError("This account is inactive", 403, "USER_INACTIVE");
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { themePreference },
+    include: { tenant: true },
+  });
+
+  await writeAuditLog({
+    actor: { id: user.id, tenantId: user.tenantId },
+    action: "UPDATE",
+    entityType: "User",
+    entityId: user.id,
+    tenantId: user.tenantId,
+    oldValues: { themePreference: existing.themePreference },
+    newValues: { themePreference: user.themePreference },
+  });
 
   return toPublicUser(user);
 };

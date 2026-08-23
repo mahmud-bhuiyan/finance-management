@@ -28,6 +28,11 @@ enum UserStatus {
   INACTIVE
 }
 
+enum UserTheme {
+  LIGHT
+  DARK
+}
+
 enum TenantStatus {
   ACTIVE
   INACTIVE
@@ -96,8 +101,9 @@ model User {
   passwordHash String     @map("password_hash")
   name         String?
   role         UserRole   @default(NORMAL_USER)
-  status       UserStatus @default(ACTIVE)
-  tenantId     String?    @map("tenant_id")
+  status           UserStatus @default(ACTIVE)
+  themePreference  UserTheme  @default(LIGHT) @map("theme_preference")
+  tenantId         String?    @map("tenant_id")
   tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")

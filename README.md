@@ -65,6 +65,7 @@ Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE
 - Step 16: [`docs/manual-test-guides/step-16-tenant-users.md`](docs/manual-test-guides/step-16-tenant-users.md) · [PDF](docs/manual-test-guides/step-16-tenant-users.pdf)
 - Step 17: [`docs/manual-test-guides/step-17-admin-shell.md`](docs/manual-test-guides/step-17-admin-shell.md) · [PDF](docs/manual-test-guides/step-17-admin-shell.pdf)
 - Step 18: [`docs/manual-test-guides/step-18-automated-tests.md`](docs/manual-test-guides/step-18-automated-tests.md) · [PDF](docs/manual-test-guides/step-18-automated-tests.pdf)
+- Step 19: [`docs/manual-test-guides/step-19-user-theme.md`](docs/manual-test-guides/step-19-user-theme.md) · [PDF](docs/manual-test-guides/step-19-user-theme.pdf)
 
 ## Postman (API)
 
