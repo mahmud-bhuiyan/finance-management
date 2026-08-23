@@ -1,23 +1,23 @@
 import type { RequestHandler } from "express";
 import { listAuditLogs } from "../services/auditService.js";
+import { AppError } from "../utils/AppError.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import { listAuditLogsSchema } from "../validators/auditValidators.js";
 
 export const list: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
-      res.status(401).json({ ok: false, message: "Unauthorized" });
-      return;
+      throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     }
 
     const query = listAuditLogsSchema.parse(req.query);
 
     if (query.tenantId && req.user.role !== "SUPER_ADMIN") {
-      res.status(403).json({ ok: false, message: "Permission denied" });
-      return;
+      throw new AppError("Permission denied", 403, "FORBIDDEN");
     }
 
     const logs = await listAuditLogs(req.user, query);
-    res.status(200).json({ ok: true, logs });
+    sendSuccess(res, 200, { logs });
   } catch (error) {
     next(error);
   }

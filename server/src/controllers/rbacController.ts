@@ -5,28 +5,29 @@ import {
   probeReportsRead,
   probeTenantsManage,
 } from "../services/rbacService.js";
+import { AppError } from "../utils/AppError.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 
 export const profile: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
-      res.status(401).json({ ok: false, message: "Unauthorized" });
-      return;
+      throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     }
 
-    res.status(200).json({ ok: true, rbac: getRbacProfile(req.user) });
+    sendSuccess(res, 200, { rbac: getRbacProfile(req.user) });
   } catch (error) {
     next(error);
   }
 };
 
 export const financeWriteProbe: RequestHandler = (_req, res) => {
-  res.status(200).json(probeFinanceWrite());
+  sendSuccess(res, 200, probeFinanceWrite());
 };
 
 export const reportsReadProbe: RequestHandler = (_req, res) => {
-  res.status(200).json(probeReportsRead());
+  sendSuccess(res, 200, probeReportsRead());
 };
 
 export const tenantsManageProbe: RequestHandler = (_req, res) => {
-  res.status(200).json(probeTenantsManage());
+  sendSuccess(res, 200, probeTenantsManage());
 };

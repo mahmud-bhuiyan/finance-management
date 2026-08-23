@@ -22,6 +22,7 @@ export type AuthUser = {
     status: string;
   } | null;
   createdAt: string;
+  updatedAt: string;
 };
 
 type AuthContextValue = {
@@ -45,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refresh = useCallback(async () => {
     try {
-      const data = await apiFetch<{ ok: boolean; user: AuthUser }>("/auth/me");
+      const data = await apiFetch<{ user: AuthUser }>("/auth/me");
       setUser(data.user);
     } catch {
       setUser(null);
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string,
     rememberMe = false,
   ) => {
-    const data = await apiFetch<{ ok: boolean; user: AuthUser }>(
+    const data = await apiFetch<{ user: AuthUser }>(
       "/auth/login",
       {
         method: "POST",
@@ -79,7 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string;
     name?: string;
   }) => {
-    const data = await apiFetch<{ ok: boolean; user: AuthUser }>(
+    const data = await apiFetch<{ user: AuthUser }>(
       "/auth/register",
       {
         method: "POST",

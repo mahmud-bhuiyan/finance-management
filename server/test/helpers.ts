@@ -67,7 +67,7 @@ export const createCompanyWithAdmin = async () => {
   const email = `admin-${stamp}@test.local`;
   const password = "password123";
   const adminRes = await superAgent
-    .post(api(`/tenants/${tenantRes.body.tenant.id}/admins`))
+    .post(api(`/tenants/${tenantRes.body.data.tenant.id}/admins`))
     .send({ email, password, name: "Company Admin" });
   if (adminRes.status !== 201) {
     throw new Error(`Create admin failed: ${JSON.stringify(adminRes.body)}`);
@@ -75,8 +75,8 @@ export const createCompanyWithAdmin = async () => {
 
   const agent = await login(email, password);
   return {
-    tenant: tenantRes.body.tenant as { id: string; name: string; slug: string },
-    admin: adminRes.body.admin as { id: string; email: string; tenantId: string },
+    tenant: tenantRes.body.data.tenant as { id: string; name: string; slug: string },
+    admin: adminRes.body.data.admin as { id: string; email: string; tenantId: string },
     email,
     password,
     agent,
@@ -97,7 +97,7 @@ export const createNormalUser = async (adminAgent: Agent) => {
     throw new Error(`Create normal user failed: ${JSON.stringify(res.body)}`);
   }
   const agent = await login(email, password);
-  return { user: res.body.user as { id: string; email: string }, email, password, agent };
+  return { user: res.body.data.user as { id: string; email: string }, email, password, agent };
 };
 
 export const createExpense = async (

@@ -83,9 +83,7 @@ export const listSupportItems = async (
   }
   const query = params.toString();
   const path = `${pathFor[kind]}${query ? `?${query}` : ""}`;
-  const data = await apiFetch<
-    { ok: boolean } & Record<string, SupportItem[]>
-  >(path);
+  const data = await apiFetch<Record<string, SupportItem[]>>(path);
   return data[listKey[kind]] ?? [];
 };
 
@@ -93,9 +91,7 @@ export const createSupportItem = async (
   kind: SupportKind,
   payload: CreateSupportPayload,
 ) => {
-  const data = await apiFetch<
-    { ok: boolean } & Record<string, SupportItem>
-  >(pathFor[kind], {
+  const data = await apiFetch<Record<string, SupportItem>>(pathFor[kind], {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -107,9 +103,7 @@ export const updateSupportItem = async (
   id: string,
   payload: UpdateSupportPayload,
 ) => {
-  const data = await apiFetch<
-    { ok: boolean } & Record<string, SupportItem>
-  >(`${pathFor[kind]}/${id}`, {
+  const data = await apiFetch<Record<string, SupportItem>>(`${pathFor[kind]}/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
@@ -117,7 +111,7 @@ export const updateSupportItem = async (
 };
 
 export const deleteSupportItem = async (kind: SupportKind, id: string) => {
-  await apiFetch<{ ok: boolean }>(`${pathFor[kind]}/${id}`, {
+  await apiFetch(`${pathFor[kind]}/${id}`, {
     method: "DELETE",
   });
 };

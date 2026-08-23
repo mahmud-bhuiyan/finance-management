@@ -5,6 +5,8 @@ import {
   loginUser,
   registerUser,
 } from "../services/authService.js";
+import { AppError } from "../utils/AppError.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import {
   loginSchema,
   registerSchema,
@@ -28,9 +30,8 @@ export const register: RequestHandler = async (req, res, next) => {
     const result = await registerUser(body);
 
     res
-      .cookie(env.JWT_COOKIE_NAME, result.accessToken, cookieOptions(true))
-      .status(201)
-      .json({ ok: true, user: result.user });
+      .cookie(env.JWT_COOKIE_NAME, result.accessToken, cookieOptions(true));
+    sendSuccess(res, 201, { user: result.user }, "Account registered successfully");
   } catch (error) {
     next(error);
   }
@@ -41,35 +42,30 @@ export const login: RequestHandler = async (req, res, next) => {
     const body = loginSchema.parse(req.body);
     const result = await loginUser(body);
 
-    res
-      .cookie(
-        env.JWT_COOKIE_NAME,
-        result.accessToken,
-        cookieOptions(result.rememberMe),
-      )
-      .status(200)
-      .json({ ok: true, user: result.user });
+    res.cookie(
+      env.JWT_COOKIE_NAME,
+      result.accessToken,
+      cookieOptions(result.rememberMe),
+    );
+    sendSuccess(res, 200, { user: result.user }, "Logged in successfully");
   } catch (error) {
     next(error);
   }
 };
 
 export const logout: RequestHandler = (_req, res) => {
-  res
-    .clearCookie(env.JWT_COOKIE_NAME, cookieOptions(true))
-    .status(200)
-    .json({ ok: true });
+  res.clearCookie(env.JWT_COOKIE_NAME, cookieOptions(true));
+  sendSuccess(res, 200, {}, "Logged out successfully");
 };
 
 export const me: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
-      res.status(401).json({ ok: false, message: "Unauthorized" });
-      return;
+      throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
     }
 
     const user = await getUserById(req.user.id);
-    res.status(200).json({ ok: true, user });
+    sendSuccess(res, 200, { user }, "Current user loaded");
   } catch (error) {
     next(error);
   }

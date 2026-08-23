@@ -27,6 +27,7 @@ export const toPublicUser = (user: UserWithTenant) => ({
   tenantId: user.tenantId,
   tenant: toPublicTenant(user.tenant),
   createdAt: user.createdAt.toISOString(),
+  updatedAt: user.updatedAt.toISOString(),
 });
 
 const SESSION_EXPIRES_IN = "12h";

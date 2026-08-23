@@ -23,7 +23,7 @@ export const useRbacProfile = (enabled: boolean) => {
     setError(null);
 
     try {
-      const data = await apiFetch<{ ok: boolean; rbac: RbacProfile }>(
+      const data = await apiFetch<{ rbac: RbacProfile }>(
         "/rbac/me",
       );
       setProfile(data.rbac);
@@ -43,4 +43,4 @@ export const useRbacProfile = (enabled: boolean) => {
 };
 
 export const probeAccess = (path: string) =>
-  apiFetch<{ ok: boolean; access: string; message: string }>(path);
+  apiFetch<{ access: string; message: string }>(path);

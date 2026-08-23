@@ -6,6 +6,7 @@ import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/index.js";
 import { ensureSuperAdmin } from "./services/bootstrapService.js";
+import { sendSuccess } from "./utils/apiResponse.js";
 
 export const createApp = () => {
   const app = express();
@@ -20,12 +21,11 @@ export const createApp = () => {
   app.use(cookieParser());
 
   app.get("/", (_req, res) => {
-    res.json({
-      ok: true,
+    sendSuccess(res, 200, {
       message: "Finance Management System API",
       version: API_VERSION,
       docs: `${API_PREFIX}/health`,
-    });
+    }, "Finance Management System API");
   });
 
   app.use(API_PREFIX, apiRouter);

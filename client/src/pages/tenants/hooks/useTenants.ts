@@ -26,7 +26,7 @@ export const useTenants = (enabled: boolean) => {
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const data = await apiFetch<{ ok: boolean; tenants: Tenant[] }>(
+    const data = await apiFetch<{ tenants: Tenant[] }>(
       "/tenants",
     );
     setTenants(data.tenants);
@@ -53,7 +53,7 @@ export const useTenants = (enabled: boolean) => {
   }, [enabled, refresh]);
 
   const createTenant = async (name: string) => {
-    const data = await apiFetch<{ ok: boolean; tenant: Tenant }>(
+    const data = await apiFetch<{ tenant: Tenant }>(
       "/tenants",
       {
         method: "POST",
@@ -65,7 +65,7 @@ export const useTenants = (enabled: boolean) => {
   };
 
   const updateTenantStatus = async (id: string, status: Tenant["status"]) => {
-    const data = await apiFetch<{ ok: boolean; tenant: Tenant }>(
+    const data = await apiFetch<{ tenant: Tenant }>(
       `/tenants/${id}`,
       {
         method: "PATCH",
@@ -81,7 +81,7 @@ export const useTenants = (enabled: boolean) => {
     tenantId: string,
     input: { email: string; password: string; name?: string },
   ) => {
-    const data = await apiFetch<{ ok: boolean; admin: TenantAdmin }>(
+    const data = await apiFetch<{ admin: TenantAdmin }>(
       `/tenants/${tenantId}/admins`,
       {
         method: "POST",

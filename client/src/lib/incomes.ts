@@ -80,7 +80,6 @@ export type IncomeListFilters = {
 };
 
 export type IncomeListResponse = {
-  ok: boolean;
   incomes: Income[];
   fields: FieldDefinition[];
   meta: IncomeListMeta;

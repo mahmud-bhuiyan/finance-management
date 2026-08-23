@@ -131,10 +131,10 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns user without password', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.user).to.be.an('object');",
-                  "  pm.expect(json.user).to.not.have.property('password');",
-                  "  pm.expect(json.user).to.not.have.property('passwordHash');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.user).to.be.an('object');",
+                  "  pm.expect(json.data.user).to.not.have.property('password');",
+                  "  pm.expect(json.data.user).to.not.have.property('passwordHash');",
                   "});"
                 ]
               }
@@ -170,8 +170,8 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns user', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.user.email).to.be.a('string');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.user.email).to.be.a('string');",
                   "});"
                 ]
               }
@@ -207,8 +207,8 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Role is SUPER_ADMIN', function () {",
-                  "  pm.expect(json.user.role).to.eql('SUPER_ADMIN');",
-                  "  pm.expect(json.user.tenantId).to.eql(null);",
+                  "  pm.expect(json.data.user.role).to.eql('SUPER_ADMIN');",
+                  "  pm.expect(json.data.user.tenantId).to.eql(null);",
                   "});"
                 ]
               }
@@ -244,8 +244,8 @@
                   "});",
                   "pm.test('Returns authenticated user', function () {",
                   "  const json = pm.response.json();",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.user.id).to.be.a('string');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.user.id).to.be.a('string');",
                   "});"
                 ]
               }
@@ -334,8 +334,8 @@
                   "});",
                   "pm.test('Returns tenants array', function () {",
                   "  const json = pm.response.json();",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.tenants).to.be.an('array');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.tenants).to.be.an('array');",
                   "});"
                 ]
               }
@@ -362,12 +362,12 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns tenant with slug', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.tenant.id).to.be.a('string');",
-                  "  pm.expect(json.tenant.slug).to.be.a('string');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.tenant.id).to.be.a('string');",
+                  "  pm.expect(json.data.tenant.slug).to.be.a('string');",
                   "});",
-                  "if (json.tenant && json.tenant.id) {",
-                  "  pm.collectionVariables.set('tenantId', json.tenant.id);",
+                  "if (json.data.tenant && json.data.tenant.id) {",
+                  "  pm.collectionVariables.set('tenantId', json.data.tenant.id);",
                   "}"
                 ]
               }
@@ -403,9 +403,9 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Admin is COMPANY_ADMIN for tenant', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.admin.role).to.eql('COMPANY_ADMIN');",
-                  "  pm.expect(json.admin.tenantId).to.eql(pm.collectionVariables.get('tenantId'));",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.admin.role).to.eql('COMPANY_ADMIN');",
+                  "  pm.expect(json.data.admin.tenantId).to.eql(pm.collectionVariables.get('tenantId'));",
                   "});"
                 ]
               }
@@ -441,7 +441,7 @@
                   "});",
                   "pm.test('Status is INACTIVE', function () {",
                   "  const json = pm.response.json();",
-                  "  pm.expect(json.tenant.status).to.eql('INACTIVE');",
+                  "  pm.expect(json.data.tenant.status).to.eql('INACTIVE');",
                   "});"
                 ]
               }
@@ -477,7 +477,7 @@
                   "});",
                   "pm.test('Status is ACTIVE', function () {",
                   "  const json = pm.response.json();",
-                  "  pm.expect(json.tenant.status).to.eql('ACTIVE');",
+                  "  pm.expect(json.data.tenant.status).to.eql('ACTIVE');",
                   "});"
                 ]
               }
@@ -552,8 +552,8 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns users array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.users).to.be.an('array');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.users).to.be.an('array');",
                   "});"
                 ]
               }
@@ -580,12 +580,12 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('User is NORMAL_USER ACTIVE', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.user.role).to.eql('NORMAL_USER');",
-                  "  pm.expect(json.user.status).to.eql('ACTIVE');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.user.role).to.eql('NORMAL_USER');",
+                  "  pm.expect(json.data.user.status).to.eql('ACTIVE');",
                   "});",
-                  "if (json.user && json.user.id) {",
-                  "  pm.collectionVariables.set('tenantUserId', json.user.id);",
+                  "if (json.data.user && json.data.user.id) {",
+                  "  pm.collectionVariables.set('tenantUserId', json.data.user.id);",
                   "}"
                 ]
               }
@@ -653,7 +653,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('User is INACTIVE', function () {",
-                  "  pm.expect(json.user.status).to.eql('INACTIVE');",
+                  "  pm.expect(json.data.user.status).to.eql('INACTIVE');",
                   "});"
                 ]
               }
@@ -689,7 +689,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('User is ACTIVE', function () {",
-                  "  pm.expect(json.user.status).to.eql('ACTIVE');",
+                  "  pm.expect(json.data.user.status).to.eql('ACTIVE');",
                   "});"
                 ]
               }
@@ -725,9 +725,9 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('User is COMPANY_ADMIN ACTIVE', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.user.role).to.eql('COMPANY_ADMIN');",
-                  "  pm.expect(json.user.status).to.eql('ACTIVE');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.user.role).to.eql('COMPANY_ADMIN');",
+                  "  pm.expect(json.data.user.status).to.eql('ACTIVE');",
                   "});"
                 ]
               }
@@ -834,8 +834,8 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns permissions array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.rbac.permissions).to.be.an('array');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.rbac.permissions).to.be.an('array');",
                   "});"
                 ]
               }
@@ -960,8 +960,8 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns logs array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.logs).to.be.an('array');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.logs).to.be.an('array');",
                   "});"
                 ]
               }
@@ -1017,8 +1017,8 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns fields array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.fields).to.be.an('array');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.fields).to.be.an('array');",
                   "});"
                 ]
               }
@@ -1045,11 +1045,11 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns field', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.field.fieldType).to.eql('TEXT');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.field.fieldType).to.eql('TEXT');",
                   "});",
-                  "if (json.field && json.field.id) {",
-                  "  pm.collectionVariables.set('fieldId', json.field.id);",
+                  "if (json.data.field && json.data.field.id) {",
+                  "  pm.collectionVariables.set('fieldId', json.data.field.id);",
                   "}"
                 ]
               }
@@ -1198,7 +1198,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns categories array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.categories).to.be.an('array');",
                   "});"
                 ]
@@ -1226,7 +1226,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns category', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.category.name).to.be.a('string');",
                   "});",
                   "if (json.category && json.category.id) {",
@@ -1369,7 +1369,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns departments array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.departments).to.be.an('array');",
                   "});"
                 ]
@@ -1397,7 +1397,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns department', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.department.name).to.be.a('string');",
                   "});",
                   "if (json.department && json.department.id) {",
@@ -1540,7 +1540,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns vendors array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.vendors).to.be.an('array');",
                   "});"
                 ]
@@ -1568,7 +1568,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns vendor', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.vendor.name).to.be.a('string');",
                   "});",
                   "if (json.vendor && json.vendor.id) {",
@@ -1711,7 +1711,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns kpis and charts', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.kpis).to.be.an('object');",
                   "  pm.expect(json.kpis).to.have.property('totalExpense');",
                   "  pm.expect(json.charts).to.be.an('object');",
@@ -1748,7 +1748,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Echoes custom from/to', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.filters.preset).to.eql('custom');",
                   "  pm.expect(json.filters.from).to.eql('2026-08-01');",
                   "  pm.expect(json.filters.to).to.eql('2026-08-31');",
@@ -1830,7 +1830,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns summary and breakdowns', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.summary).to.be.an('object');",
                   "  pm.expect(json.summary).to.have.property('totalExpense');",
                   "  pm.expect(json.byMonth).to.be.an('array');",
@@ -1865,7 +1865,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Echoes custom from/to', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.filters.preset).to.eql('custom');",
                   "  pm.expect(json.filters.from).to.eql('2026-08-01');",
                   "  pm.expect(json.filters.to).to.eql('2026-08-31');",
@@ -2067,9 +2067,9 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns expenses, fields, and meta', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.expenses).to.be.an('array');",
-                  "  pm.expect(json.fields).to.be.an('array');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.expenses).to.be.an('array');",
+                  "  pm.expect(json.data.fields).to.be.an('array');",
                   "  pm.expect(json.meta).to.be.an('object');",
                   "  pm.expect(json.meta).to.have.property('total');",
                   "  pm.expect(json.meta).to.have.property('page');",
@@ -2099,12 +2099,12 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns expense with decimal amount', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.expense.type).to.eql('EXPENSE');",
-                  "  pm.expect(json.expense.amount).to.be.a('string');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.expense.type).to.eql('EXPENSE');",
+                  "  pm.expect(json.data.expense.amount).to.be.a('string');",
                   "});",
-                  "if (json.expense && json.expense.id) {",
-                  "  pm.collectionVariables.set('expenseId', json.expense.id);",
+                  "if (json.data.expense && json.data.expense.id) {",
+                  "  pm.collectionVariables.set('expenseId', json.data.expense.id);",
                   "}"
                 ]
               }
@@ -2140,7 +2140,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns attachments array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.attachments).to.be.an('array');",
                   "});"
                 ]
@@ -2168,7 +2168,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns attachment metadata', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.attachment).to.have.property(\"id\");",
                   "  pm.expect(json.attachment).to.have.property(\"originalName\");",
                   "});",
@@ -2403,9 +2403,9 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns incomes, fields, and meta', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.incomes).to.be.an('array');",
-                  "  pm.expect(json.fields).to.be.an('array');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.incomes).to.be.an('array');",
+                  "  pm.expect(json.data.fields).to.be.an('array');",
                   "  pm.expect(json.meta).to.be.an('object');",
                   "});"
                 ]
@@ -2433,12 +2433,12 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns income with type INCOME', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
-                  "  pm.expect(json.income.type).to.eql('INCOME');",
-                  "  pm.expect(json.income.amount).to.be.a('string');",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.income.type).to.eql('INCOME');",
+                  "  pm.expect(json.data.income.amount).to.be.a('string');",
                   "});",
-                  "if (json.income && json.income.id) {",
-                  "  pm.collectionVariables.set('incomeId', json.income.id);",
+                  "if (json.data.income && json.data.income.id) {",
+                  "  pm.collectionVariables.set('incomeId', json.data.income.id);",
                   "}"
                 ]
               }
@@ -2516,7 +2516,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns attachments array', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.attachments).to.be.an('array');",
                   "});"
                 ]
@@ -2544,7 +2544,7 @@
                   "});",
                   "const json = pm.response.json();",
                   "pm.test('Returns attachment metadata', function () {",
-                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.attachment).to.have.property(\"id\");",
                   "  pm.expect(json.attachment).to.have.property(\"originalName\");",
                   "});",

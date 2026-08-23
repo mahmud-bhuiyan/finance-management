@@ -27,7 +27,6 @@ export type ReportSlice = {
 };
 
 export type ReportSummary = {
-  ok: boolean;
   filters: {
     preset: ReportPreset;
     from: string;

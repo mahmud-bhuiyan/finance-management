@@ -59,7 +59,7 @@ export const useExpenses = (enabled: boolean, filters: ExpenseListFilters) => {
   }, [enabled, refresh]);
 
   const createExpense = async (payload: CreateExpensePayload) => {
-    const data = await apiFetch<{ ok: boolean; expense: Expense }>(
+    const data = await apiFetch<{ expense: Expense }>(
       "/expenses",
       {
         method: "POST",
@@ -71,7 +71,7 @@ export const useExpenses = (enabled: boolean, filters: ExpenseListFilters) => {
   };
 
   const updateExpense = async (id: string, payload: UpdateExpensePayload) => {
-    const data = await apiFetch<{ ok: boolean; expense: Expense }>(
+    const data = await apiFetch<{ expense: Expense }>(
       `/expenses/${id}`,
       {
         method: "PATCH",
@@ -83,13 +83,12 @@ export const useExpenses = (enabled: boolean, filters: ExpenseListFilters) => {
   };
 
   const deleteExpense = async (id: string) => {
-    await apiFetch<{ ok: boolean }>(`/expenses/${id}`, { method: "DELETE" });
+    await apiFetch(`/expenses/${id}`, { method: "DELETE" });
     await refresh();
   };
 
   const listAttachments = useCallback(async (expenseId: string) => {
     const data = await apiFetch<{
-      ok: boolean;
       attachments: ExpenseAttachment[];
     }>(`/expenses/${expenseId}/attachments`);
     return data.attachments;
@@ -100,7 +99,6 @@ export const useExpenses = (enabled: boolean, filters: ExpenseListFilters) => {
       const formData = new FormData();
       formData.append("file", file);
       const data = await apiUpload<{
-        ok: boolean;
         attachment: ExpenseAttachment;
       }>(`/expenses/${expenseId}/attachments`, formData);
       await refresh();
@@ -111,7 +109,7 @@ export const useExpenses = (enabled: boolean, filters: ExpenseListFilters) => {
 
   const deleteAttachment = useCallback(
     async (expenseId: string, attachmentId: string) => {
-      await apiFetch<{ ok: boolean }>(
+      await apiFetch(
         `/expenses/${expenseId}/attachments/${attachmentId}`,
         { method: "DELETE" },
       );
