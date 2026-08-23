@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
-import { ApiError, apiFetch, apiUpload } from "../../../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { apiFetch } from "../../../lib/api";
 import type {
   CreateExpensePayload,
   Expense,
-  ExpenseAttachment,
   ExpenseListFilters,
   ExpenseListMeta,
   ExpenseListResponse,
   UpdateExpensePayload,
 } from "../../../lib/expenses";
 import { buildExpenseListQuery } from "../../../lib/expenses";
-import type { FieldDefinition } from "../../../lib/fields";
+import { toQueryErrorMessage } from "../../../lib/queryClient";
 
 const defaultMeta = (filters: ExpenseListFilters): ExpenseListMeta => ({
   page: filters.page,
@@ -21,116 +21,92 @@ const defaultMeta = (filters: ExpenseListFilters): ExpenseListMeta => ({
   sortDir: filters.sortDir,
 });
 
+export const expenseQueryKeys = {
+  all: ["expenses"] as const,
+  lists: () => [...expenseQueryKeys.all, "list"] as const,
+  list: (filters: ExpenseListFilters) =>
+    [...expenseQueryKeys.lists(), filters] as const,
+  attachments: (expenseId: string) =>
+    [...expenseQueryKeys.all, "attachments", expenseId] as const,
+};
+
+const fetchExpenseList = (filters: ExpenseListFilters) =>
+  apiFetch<ExpenseListResponse>(`/expenses?${buildExpenseListQuery(filters)}`);
+
 export const useExpenses = (enabled: boolean, filters: ExpenseListFilters) => {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [fields, setFields] = useState<FieldDefinition[]>([]);
-  const [meta, setMeta] = useState<ExpenseListMeta>(() => defaultMeta(filters));
-  const [loading, setLoading] = useState(enabled);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
-    const data = await apiFetch<ExpenseListResponse>(
-      `/expenses?${buildExpenseListQuery(filters)}`,
-    );
-    setExpenses(data.expenses);
-    setFields(data.fields);
-    setMeta(data.meta);
-  }, [filters]);
+  const listQuery = useQuery({
+    queryKey: expenseQueryKeys.list(filters),
+    queryFn: () => fetchExpenseList(filters),
+    enabled,
+  });
 
-  useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
-      return;
-    }
+  const invalidateLists = useCallback(
+    () =>
+      queryClient.invalidateQueries({ queryKey: expenseQueryKeys.lists() }),
+    [queryClient],
+  );
 
-    setLoading(true);
-    void (async () => {
-      try {
-        setError(null);
-        await refresh();
-      } catch (err) {
-        setError(
-          err instanceof ApiError ? err.message : "Failed to load expenses",
-        );
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [enabled, refresh]);
-
-  const createExpense = async (payload: CreateExpensePayload) => {
-    const data = await apiFetch<{ expense: Expense }>(
-      "/expenses",
-      {
+  const createMutation = useMutation({
+    mutationFn: (payload: CreateExpensePayload) =>
+      apiFetch<{ expense: Expense }>("/expenses", {
         method: "POST",
         body: JSON.stringify(payload),
-      },
-    );
-    await refresh();
+      }),
+    onSuccess: invalidateLists,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateExpensePayload;
+    }) =>
+      apiFetch<{ expense: Expense }>(`/expenses/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: invalidateLists,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/expenses/${id}`, { method: "DELETE" }),
+    onSuccess: invalidateLists,
+  });
+
+  const createExpense = async (payload: CreateExpensePayload) => {
+    const data = await createMutation.mutateAsync(payload);
     return data.expense;
   };
 
   const updateExpense = async (id: string, payload: UpdateExpensePayload) => {
-    const data = await apiFetch<{ expense: Expense }>(
-      `/expenses/${id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      },
-    );
-    await refresh();
+    const data = await updateMutation.mutateAsync({ id, payload });
     return data.expense;
   };
 
   const deleteExpense = async (id: string) => {
-    await apiFetch(`/expenses/${id}`, { method: "DELETE" });
-    await refresh();
+    await deleteMutation.mutateAsync(id);
   };
 
-  const listAttachments = useCallback(async (expenseId: string) => {
-    const data = await apiFetch<{
-      attachments: ExpenseAttachment[];
-    }>(`/expenses/${expenseId}/attachments`);
-    return data.attachments;
-  }, []);
-
-  const uploadAttachment = useCallback(
-    async (expenseId: string, file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      const data = await apiUpload<{
-        attachment: ExpenseAttachment;
-      }>(`/expenses/${expenseId}/attachments`, formData);
-      await refresh();
-      return data.attachment;
-    },
-    [refresh],
-  );
-
-  const deleteAttachment = useCallback(
-    async (expenseId: string, attachmentId: string) => {
-      await apiFetch(
-        `/expenses/${expenseId}/attachments/${attachmentId}`,
-        { method: "DELETE" },
-      );
-      await refresh();
-    },
-    [refresh],
-  );
+  const queryError = listQuery.error
+    ? toQueryErrorMessage(listQuery.error, "Failed to load expenses")
+    : null;
 
   return {
-    expenses,
-    fields,
-    meta,
-    loading,
-    error,
-    setError,
-    refresh,
+    expenses: listQuery.data?.expenses ?? [],
+    fields: listQuery.data?.fields ?? [],
+    meta: listQuery.data?.meta ?? defaultMeta(filters),
+    loading: listQuery.isPending,
+    error: mutationError ?? queryError,
+    setError: setMutationError,
+    refresh: listQuery.refetch,
     createExpense,
     updateExpense,
     deleteExpense,
-    listAttachments,
-    uploadAttachment,
-    deleteAttachment,
   };
 };

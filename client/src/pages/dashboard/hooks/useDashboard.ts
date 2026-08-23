@@ -1,63 +1,38 @@
-import { useEffect, useState } from "react";
-import { ApiError } from "../../../lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   fetchDashboardSummary,
   type DashboardQuery,
   type DashboardSummary,
 } from "../../../lib/dashboard";
+import { toQueryErrorMessage } from "../../../lib/queryClient";
+
+export const dashboardQueryKeys = {
+  all: ["dashboard"] as const,
+  summary: (query: DashboardQuery) =>
+    [...dashboardQueryKeys.all, "summary", query] as const,
+};
+
+const canFetchDashboard = (enabled: boolean, query: DashboardQuery) =>
+  enabled && !(query.preset === "custom" && (!query.from || !query.to));
 
 export const useDashboard = (enabled: boolean, query: DashboardQuery) => {
-  const [data, setData] = useState<DashboardSummary | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [manualError, setManualError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
+  const summaryQuery = useQuery({
+    queryKey: dashboardQueryKeys.summary(query),
+    queryFn: () => fetchDashboardSummary(query),
+    enabled: canFetchDashboard(enabled, query),
+  });
 
-    if (query.preset === "custom" && (!query.from || !query.to)) {
-      return;
-    }
+  const queryError = summaryQuery.error
+    ? toQueryErrorMessage(summaryQuery.error, "Could not load dashboard")
+    : null;
 
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    void (async () => {
-      try {
-        const next = await fetchDashboardSummary(query);
-        if (!cancelled) {
-          setData(next);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof ApiError
-              ? err.message
-              : "Could not load dashboard",
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    enabled,
-    query.preset,
-    query.from,
-    query.to,
-    query.categoryId,
-    query.departmentId,
-    query.vendorId,
-    query.paymentMethod,
-  ]);
-
-  return { data, loading, error, setError };
+  return {
+    data: (summaryQuery.data ?? null) as DashboardSummary | null,
+    loading: summaryQuery.isPending,
+    error: manualError ?? queryError,
+    setError: setManualError,
+  };
 };

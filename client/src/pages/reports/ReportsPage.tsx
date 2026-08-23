@@ -1,23 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
 import { Button } from "../../components/ui/Button";
+import { useActiveSupportPickers } from "../../hooks/useActiveSupportPickers";
 import { useAuth } from "../../hooks/useAuth";
-import { ApiError } from "../../lib/api";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
-import {
-  downloadReportCsv,
-  downloadReportExcel,
-  downloadReportPdf,
-  type ReportFilters,
-} from "../../lib/reports";
-import { listSupportItems, type SupportItem } from "../../lib/supportData";
+import type { ReportFilters } from "../../lib/reports";
 import { ReportFiltersPanel } from "./components/ReportFilters";
 import { ReportSummaryCards } from "./components/ReportSummaryCards";
 import { ReportTables } from "./components/ReportTables";
+import { useReportExport } from "./hooks/useReportExport";
 import { useReportSummary } from "./hooks/useReportSummary";
 
 const todayUtc = () => new Date().toISOString().slice(0, 10);
@@ -50,11 +45,14 @@ export const ReportsPage = () => {
     paymentMethod: "",
     type: "ALL",
   }));
-  const [categories, setCategories] = useState<SupportItem[]>([]);
-  const [departments, setDepartments] = useState<SupportItem[]>([]);
-  const [vendors, setVendors] = useState<SupportItem[]>([]);
-  const [exporting, setExporting] = useState<ExportKind | null>(null);
-  const [exportError, setExportError] = useState<string | null>(null);
+  const supportPickers = useActiveSupportPickers(!authLoading && canRead);
+  const {
+    exportReport,
+    exporting,
+    exportError,
+    resetExportError,
+  } = useReportExport();
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const query = useMemo(
     () => ({
@@ -71,26 +69,6 @@ export const ReportsPage = () => {
   );
 
   const report = useReportSummary(!authLoading && canRead, query);
-
-  useEffect(() => {
-    if (!canRead) {
-      return;
-    }
-    void (async () => {
-      try {
-        const [nextCategories, nextDepartments, nextVendors] = await Promise.all([
-          listSupportItems("category", { active: true }),
-          listSupportItems("department", { active: true }),
-          listSupportItems("vendor", { active: true }),
-        ]);
-        setCategories(nextCategories);
-        setDepartments(nextDepartments);
-        setVendors(nextVendors);
-      } catch {
-        // Tables still work without dimension pickers.
-      }
-    })();
-  }, [canRead]);
 
   if (authLoading) {
     return <LoadingState message="Loading session…" />;
@@ -110,27 +88,15 @@ export const ReportsPage = () => {
 
   const handleExport = async (kind: ExportKind) => {
     if (filters.preset === "custom" && (!filters.from || !filters.to)) {
-      setExportError("Custom range needs from and to dates.");
+      setValidationError("Custom range needs from and to dates.");
       return;
     }
-    setExporting(kind);
-    setExportError(null);
+    setValidationError(null);
+    resetExportError();
     try {
-      if (kind === "csv") {
-        await downloadReportCsv(query);
-      } else if (kind === "xlsx") {
-        await downloadReportExcel(query);
-      } else {
-        await downloadReportPdf(query);
-      }
-    } catch (err) {
-      const label =
-        kind === "csv" ? "CSV" : kind === "xlsx" ? "Excel" : "PDF";
-      setExportError(
-        err instanceof ApiError ? err.message : `${label} download failed`,
-      );
-    } finally {
-      setExporting(null);
+      await exportReport({ kind, query });
+    } catch {
+      // Error message is shown from hook state.
     }
   };
 
@@ -177,14 +143,14 @@ export const ReportsPage = () => {
 
         <ReportFiltersPanel
           filters={filters}
-          categories={categories}
-          departments={departments}
-          vendors={vendors}
+          categories={supportPickers.categories}
+          departments={supportPickers.departments}
+          vendors={supportPickers.vendors}
           onChange={patchFilters}
         />
 
-        {(report.error || exportError) && (
-          <ErrorBanner message={report.error ?? exportError ?? ""} />
+        {(report.error || exportError || validationError) && (
+          <ErrorBanner message={report.error ?? exportError ?? validationError ?? ""} />
         )}
 
         {report.loading && !report.data ? (

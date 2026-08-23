@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { useActiveSupportPickers } from "../../hooks/useActiveSupportPickers";
 import { useAuth } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
 import type {
@@ -13,7 +14,7 @@ import type {
 } from "../../lib/incomes";
 import { currentYearMonth } from "../../lib/incomes";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
-import { listSupportItems, type SupportItem } from "../../lib/supportData";
+import type { SupportItem } from "../../lib/supportData";
 import { IncomeAttachments } from "./components/IncomeAttachments";
 import { IncomeFilters } from "./components/IncomeFilters";
 import { IncomeForm } from "./components/IncomeForm";
@@ -46,30 +47,11 @@ export const IncomesPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Income | null>(null);
-  const [categories, setCategories] = useState<SupportItem[]>([]);
-  const [departments, setDepartments] = useState<SupportItem[]>([]);
-  const [vendors, setVendors] = useState<SupportItem[]>([]);
   const incomesApi = useIncomes(!authLoading && canRead, filters);
-
-  useEffect(() => {
-    if (!canRead) {
-      return;
-    }
-    void (async () => {
-      try {
-        const [nextCategories, nextDepartments, nextVendors] = await Promise.all([
-          listSupportItems("category", { active: true }),
-          listSupportItems("department", { active: true }),
-          listSupportItems("vendor", { active: true }),
-        ]);
-        setCategories(nextCategories);
-        setDepartments(nextDepartments);
-        setVendors(nextVendors);
-      } catch {
-        // Income list can still work without pickers; form shows empty selects.
-      }
-    })();
-  }, [canRead]);
+  const supportPickers = useActiveSupportPickers(!authLoading && canRead);
+  const categories = supportPickers.categories;
+  const departments = supportPickers.departments;
+  const vendors = supportPickers.vendors;
 
   if (authLoading) {
     return <LoadingState message="Loading session…" />;
@@ -202,9 +184,6 @@ export const IncomesPage = () => {
               <IncomeAttachments
                 incomeId={editing.id}
                 canWrite={canWrite}
-                listAttachments={incomesApi.listAttachments}
-                uploadAttachment={incomesApi.uploadAttachment}
-                deleteAttachment={incomesApi.deleteAttachment}
               />
             )}
           </>

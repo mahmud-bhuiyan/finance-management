@@ -1,70 +1,80 @@
-import { useCallback, useEffect, useState } from "react";
-import { ApiError } from "../../../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { toQueryErrorMessage } from "../../../lib/queryClient";
+import { supportDataQueryKeys } from "../../../lib/supportQueryKeys";
 import {
   createSupportItem,
   deleteSupportItem,
   listSupportItems,
   updateSupportItem,
   type CreateSupportPayload,
-  type SupportItem,
   type SupportKind,
   type UpdateSupportPayload,
 } from "../../../lib/supportData";
 
+export { supportDataQueryKeys };
+
 export const useSupportData = (enabled: boolean, kind: SupportKind) => {
-  const [items, setItems] = useState<SupportItem[]>([]);
-  const [loading, setLoading] = useState(enabled);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const listOptions = { includeInactive: true } as const;
 
-  const refresh = useCallback(async () => {
-    const data = await listSupportItems(kind, { includeInactive: true });
-    setItems(data);
-  }, [kind]);
+  const listQuery = useQuery({
+    queryKey: supportDataQueryKeys.list(kind, listOptions),
+    queryFn: () => listSupportItems(kind, listOptions),
+    enabled,
+  });
 
-  useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
-      return;
-    }
+  const invalidateLists = useCallback(
+    () =>
+      queryClient.invalidateQueries({ queryKey: supportDataQueryKeys.lists() }),
+    [queryClient],
+  );
 
-    setLoading(true);
-    void (async () => {
-      try {
-        setError(null);
-        await refresh();
-      } catch (err) {
-        setError(
-          err instanceof ApiError ? err.message : "Failed to load items",
-        );
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [enabled, refresh]);
+  const createMutation = useMutation({
+    mutationFn: (payload: CreateSupportPayload) =>
+      createSupportItem(kind, payload),
+    onSuccess: invalidateLists,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateSupportPayload;
+    }) => updateSupportItem(kind, id, payload),
+    onSuccess: invalidateLists,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteSupportItem(kind, id),
+    onSuccess: invalidateLists,
+  });
 
   const createItem = async (payload: CreateSupportPayload) => {
-    const item = await createSupportItem(kind, payload);
-    await refresh();
-    return item;
+    return createMutation.mutateAsync(payload);
   };
 
   const updateItem = async (id: string, payload: UpdateSupportPayload) => {
-    const item = await updateSupportItem(kind, id, payload);
-    await refresh();
-    return item;
+    return updateMutation.mutateAsync({ id, payload });
   };
 
   const removeItem = async (id: string) => {
-    await deleteSupportItem(kind, id);
-    setItems((current) => current.filter((item) => item.id !== id));
+    await deleteMutation.mutateAsync(id);
   };
 
+  const queryError = listQuery.error
+    ? toQueryErrorMessage(listQuery.error, "Failed to load items")
+    : null;
+
   return {
-    items,
-    loading,
-    error,
-    setError,
-    refresh,
+    items: listQuery.data ?? [],
+    loading: listQuery.isPending,
+    error: mutationError ?? queryError,
+    setError: setMutationError,
+    refresh: listQuery.refetch,
     createItem,
     updateItem,
     removeItem,
