@@ -129,7 +129,7 @@ export const IncomeForm = ({
   return (
     <form
       onSubmit={(event) => void handleSubmit(event)}
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="surface p-5"
     >
       <h2 className="text-lg font-medium text-slate-900">
         {editing ? "Edit income" : "Add income"}

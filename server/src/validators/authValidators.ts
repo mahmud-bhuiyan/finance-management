@@ -12,5 +12,10 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().optional().default(false),
 });
 
+export const updateThemeSchema = z.object({
+  themePreference: z.enum(["LIGHT", "DARK"]),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type UpdateThemeInput = z.infer<typeof updateThemeSchema>;

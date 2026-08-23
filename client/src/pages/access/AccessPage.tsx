@@ -23,7 +23,7 @@ export const AccessPage = () => {
   const permissions = rbac.profile?.permissions ?? permissionsForRole(user.role);
 
   return (
-    <PageFrame maxWidth="max-w-3xl">
+    <PageFrame>
       <PageHeader
         kicker="Account"
         title="Role & access"
@@ -32,28 +32,28 @@ export const AccessPage = () => {
 
         {rbac.error && <ErrorBanner message={rbac.error} />}
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-medium text-slate-900">
+        <section className="surface p-6">
+          <h2 className="font-display text-2xl font-medium italic text-(--fms-ink)">
             Current access
           </h2>
           {rbac.loading ? (
             <LoadingState message="Loading permissions…" />
           ) : (
-            <div className="space-y-3 text-sm text-slate-700">
+            <div className="mt-3 space-y-3 text-sm text-(--fms-muted)">
               <p>
                 Role:{" "}
-                <span className="font-medium text-teal-800">
+                <span className="font-medium text-(--fms-accent)">
                   {roleLabel(user.role)}
                 </span>
               </p>
               <p>Company: {user.tenant?.name ?? "Platform (no company)"}</p>
               <div>
-                <p className="mb-2 font-medium text-slate-900">Permissions</p>
+                <p className="mb-2 font-medium text-(--fms-ink)">Permissions</p>
                 <ul className="flex flex-wrap gap-2">
                   {permissions.map((permission) => (
                     <li
                       key={permission}
-                      className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-900"
+                      className="rounded-full bg-[color-mix(in_srgb,var(--fms-accent)_14%,transparent)] px-3 py-1 text-xs font-medium text-(--fms-accent)"
                     >
                       {permission}
                     </li>

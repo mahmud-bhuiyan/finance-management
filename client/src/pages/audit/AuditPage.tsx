@@ -26,7 +26,7 @@ export const AuditPage = () => {
   }
 
   return (
-    <PageFrame maxWidth="max-w-4xl">
+    <PageFrame>
       <PageHeader
         kicker="Account"
         title="Audit trail"

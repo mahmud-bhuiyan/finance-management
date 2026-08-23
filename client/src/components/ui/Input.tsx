@@ -15,14 +15,16 @@ export const Input = ({
   const inputId = id ?? props.name;
 
   return (
-    <label className="block space-y-1.5 text-sm text-slate-700">
-      <span className="font-medium text-slate-800">{label}</span>
+    <label className="block space-y-2 text-sm text-(--fms-muted)">
+      <span className="block font-medium text-(--fms-ink)">{label}</span>
       <input
         id={inputId}
-        className={`w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-teal-700/30 focus:ring-2 ${className}`}
+        className={`w-full px-3 py-2 text-(--fms-ink) ${className}`}
         {...props}
       />
-      {error && <span className="text-xs text-red-600">{error}</span>}
+      {error && (
+        <span className="text-xs text-(--fms-rose)">{error}</span>
+      )}
     </label>
   );
 };

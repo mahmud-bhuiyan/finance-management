@@ -24,4 +24,4 @@ Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:40
 
 ## Pending cloud sync
 
-- None — cloud collection UID `31395184-5914500b-3ae9-4fe4-9371-f1b01cc92ff0` re-aligned with git on 2026-08-22 (folder/request order, List expenses pagination, collection description, unauthenticated request names; collection comment left in Postman).
+- **2026-08-23** — Add **Auth → Update theme** (`PATCH /auth/me/theme`) after login in Postman cloud (git JSON updated; Postman MCP returned 401).

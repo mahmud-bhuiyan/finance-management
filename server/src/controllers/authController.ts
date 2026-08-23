@@ -4,12 +4,14 @@ import {
   getUserById,
   loginUser,
   registerUser,
+  updateUserTheme,
 } from "../services/authService.js";
 import { AppError } from "../utils/AppError.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import {
   loginSchema,
   registerSchema,
+  updateThemeSchema,
 } from "../validators/authValidators.js";
 
 const isProduction =
@@ -66,6 +68,20 @@ export const me: RequestHandler = async (req, res, next) => {
 
     const user = await getUserById(req.user.id);
     sendSuccess(res, 200, { user }, "Current user loaded");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateTheme: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
+    }
+
+    const body = updateThemeSchema.parse(req.body);
+    const user = await updateUserTheme(req.user.id, body.themePreference);
+    sendSuccess(res, 200, { user }, "Theme preference updated");
   } catch (error) {
     next(error);
   }

@@ -28,7 +28,7 @@ export const DashboardFiltersPanel = ({
   vendors,
   onChange,
 }: DashboardFiltersProps) => (
-  <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+  <section className="surface p-4">
     <h2 className="text-sm font-semibold text-slate-900">Filters</h2>
     <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       <label className="flex flex-col gap-1 text-sm text-slate-700">

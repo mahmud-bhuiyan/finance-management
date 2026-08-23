@@ -65,7 +65,7 @@ export const FieldsPage = () => {
   };
 
   return (
-    <PageFrame maxWidth="max-w-4xl">
+    <PageFrame>
       <PageHeader
         kicker="Company admin"
         title="Custom fields"

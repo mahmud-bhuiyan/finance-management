@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -8,4 +18,381 @@ body {
     system-ui,
     -apple-system,
     sans-serif;
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(109, 135, 127, 0.55) transparent;
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(109, 135, 127, 0.45);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(109, 135, 127, 0.7);
+}
+
+.dark {
+  scrollbar-color: rgba(62, 224, 192, 0.35) transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(62, 224, 192, 0.28);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(62, 224, 192, 0.48);
+}
+
+/* Canvas, type, and color tokens for the workspace and guest auth screens. */
+.app-shell {
+  --fms-font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --fms-font-ui: "Plus Jakarta Sans", system-ui, sans-serif;
+  --fms-canvas: #efe6d4;
+  --fms-ink: #12211c;
+  --fms-muted: #5d6f68;
+  --fms-faint: #7d8d86;
+  --fms-accent: #0b6d5e;
+  --fms-accent-soft: #149883;
+  --fms-gold: #b8892d;
+  --fms-rose: #c45c5c;
+  --fms-violet: #6b5ce0;
+  --fms-surface: rgba(255, 250, 242, 0.72);
+  --fms-surface-strong: #fffaf2;
+  --fms-border: rgba(18, 33, 28, 0.1);
+  --fms-border-strong: rgba(18, 33, 28, 0.16);
+  --fms-ring: rgba(11, 109, 94, 0.28);
+  --fms-orb-a: rgba(11, 109, 94, 0.28);
+  --fms-orb-b: rgba(184, 137, 45, 0.22);
+  --fms-orb-c: rgba(107, 92, 224, 0.14);
+  --fms-grid: rgba(18, 33, 28, 0.05);
+  --fms-noise: 0.055;
+  --fms-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 18px 40px -24px rgba(18, 33, 28, 0.35);
+  font-family: var(--fms-font-ui);
+  color: var(--fms-ink);
+  background: var(--fms-canvas);
+}
+
+.dark .app-shell {
+  --fms-canvas: #04110f;
+  --fms-ink: #e8f5f0;
+  --fms-muted: #93aea5;
+  --fms-faint: #6d877f;
+  --fms-accent: #3ee0c0;
+  --fms-accent-soft: #1fb89a;
+  --fms-gold: #e8c97a;
+  --fms-rose: #f08a8a;
+  --fms-violet: #b8a8ff;
+  --fms-surface: rgba(9, 32, 28, 0.62);
+  --fms-surface-strong: rgba(12, 38, 34, 0.88);
+  --fms-border: rgba(62, 224, 192, 0.14);
+  --fms-border-strong: rgba(62, 224, 192, 0.22);
+  --fms-ring: rgba(62, 224, 192, 0.32);
+  --fms-orb-a: rgba(62, 224, 192, 0.16);
+  --fms-orb-b: rgba(232, 201, 122, 0.1);
+  --fms-orb-c: rgba(184, 168, 255, 0.1);
+  --fms-grid: rgba(62, 224, 192, 0.05);
+  --fms-noise: 0.07;
+  --fms-shadow:
+    0 1px 0 rgba(62, 224, 192, 0.08) inset,
+    0 24px 48px -28px rgba(0, 0, 0, 0.7);
+}
+
+.app-atmosphere {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.app-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+}
+
+.app-orb-a {
+  top: -12rem;
+  right: -6rem;
+  width: 38rem;
+  height: 38rem;
+  background: radial-gradient(circle, var(--fms-orb-a) 0%, transparent 68%);
+}
+
+.app-orb-b {
+  bottom: -10rem;
+  left: 18%;
+  width: 28rem;
+  height: 28rem;
+  background: radial-gradient(circle, var(--fms-orb-b) 0%, transparent 70%);
+}
+
+.app-orb-c {
+  top: 38%;
+  left: -8rem;
+  width: 22rem;
+  height: 22rem;
+  background: radial-gradient(circle, var(--fms-orb-c) 0%, transparent 70%);
+}
+
+.app-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--fms-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--fms-grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, #000 20%, transparent 75%);
+}
+
+.app-noise {
+  position: absolute;
+  inset: 0;
+  opacity: var(--fms-noise);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.app-shell > .app-content {
+  position: relative;
+  z-index: 1;
+}
+
+.font-display {
+  font-family: var(--fms-font-display);
+}
+
+.surface {
+  background: var(--fms-surface);
+  backdrop-filter: blur(22px) saturate(1.15);
+  border: 1px solid var(--fms-border);
+  border-radius: 1.5rem;
+  box-shadow: var(--fms-shadow);
+}
+
+.surface-dashed {
+  background: color-mix(in srgb, var(--fms-surface) 55%, transparent);
+  border: 1px dashed var(--fms-border-strong);
+  border-radius: 1.5rem;
+}
+
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--kpi-tone, var(--fms-accent)),
+    transparent 80%
+  );
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(160deg, var(--fms-accent-soft), var(--fms-accent));
+  color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18) inset,
+    0 10px 24px -10px var(--fms-accent);
+}
+
+.dark .brand-mark {
+  color: #04110f;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 0.9rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fms-muted);
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.nav-link:hover {
+  background: color-mix(in srgb, var(--fms-accent) 8%, transparent);
+  color: var(--fms-ink);
+}
+
+.nav-link.is-active {
+  background: color-mix(in srgb, var(--fms-accent) 16%, transparent);
+  color: var(--fms-ink);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--fms-accent) 22%, transparent);
+}
+
+.nav-link.is-active .nav-ico {
+  color: var(--fms-accent);
+}
+
+.nav-ico {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.app-shell .text-slate-950,
+.app-shell .text-slate-900,
+.app-shell .text-slate-800 {
+  color: var(--fms-ink);
+}
+
+.app-shell .text-slate-700,
+.app-shell .text-slate-600 {
+  color: var(--fms-muted);
+}
+
+.app-shell .text-slate-500,
+.app-shell .text-slate-400 {
+  color: var(--fms-faint);
+}
+
+.app-shell .text-teal-800,
+.app-shell .text-teal-700,
+.app-shell .text-teal-300 {
+  color: var(--fms-accent);
+}
+
+.app-shell .border-slate-200,
+.app-shell .border-slate-300,
+.app-shell .border-slate-100,
+.app-shell .border-slate-800,
+.app-shell .border-slate-600 {
+  border-color: var(--fms-border);
+}
+
+.app-shell .bg-slate-50,
+.app-shell .bg-slate-100 {
+  background-color: color-mix(in srgb, var(--fms-accent) 7%, var(--fms-surface-strong));
+}
+
+.app-shell .bg-teal-50 {
+  background-color: color-mix(in srgb, var(--fms-accent) 14%, transparent);
+}
+
+.app-shell thead th {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dark .app-shell .bg-emerald-100 {
+  background-color: rgba(62, 224, 192, 0.16);
+}
+.dark .app-shell .text-emerald-800 {
+  color: #3ee0c0;
+}
+.dark .app-shell .bg-amber-100 {
+  background-color: rgba(232, 201, 122, 0.16);
+}
+.dark .app-shell .text-amber-800 {
+  color: #e8c97a;
+}
+.dark .app-shell .bg-red-100 {
+  background-color: rgba(240, 138, 138, 0.16);
+}
+.dark .app-shell .text-red-800 {
+  color: #f08a8a;
+}
+
+.app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.app-shell select,
+.app-shell textarea {
+  background: color-mix(in srgb, var(--fms-surface-strong) 88%, transparent);
+  border: 1px solid var(--fms-border-strong);
+  color: var(--fms-ink);
+  border-radius: 0.8rem;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+.app-shell select:focus,
+.app-shell textarea:focus {
+  outline: none;
+  border-color: var(--fms-accent);
+  box-shadow: 0 0 0 3px var(--fms-ring);
+}
+
+.app-shell table {
+  font-variant-numeric: tabular-nums;
+}
+
+.app-shell thead {
+  letter-spacing: 0.04em;
+}
+
+.app-shell tbody tr {
+  transition: background 0.12s ease;
+}
+
+.app-shell tbody tr:hover {
+  background: color-mix(in srgb, var(--fms-accent) 6%, transparent);
+}
+
+.app-shell .error-banner {
+  border: 1px solid color-mix(in srgb, var(--fms-rose) 38%, transparent);
+  background: color-mix(in srgb, var(--fms-rose) 12%, var(--fms-surface-strong));
+  color: var(--fms-ink);
+  box-shadow: none;
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+  font-weight: 600;
+}
+
+.spinner {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--fms-accent) 25%, transparent);
+  border-top-color: var(--fms-accent);
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

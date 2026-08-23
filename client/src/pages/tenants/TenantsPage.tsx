@@ -45,7 +45,7 @@ export const TenantsPage = () => {
   };
 
   return (
-    <PageFrame maxWidth="max-w-3xl">
+    <PageFrame>
       <PageHeader
         kicker="Super Admin"
         title="Companies"

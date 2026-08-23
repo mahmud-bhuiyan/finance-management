@@ -1,7 +1,7 @@
 import type { FormEvent } from "react";
-import { AuthButton } from "../../../components/forms/AuthButton";
-import { AuthInput } from "../../../components/forms/AuthInput";
 import { ErrorBanner } from "../../../components/feedback/ErrorBanner";
+import { AuthInput } from "../../../components/forms/AuthInput";
+import { Button } from "../../../components/ui/Button";
 
 type RegisterFormProps = {
   name: string;
@@ -60,9 +60,9 @@ export const RegisterForm = ({
       />
       {error && <ErrorBanner message={error} />}
       <div className="pt-1">
-        <AuthButton type="submit" tone="pink" disabled={submitting}>
+        <Button type="submit" className="w-full py-3" disabled={submitting}>
           {submitting ? "Signing up…" : "Sign up"}
-        </AuthButton>
+        </Button>
       </div>
     </form>
   );

@@ -13,6 +13,7 @@ export type AuthUser = {
   name: string | null;
   role: string;
   status?: string;
+  themePreference: "LIGHT" | "DARK";
   tenantId: string | null;
   tenant: {
     id: string;

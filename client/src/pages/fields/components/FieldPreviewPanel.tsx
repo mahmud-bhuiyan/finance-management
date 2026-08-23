@@ -20,7 +20,7 @@ export const FieldPreviewPanel = ({ fields }: FieldPreviewPanelProps) => {
   }, [fields, values]);
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="surface p-5">
       <h2 className="text-lg font-medium text-slate-900">Live preview</h2>
       <p className="mt-1 text-sm text-slate-600">
         Reusable dynamic form renderer — enabled fields only, ordered by sort

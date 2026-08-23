@@ -7,6 +7,10 @@
   },
   "variable": [
     {
+      "key": "serverRoot",
+      "value": "http://localhost:4000"
+    },
+    {
       "key": "baseUrl",
       "value": "http://localhost:4000/api/v1"
     },
@@ -108,7 +112,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/health",
+            "url": "{{serverRoot}}/health",
             "description": "Expects HTTP 200 and `database.connected: true` when Postgres is up."
           },
           "response": []
@@ -256,6 +260,43 @@
             "header": [],
             "url": "{{baseUrl}}/auth/me",
             "description": "Requires `fms_token` cookie from Login / Register / Login (Super Admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update theme",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns updated theme preference', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.user.themePreference).to.eql('DARK');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"themePreference\": \"DARK\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/me/theme",
+            "description": "Updates the authenticated user's theme preference (`LIGHT` or `DARK`). Requires session cookie."
           },
           "response": []
         },

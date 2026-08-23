@@ -38,7 +38,7 @@ pages/
 components/
   ui/         # Button, Input, Select, Modal, Table, …
   feedback/   # LoadingState, EmptyState, ErrorBanner, …
-  layout/     # AppShell, Sidebar, PageHeader, …
+  layout/     # AppLayout, Sidebar, PageHeader, …
   forms/      # shared form helpers used by multiple pages
 ```
 
@@ -52,7 +52,7 @@ components/
 
 ## App shell (SPA — no full page reloads)
 
-- **`main.tsx`** — mount the app and wrap it with global providers only (`QueryClientProvider`, `BrowserRouter`, `AuthProvider`, future contexts). Providers stay mounted so session state survives route changes.
+- **`main.tsx`** — mount the app and wrap it with **all** global providers. Do not put providers in `App.tsx`, layouts, or pages. Current stack (outer → inner): `QueryClientProvider` → `BrowserRouter` → `AuthProvider` → `ThemeProvider` → `App`. Keep `ThemeProvider` inside `AuthProvider` so it can read the session. Providers stay mounted so session and theme survive route changes.
 - **`App.tsx`** — route table only (`Routes` / `Route`). No providers here.
 - Navigate with **`Link`** or **`useNavigate`** from `react-router-dom` — never plain `<a href="/…">` for in-app links (that triggers a full reload).
 
@@ -64,3 +64,9 @@ components/
 - **Auth** — `useAuth` loads `/auth/me` via `useQuery`; login/register call `setQueryData`, logout clears the cache, `refresh()` invalidates.
 - **Defaults** (`queryClient.ts`): `retry: 1`, `refetchOnWindowFocus: false`. Override per hook when needed (e.g. auth `retry: false`).
 - Do **not** fetch API data with raw `useEffect` + `useState` — use React Query.
+
+## Theme preference
+
+- **`src/lib/theme.ts`** — `ThemePreference`, `applyThemePreference()`, and localStorage helpers (`readStoredThemePreference`, `persistThemePreference`).
+- **`ThemeProvider`** (`src/hooks/useTheme.tsx`) — local-first during the session: toggle updates localStorage and the DOM immediately; `PATCH /auth/me/theme` runs in the background. Rapid toggles are allowed; if a stale API response does not match the current local value, ignore it (local wins).
+- **Page refresh / first session load** — when auth resolves for a user, apply the server `themePreference` once and refresh localStorage (API wins). Do not re-apply from auth cache updates during the same session.

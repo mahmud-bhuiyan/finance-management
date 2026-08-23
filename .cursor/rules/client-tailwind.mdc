@@ -1,0 +1,43 @@
+---
+description: Tailwind v4 class syntax — avoid language-server rewrite warnings
+globs: client/src/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# Tailwind v4 class syntax
+
+This client uses **Tailwind CSS v4**. Apply the language server’s suggested rewrite instead of leaving a warning.
+
+## Important modifier — suffix, not prefix
+
+```tsx
+// ❌ BAD
+className="!rounded-none lg:!hidden"
+
+// ✅ GOOD
+className="rounded-none! lg:hidden!"
+```
+
+## CSS variables — parentheses, not `[var(--…)]`
+
+```tsx
+// ❌ BAD
+className="text-[var(--fms-ink)] border-[var(--fms-border)]"
+
+// ✅ GOOD
+className="text-(--fms-ink) border-(--fms-border)"
+```
+
+Keep `[…]` for values that are not a bare CSS variable (`color-mix(…)`, calc, etc.).
+
+## Prefer the suggested scale over equivalent arbitrary values
+
+```tsx
+// ❌ BAD
+className="w-[16.5rem] lg:pl-[18rem]"
+
+// ✅ GOOD
+className="w-66 lg:pl-72"
+```
+
+Use arbitrary values only when there is no matching utility.

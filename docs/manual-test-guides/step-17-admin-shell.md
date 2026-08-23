@@ -8,7 +8,7 @@
 **Artifacts:**  
 - Markdown: `docs/manual-test-guides/step-17-admin-shell.md`  
 - PDF: `docs/manual-test-guides/step-17-admin-shell.pdf`  
-- Client: `AppShell` + `Sidebar` wrapping authenticated routes  
+- Client: `AppLayout` + `Sidebar` wrapping authenticated routes  
 - No new HTTP APIs (Postman: missing income attachment + user negative requests added in this step)
 
 ---
