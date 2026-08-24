@@ -22,7 +22,7 @@ export const AuditLogTable = () => {
       {
         id: "when",
         header: "When",
-        width: "18%",
+        width: "25%",
         align: "left",
         className: "truncate whitespace-nowrap",
         cell: (log: AuditLogEntry) =>
@@ -31,7 +31,7 @@ export const AuditLogTable = () => {
       {
         id: "actor",
         header: "Actor",
-        width: "28%",
+        width: "30%",
         align: "left",
         className: "truncate",
         cell: (log: AuditLogEntry) => (
@@ -56,7 +56,7 @@ export const AuditLogTable = () => {
       {
         id: "entity",
         header: "Entity",
-        width: "12%",
+        width: "10%",
         align: "left",
         className: "truncate",
         cell: (log: AuditLogEntry) => log.entityType,
@@ -64,7 +64,7 @@ export const AuditLogTable = () => {
       {
         id: "entityId",
         header: "Entity ID",
-        width: "22%",
+        width: "15%",
         align: "left",
         className: "truncate font-mono text-xs text-(--fms-muted)",
         cell: (log: AuditLogEntry) => (

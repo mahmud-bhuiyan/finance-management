@@ -11,6 +11,7 @@ import { TenantFormSection } from "./components/TenantFormSection";
 import { TenantSummaryAside } from "./components/TenantSummaryAside";
 import { TenantSuperAdminGate } from "./components/TenantSuperAdminGate";
 import type { Tenant } from "./lib/tenantApi";
+import { TENANT_LIST_PATHS } from "./lib/tenantPaths";
 import { useTenantMutations } from "./hooks/useTenantMutations";
 
 export const CreateTenantPage = () => {
@@ -50,7 +51,7 @@ export const CreateTenantPage = () => {
     setError(null);
     try {
       await createAdmin(createdTenant.id, input);
-      navigate("/tenants", { replace: true });
+      navigate(TENANT_LIST_PATHS.active, { replace: true });
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "Could not create company admin",
@@ -72,7 +73,7 @@ export const CreateTenantPage = () => {
           }
           actions={
             <Link
-              to="/tenants"
+              to={TENANT_LIST_PATHS.active}
               className="inline-flex items-center rounded-xl border border-(--fms-border-strong) bg-transparent px-4 py-2 text-sm font-semibold tracking-wide text-(--fms-ink) transition-colors hover:bg-[color-mix(in_srgb,var(--fms-accent)_10%,transparent)]"
             >
               Back to companies
@@ -118,7 +119,7 @@ export const CreateTenantPage = () => {
                 </form>
 
                 <TenantFormFooter
-                  cancelTo="/tenants"
+                  cancelTo={TENANT_LIST_PATHS.active}
                   submitLabel="Save company"
                   submitting={isCreating}
                   submitDisabled={!canSaveName}

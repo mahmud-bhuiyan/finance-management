@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import { GuestOnly } from "./components/layout/GuestOnly";
 import { AccessPage } from "./pages/access/AccessPage";
@@ -40,7 +40,9 @@ const App = () => (
     <Route element={<AppLayout />}>
       <Route path="/" element={<HomePage />} />
       <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/tenants" element={<TenantsPage />} />
+      <Route path="/tenants" element={<Navigate to="/tenants/active" replace />} />
+      <Route path="/tenants/active" element={<TenantsPage status="ACTIVE" />} />
+      <Route path="/tenants/inactive" element={<TenantsPage status="INACTIVE" />} />
       <Route path="/tenants/new" element={<CreateTenantPage />} />
       <Route path="/tenants/:tenantId/edit" element={<EditTenantPage />} />
       <Route path="/users" element={<UsersPage />} />

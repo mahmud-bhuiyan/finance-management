@@ -11,6 +11,7 @@ import { TenantSummaryAside } from "./components/TenantSummaryAside";
 import { TenantSuperAdminGate } from "./components/TenantSuperAdminGate";
 import { useTenant } from "./hooks/useTenant";
 import { useTenantMutations } from "./hooks/useTenantMutations";
+import { TENANT_LIST_PATHS, tenantListPathForStatus } from "./lib/tenantPaths";
 
 export const EditTenantPage = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
@@ -34,7 +35,7 @@ export const EditTenantPage = () => {
   }, [location.state]);
 
   if (notFound) {
-    return <Navigate to="/tenants" replace />;
+    return <Navigate to={TENANT_LIST_PATHS.active} replace />;
   }
 
   const handleUpdateName = async (name: string) => {
@@ -98,7 +99,7 @@ export const EditTenantPage = () => {
           description="Update company details and assign admins."
           actions={
             <Link
-              to="/tenants"
+              to={tenant ? tenantListPathForStatus(tenant.status) : TENANT_LIST_PATHS.active}
               className="inline-flex items-center rounded-xl border border-(--fms-border-strong) bg-transparent px-4 py-2 text-sm font-semibold tracking-wide text-(--fms-ink) transition-colors hover:bg-[color-mix(in_srgb,var(--fms-accent)_10%,transparent)]"
             >
               Back to companies
