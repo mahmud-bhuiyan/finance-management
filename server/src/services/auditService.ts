@@ -104,16 +104,36 @@ export const listAuditLogs = async (
     where.entityId = query.entityId;
   }
 
-  const logs = await prisma.auditLog.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    take: query.limit,
-    include: {
-      actor: {
-        select: { id: true, email: true, name: true, role: true },
-      },
-    },
-  });
+  if (query.action) {
+    where.action = query.action;
+  }
 
-  return logs.map(toPublicAuditLog);
+  const skip = (query.page - 1) * query.pageSize;
+
+  const [logs, total] = await Promise.all([
+    prisma.auditLog.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: query.pageSize,
+      include: {
+        actor: {
+          select: { id: true, email: true, name: true, role: true },
+        },
+      },
+    }),
+    prisma.auditLog.count({ where }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / query.pageSize));
+
+  return {
+    logs: logs.map(toPublicAuditLog),
+    meta: {
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+      totalPages,
+    },
+  };
 };

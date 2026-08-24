@@ -163,3 +163,40 @@ export const createCompanyAdmin = async (
 
   return publicAdmin;
 };
+
+export const deleteTenant = async (id: string, actorId: string) => {
+  const existing = await prisma.tenant.findUnique({
+    where: { id },
+    include: tenantWithAdmins,
+  });
+  if (!existing) {
+    throw new AppError("Company not found", 404, "TENANT_NOT_FOUND");
+  }
+
+  const transactionCount = await prisma.financialTransaction.count({
+    where: { tenantId: id },
+  });
+  if (transactionCount > 0) {
+    throw new AppError(
+      "Company has financial records and cannot be deleted",
+      400,
+      "TENANT_HAS_DATA",
+    );
+  }
+
+  const publicTenant = toPublicTenant(existing);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.deleteMany({ where: { tenantId: id } });
+    await tx.tenant.delete({ where: { id } });
+  });
+
+  await writeAuditLog({
+    actor: { id: actorId, tenantId: null },
+    action: "DELETE",
+    entityType: "Tenant",
+    entityId: id,
+    tenantId: null,
+    oldValues: publicTenant,
+  });
+};
