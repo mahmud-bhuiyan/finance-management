@@ -1,4 +1,5 @@
 import { useState, type InputHTMLAttributes, type ReactElement } from "react";
+import { FormField } from "./FormField";
 
 type AuthInputIcon = "email" | "user" | "password";
 
@@ -82,8 +83,7 @@ export const AuthInput = ({
   const paddingClass = `${FieldIcon ? "pl-10" : "pl-3"} ${isPassword ? "pr-10" : "pr-3"}`;
 
   return (
-    <label className="block space-y-2 text-sm text-(--fms-muted)">
-      <span className="block font-medium text-(--fms-ink)">{label}</span>
+    <FormField label={label} error={error}>
       <div className="relative">
         {FieldIcon && (
           <span className="pointer-events-none absolute top-1/2 left-3 z-10 -translate-y-1/2 text-(--fms-faint)">
@@ -107,7 +107,6 @@ export const AuthInput = ({
           </button>
         )}
       </div>
-      {error && <span className="text-xs text-(--fms-rose)">{error}</span>}
-    </label>
+    </FormField>
   );
 };

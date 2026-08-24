@@ -15,10 +15,26 @@ export const updateTenantSchema = z
   .object({
     name: z.string().trim().min(2).max(120).optional(),
     status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
+    slug: z
+      .string()
+      .trim()
+      .min(2)
+      .max(80)
+      .regex(
+        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+        "Slug must be lowercase letters, numbers, and hyphens",
+      )
+      .optional(),
   })
-  .refine((data) => data.name !== undefined || data.status !== undefined, {
-    message: "Provide name and/or status",
-  });
+  .refine(
+    (data) =>
+      data.name !== undefined ||
+      data.status !== undefined ||
+      data.slug !== undefined,
+    {
+      message: "Provide name, slug, and/or status",
+    },
+  );
 
 export const createCompanyAdminSchema = z.object({
   email: z.string().trim().email().max(255),

@@ -1,27 +1,30 @@
-import type { InputHTMLAttributes } from "react";
+import type { SelectHTMLAttributes } from "react";
 import { FormField } from "../forms/FormField";
 
-type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
   label: string;
   error?: string;
 };
 
-export const Input = ({
+export const Select = ({
   label,
   error,
   id,
   className = "",
+  children,
   ...props
-}: InputProps) => {
-  const inputId = id ?? props.name;
+}: SelectProps) => {
+  const selectId = id ?? props.name;
 
   return (
     <FormField label={label} error={error}>
-      <input
-        id={inputId}
+      <select
+        id={selectId}
         className={`w-full px-3 py-2 text-(--fms-ink) ${className}`}
         {...props}
-      />
+      >
+        {children}
+      </select>
     </FormField>
   );
 };

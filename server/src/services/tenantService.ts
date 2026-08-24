@@ -100,11 +100,21 @@ export const updateTenant = async (
     throw new AppError("Company not found", 404, "TENANT_NOT_FOUND");
   }
 
+  if (input.slug !== undefined && input.slug !== existing.slug) {
+    const conflict = await prisma.tenant.findUnique({
+      where: { slug: input.slug },
+    });
+    if (conflict) {
+      throw new AppError("Slug is already in use", 409, "SLUG_TAKEN");
+    }
+  }
+
   const tenant = await prisma.tenant.update({
     where: { id },
     data: {
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.status !== undefined ? { status: input.status } : {}),
+      ...(input.slug !== undefined ? { slug: input.slug } : {}),
     },
     include: tenantWithAdmins,
   });

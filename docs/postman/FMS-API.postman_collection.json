@@ -538,6 +538,42 @@
           "response": []
         },
         {
+          "name": "Update tenant (change slug)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Slug updated', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.tenant.slug).to.eql('acme-renamed');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"acme-renamed\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tenants/{{tenantId}}",
+            "description": "Updates the company URL slug. Slug must be lowercase letters, numbers, and hyphens; returns 409 SLUG_TAKEN if already in use."
+          },
+          "response": []
+        },
+        {
           "name": "Delete tenant",
           "event": [
             {

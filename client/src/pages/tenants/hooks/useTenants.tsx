@@ -39,12 +39,32 @@ export type TenantConfirmAction = "deactivate" | "activate" | "delete";
 export type TenantListState = {
   page: number;
   pageSize: number;
+  search: string;
 };
 
 export const defaultTenantListState = (): TenantListState => ({
   page: 1,
   pageSize: DEFAULT_PAGE_SIZE,
+  search: "",
 });
+
+const matchesTenantSearch = (tenant: Tenant, query: string) => {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
+  return (
+    tenant.name.toLowerCase().includes(normalized) ||
+    tenant.slug.toLowerCase().includes(normalized) ||
+    tenant.status.toLowerCase().includes(normalized) ||
+    tenant.admins.some(
+      (admin) =>
+        admin.email.toLowerCase().includes(normalized) ||
+        (admin.name?.toLowerCase().includes(normalized) ?? false),
+    )
+  );
+};
 
 export const tenantQueryKeys = {
   all: ["tenants"] as const,
@@ -74,6 +94,7 @@ type TenantsContextValue = {
   closeConfirm: () => void;
   createTenant: (name: string) => Promise<Tenant>;
   updateTenantName: (id: string, name: string) => Promise<Tenant>;
+  updateTenantSlug: (id: string, slug: string) => Promise<Tenant>;
   updateTenantStatus: (id: string, status: Tenant["status"]) => Promise<void>;
   deleteTenant: (id: string) => Promise<void>;
   createAdmin: (
@@ -130,7 +151,7 @@ export const TenantsProvider = ({ children, enabled }: TenantsProviderProps) => 
       body,
     }: {
       id: string;
-      body: { name?: string; status?: Tenant["status"] };
+      body: { name?: string; slug?: string; status?: Tenant["status"] };
     }) =>
       apiFetch<{ tenant: Tenant }>(`/tenants/${id}`, {
         method: "PATCH",
@@ -177,8 +198,13 @@ export const TenantsProvider = ({ children, enabled }: TenantsProviderProps) => 
     }
   }, [tenants, editTenant?.id]);
 
+  const filteredTenants = useMemo(
+    () => tenants.filter((tenant) => matchesTenantSearch(tenant, listState.search)),
+    [tenants, listState.search],
+  );
+
   const meta = useMemo(() => {
-    const total = tenants.length;
+    const total = filteredTenants.length;
     const totalPages = Math.max(1, Math.ceil(total / listState.pageSize));
     const page = Math.min(listState.page, totalPages);
 
@@ -188,12 +214,12 @@ export const TenantsProvider = ({ children, enabled }: TenantsProviderProps) => 
       total,
       totalPages,
     };
-  }, [tenants.length, listState.page, listState.pageSize]);
+  }, [filteredTenants.length, listState.page, listState.pageSize]);
 
   const pageRows = useMemo(() => {
     const start = (meta.page - 1) * meta.pageSize;
-    return tenants.slice(start, start + meta.pageSize);
-  }, [tenants, meta.page, meta.pageSize]);
+    return filteredTenants.slice(start, start + meta.pageSize);
+  }, [filteredTenants, meta.page, meta.pageSize]);
 
   const patchListState = useCallback((next: Partial<TenantListState>) => {
     setListState((current) => ({ ...current, ...next }));
@@ -239,6 +265,14 @@ export const TenantsProvider = ({ children, enabled }: TenantsProviderProps) => 
     return data.tenant;
   };
 
+  const updateTenantSlug = async (id: string, slug: string) => {
+    const data = await updateTenantMutation.mutateAsync({
+      id,
+      body: { slug },
+    });
+    return data.tenant;
+  };
+
   const updateTenantStatus = async (id: string, status: Tenant["status"]) => {
     await updateTenantMutation.mutateAsync({ id, body: { status } });
   };
@@ -280,6 +314,7 @@ export const TenantsProvider = ({ children, enabled }: TenantsProviderProps) => 
         closeConfirm,
         createTenant,
         updateTenantName,
+        updateTenantSlug,
         updateTenantStatus,
         deleteTenant,
         createAdmin,

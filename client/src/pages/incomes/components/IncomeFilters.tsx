@@ -24,7 +24,7 @@ const FilterSelect = ({
   options: SupportItem[];
   onChange: (value: string) => void;
 }) => (
-  <label className="block space-y-1 text-sm text-slate-700">
+  <label className="block space-y-2 text-sm text-slate-700">
     <span className="font-medium text-slate-800">{label}</span>
     <select
       value={value}
@@ -53,7 +53,7 @@ export const IncomeFilters = ({
       Filters
     </h2>
     <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      <label className="block space-y-1 text-sm text-slate-700 sm:col-span-2 lg:col-span-1">
+      <label className="block space-y-2 text-sm text-slate-700 sm:col-span-2 lg:col-span-1">
         <span className="font-medium text-slate-800">Search notes</span>
         <input
           type="search"
@@ -81,7 +81,7 @@ export const IncomeFilters = ({
         options={vendors}
         onChange={(vendorId) => onChange({ vendorId, page: 1 })}
       />
-      <label className="block space-y-1 text-sm text-slate-700">
+      <label className="block space-y-2 text-sm text-slate-700">
         <span className="font-medium text-slate-800">Payment method</span>
         <select
           value={filters.paymentMethod}
@@ -98,7 +98,7 @@ export const IncomeFilters = ({
           ))}
         </select>
       </label>
-      <label className="block space-y-1 text-sm text-slate-700">
+      <label className="block space-y-2 text-sm text-slate-700">
         <span className="font-medium text-slate-800">Sort by</span>
         <select
           value={filters.sortBy}
@@ -115,7 +115,7 @@ export const IncomeFilters = ({
           <option value="createdAt">Created</option>
         </select>
       </label>
-      <label className="block space-y-1 text-sm text-slate-700">
+      <label className="block space-y-2 text-sm text-slate-700">
         <span className="font-medium text-slate-800">Direction</span>
         <select
           value={filters.sortDir}
