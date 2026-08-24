@@ -10,8 +10,8 @@ import {
 export const useTenantMutations = () => {
   const queryClient = useQueryClient();
 
-  const invalidateList = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: tenantQueryKeys.list() }),
+  const invalidateTenant = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: tenantQueryKeys.all }),
     [queryClient],
   );
 
@@ -21,7 +21,7 @@ export const useTenantMutations = () => {
         method: "POST",
         body: JSON.stringify({ name }),
       }),
-    onSuccess: invalidateList,
+    onSuccess: invalidateTenant,
   });
 
   const updateTenantMutation = useMutation({
@@ -36,7 +36,7 @@ export const useTenantMutations = () => {
         method: "PATCH",
         body: JSON.stringify(body),
       }),
-    onSuccess: invalidateList,
+    onSuccess: invalidateTenant,
   });
 
   const deleteTenantMutation = useMutation({
@@ -44,7 +44,7 @@ export const useTenantMutations = () => {
       apiFetch<{ deleted: boolean }>(`/tenants/${id}`, {
         method: "DELETE",
       }),
-    onSuccess: invalidateList,
+    onSuccess: invalidateTenant,
   });
 
   const createAdminMutation = useMutation({
@@ -59,7 +59,7 @@ export const useTenantMutations = () => {
         method: "POST",
         body: JSON.stringify(input),
       }),
-    onSuccess: invalidateList,
+    onSuccess: invalidateTenant,
   });
 
   const createTenant = async (name: string) => {

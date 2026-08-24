@@ -43,7 +43,7 @@ export const TenantAdminsSection = ({
       description="People who can sign in and manage this company."
     >
       {tenant.admins.length === 0 ? (
-        <p className="surface-dashed px-4 py-5 text-sm text-(--fms-muted)">
+        <p className="surface-dashed mb-5 px-4 py-5 text-sm text-(--fms-muted)">
           No company admins yet. Add one below so someone can sign in.
         </p>
       ) : (

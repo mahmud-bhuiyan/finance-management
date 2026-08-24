@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
@@ -12,13 +12,14 @@ import { toQueryErrorMessage } from "../../../lib/queryClient";
 import {
   type Tenant,
   type TenantConfirmAction,
-  fetchTenants,
+  type TenantListFilters,
+  type TenantListMeta,
+  type TenantSortBy,
+  type TenantSortDir,
+  fetchTenantList,
   tenantQueryKeys,
 } from "../lib/tenantApi";
 import { useTenantMutations } from "./useTenantMutations";
-
-export type TenantSortBy = "name" | "slug" | "admins";
-export type TenantSortDir = "asc" | "desc";
 
 export type TenantListState = {
   page: number;
@@ -36,53 +37,21 @@ export const defaultTenantListState = (): TenantListState => ({
   sortDir: "asc",
 });
 
-const sortTenants = (
-  tenants: Tenant[],
-  sortBy: TenantSortBy,
-  sortDir: TenantSortDir,
-) => {
-  const factor = sortDir === "asc" ? 1 : -1;
-
-  return [...tenants].sort((left, right) => {
-    let comparison = 0;
-
-    switch (sortBy) {
-      case "name":
-        comparison = left.name.localeCompare(right.name);
-        break;
-      case "slug":
-        comparison = left.slug.localeCompare(right.slug);
-        break;
-      case "admins":
-        comparison = left.admins.length - right.admins.length;
-        break;
-    }
-
-    return comparison * factor;
-  });
-};
-
-const matchesTenantSearch = (tenant: Tenant, query: string) => {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) {
-    return true;
-  }
-
-  return (
-    tenant.name.toLowerCase().includes(normalized) ||
-    tenant.slug.toLowerCase().includes(normalized) ||
-    tenant.status.toLowerCase().includes(normalized) ||
-    tenant.admins.some(
-      (admin) =>
-        admin.email.toLowerCase().includes(normalized) ||
-        (admin.name?.toLowerCase().includes(normalized) ?? false),
-    )
-  );
-};
+const defaultMeta = (
+  status: Tenant["status"],
+  listState: TenantListState,
+): TenantListMeta => ({
+  page: listState.page,
+  pageSize: listState.pageSize,
+  total: 0,
+  totalPages: 1,
+  sortBy: listState.sortBy,
+  sortDir: listState.sortDir,
+  status,
+});
 
 type TenantsContextValue = {
   status: Tenant["status"];
-  tenants: Tenant[];
   pageRows: Tenant[];
   meta: PaginationMeta;
   listState: TenantListState;
@@ -126,47 +95,38 @@ export const TenantsProvider = ({
     isDeleting,
   } = useTenantMutations();
 
+  const listFilters = useMemo<TenantListFilters>(
+    () => ({
+      status,
+      search: listState.search,
+      page: listState.page,
+      pageSize: listState.pageSize,
+      sortBy: listState.sortBy,
+      sortDir: listState.sortDir,
+    }),
+    [status, listState],
+  );
+
   const listQuery = useQuery({
-    queryKey: tenantQueryKeys.list(),
-    queryFn: fetchTenants,
+    queryKey: tenantQueryKeys.list(listFilters),
+    queryFn: () => fetchTenantList(listFilters),
     enabled,
+    placeholderData: keepPreviousData,
   });
 
-  const tenants = listQuery.data ?? [];
+  const pageRows = listQuery.data?.tenants ?? [];
 
-  const filteredTenants = useMemo(
-    () =>
-      tenants.filter(
-        (tenant) =>
-          tenant.status === status &&
-          matchesTenantSearch(tenant, listState.search),
-      ),
-    [status, tenants, listState.search],
-  );
-
-  const sortedTenants = useMemo(
-    () =>
-      sortTenants(filteredTenants, listState.sortBy, listState.sortDir),
-    [filteredTenants, listState.sortBy, listState.sortDir],
-  );
-
-  const meta = useMemo(() => {
-    const total = sortedTenants.length;
-    const totalPages = Math.max(1, Math.ceil(total / listState.pageSize));
-    const page = Math.min(listState.page, totalPages);
+  const meta = useMemo<PaginationMeta>(() => {
+    const responseMeta =
+      listQuery.data?.meta ?? defaultMeta(status, listState);
 
     return {
-      page,
-      pageSize: listState.pageSize,
-      total,
-      totalPages,
+      page: responseMeta.page,
+      pageSize: responseMeta.pageSize,
+      total: responseMeta.total,
+      totalPages: responseMeta.totalPages,
     };
-  }, [sortedTenants.length, listState.page, listState.pageSize]);
-
-  const pageRows = useMemo(() => {
-    const start = (meta.page - 1) * meta.pageSize;
-    return sortedTenants.slice(start, start + meta.pageSize);
-  }, [sortedTenants, meta.page, meta.pageSize]);
+  }, [listQuery.data?.meta, listState, status]);
 
   const patchListState = useCallback((next: Partial<TenantListState>) => {
     setListState((current) => ({ ...current, ...next }));
@@ -191,12 +151,11 @@ export const TenantsProvider = ({
     <TenantsContext.Provider
       value={{
         status,
-        tenants,
         pageRows,
         meta,
         listState,
         patchListState,
-        loading: listQuery.isPending,
+        loading: listQuery.isPending && !listQuery.data,
         error: mutationError ?? queryError,
         setError: setMutationError,
         confirmAction,
@@ -221,5 +180,5 @@ export const useTenants = () => {
   return ctx;
 };
 
-// Re-export types for convenience
+export type { TenantSortBy, TenantSortDir };
 export type { Tenant, TenantAdmin, TenantConfirmAction } from "../lib/tenantApi";

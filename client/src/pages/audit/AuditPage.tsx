@@ -17,14 +17,14 @@ const AuditPageContent = () => {
     <>
       {error && <ErrorBanner message={error} />}
 
-      {loading ? (
-        <LoadingState message="Loading audit logs…" />
-      ) : (
-        <div className="space-y-3">
-          <AuditLogFilters />
+      <div className="space-y-3">
+        <AuditLogFilters />
+        {loading ? (
+          <LoadingState message="Loading audit logs…" />
+        ) : (
           <AuditLogTable />
-        </div>
-      )}
+        )}
+      </div>
 
       <AuditLogDetailModal />
     </>

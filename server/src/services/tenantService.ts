@@ -1,4 +1,4 @@
-import type { Tenant, User, UserRole } from "@prisma/client";
+import type { Prisma, Tenant, User, UserRole } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { writeAuditLog } from "./auditService.js";
 import { AppError } from "../utils/AppError.js";
@@ -7,6 +7,7 @@ import { slugify } from "../utils/slug.js";
 import type {
   CreateCompanyAdminInput,
   CreateTenantInput,
+  ListTenantsQuery,
   UpdateTenantInput,
 } from "../validators/tenantValidators.js";
 
@@ -53,13 +54,156 @@ const tenantWithAdmins = {
   },
 };
 
-export const listTenants = async () => {
-  const tenants = await prisma.tenant.findMany({
-    orderBy: { createdAt: "desc" },
+const buildListWhere = (query: ListTenantsQuery): Prisma.TenantWhereInput => {
+  const where: Prisma.TenantWhereInput = {};
+
+  if (query.status) {
+    where.status = query.status;
+  }
+
+  const search = query.q?.trim();
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { slug: { contains: search, mode: "insensitive" } },
+      {
+        users: {
+          some: {
+            role: "COMPANY_ADMIN",
+            OR: [
+              { email: { contains: search, mode: "insensitive" } },
+              { name: { contains: search, mode: "insensitive" } },
+            ],
+          },
+        },
+      },
+    ];
+  }
+
+  return where;
+};
+
+const buildListOrderBy = (
+  query: ListTenantsQuery,
+): Prisma.TenantOrderByWithRelationInput | Prisma.TenantOrderByWithRelationInput[] => {
+  const dir = query.sortDir;
+
+  if (query.sortBy === "slug") {
+    return { slug: dir };
+  }
+  if (query.sortBy === "createdAt") {
+    return { createdAt: dir };
+  }
+
+  return { name: dir };
+};
+
+export const listTenants = async (query: ListTenantsQuery) => {
+  const where = buildListWhere(query);
+  const skip = (query.page - 1) * query.pageSize;
+
+  if (query.sortBy === "admins") {
+    const matching = await prisma.tenant.findMany({
+      where,
+      select: {
+        id: true,
+        users: {
+          where: { role: "COMPANY_ADMIN" },
+          select: { id: true },
+        },
+      },
+    });
+
+    matching.sort((left, right) => {
+      const comparison = left.users.length - right.users.length;
+      return query.sortDir === "asc" ? comparison : -comparison;
+    });
+
+    const total = matching.length;
+    const totalPages = Math.max(1, Math.ceil(total / query.pageSize));
+    const pageIds = matching
+      .slice(skip, skip + query.pageSize)
+      .map((row) => row.id);
+
+    if (pageIds.length === 0) {
+      return {
+        tenants: [],
+        meta: {
+          page: query.page,
+          pageSize: query.pageSize,
+          total,
+          totalPages,
+          sortBy: query.sortBy,
+          sortDir: query.sortDir,
+          status: query.status,
+          q: query.q,
+        },
+      };
+    }
+
+    const rows = await prisma.tenant.findMany({
+      where: { id: { in: pageIds } },
+      include: tenantWithAdmins,
+    });
+    const rowsById = new Map(rows.map((row) => [row.id, row]));
+    const orderedRows = pageIds
+      .map((id) => rowsById.get(id))
+      .filter((row): row is NonNullable<typeof row> => row !== undefined);
+
+    return {
+      tenants: orderedRows.map(toPublicTenant),
+      meta: {
+        page: query.page,
+        pageSize: query.pageSize,
+        total,
+        totalPages,
+        sortBy: query.sortBy,
+        sortDir: query.sortDir,
+        status: query.status,
+        q: query.q,
+      },
+    };
+  }
+
+  const [rows, total] = await Promise.all([
+    prisma.tenant.findMany({
+      where,
+      include: tenantWithAdmins,
+      orderBy: buildListOrderBy(query),
+      skip,
+      take: query.pageSize,
+    }),
+    prisma.tenant.count({ where }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / query.pageSize));
+
+  return {
+    tenants: rows.map(toPublicTenant),
+    meta: {
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+      totalPages,
+      sortBy: query.sortBy,
+      sortDir: query.sortDir,
+      status: query.status,
+      q: query.q,
+    },
+  };
+};
+
+export const getTenant = async (id: string) => {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id },
     include: tenantWithAdmins,
   });
 
-  return tenants.map(toPublicTenant);
+  if (!tenant) {
+    throw new AppError("Company not found", 404, "TENANT_NOT_FOUND");
+  }
+
+  return toPublicTenant(tenant);
 };
 
 export const createTenant = async (

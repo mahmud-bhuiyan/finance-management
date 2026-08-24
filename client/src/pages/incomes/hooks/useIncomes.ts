@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { apiFetch } from "../../../lib/api";
 import type { FieldDefinition } from "../../../lib/fields";
@@ -42,6 +42,7 @@ export const useIncomes = (enabled: boolean, filters: IncomeListFilters) => {
     queryKey: incomeQueryKeys.list(filters),
     queryFn: () => fetchIncomeList(filters),
     enabled,
+    placeholderData: keepPreviousData,
   });
 
   const invalidateLists = useCallback(
@@ -101,7 +102,7 @@ export const useIncomes = (enabled: boolean, filters: IncomeListFilters) => {
     incomes: listQuery.data?.incomes ?? [],
     fields: (listQuery.data?.fields ?? []) as FieldDefinition[],
     meta: listQuery.data?.meta ?? defaultMeta(filters),
-    loading: listQuery.isPending,
+    loading: listQuery.isPending && !listQuery.data,
     error: mutationError ?? queryError,
     setError: setMutationError,
     refresh: listQuery.refetch,

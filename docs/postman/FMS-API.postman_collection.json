@@ -373,6 +373,11 @@
                   "  const json = pm.response.json();",
                   "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.data.tenants).to.be.an('array');",
+                  "  pm.expect(json.data.meta).to.be.an('object');",
+                  "  pm.expect(json.data.meta.page).to.eql(1);",
+                  "  pm.expect(json.data.meta.pageSize).to.eql(25);",
+                  "  pm.expect(json.data.meta.sortBy).to.eql('name');",
+                  "  pm.expect(json.data.meta.sortDir).to.eql('asc');",
                   "});"
                 ]
               }
@@ -381,8 +386,8 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/tenants",
-            "description": "Lists all companies."
+            "url": "{{baseUrl}}/api/v1/tenants?status=ACTIVE&page=1&pageSize=25&sortBy=name&sortDir=asc",
+            "description": "Lists companies with server-side pagination, sorting, and search. Query: `status` (ACTIVE|INACTIVE), `q` (search name/slug/admin), `page`, `pageSize` (max 100), `sortBy` (name|slug|admins|createdAt), `sortDir` (asc|desc). Default: name asc, page 1, pageSize 25."
           },
           "response": []
         },
@@ -462,6 +467,34 @@
             },
             "url": "{{baseUrl}}/api/v1/tenants/{{tenantId}}/admins",
             "description": "Creates a company admin for `{{tenantId}}`. Run Create tenant first (or set `tenantId` manually)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get tenant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns tenant', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.tenant.id).to.eql(pm.collectionVariables.get('tenantId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/tenants/{{tenantId}}",
+            "description": "Returns one company by id. Run Create tenant first (or set `tenantId` manually)."
           },
           "response": []
         },
@@ -1074,7 +1107,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/v1/audit/logs?page=1&pageSize=25",
-            "description": "Lists audit entries visible to the signed-in admin with pagination (`page`, `pageSize` default 25, max 100). Optional filters: `action` (CREATE|UPDATE|DELETE), `entityType`, `entityId`, `tenantId` (Super Admin only). Response includes `logs` and `meta` (page, pageSize, total, totalPages)."
+            "description": "Lists audit entries visible to the signed-in admin with server-side pagination (`page`, `pageSize` default 25, max 100). Optional filters: `action` (CREATE|UPDATE|DELETE, exact match), `q` (case-insensitive partial match on actor email/name, entity type, or entity id), legacy `entityType` / `entityId` (partial match when `q` is omitted), `tenantId` (Super Admin only). Response includes `logs` and `meta` (page, pageSize, total, totalPages)."
           },
           "response": []
         },

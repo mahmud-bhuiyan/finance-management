@@ -96,12 +96,28 @@ export const listAuditLogs = async (
     throw new AppError("Permission denied", 403, "FORBIDDEN");
   }
 
-  if (query.entityType) {
-    where.entityType = query.entityType;
-  }
+  if (query.q) {
+    const search = query.q.trim();
+    where.OR = [
+      { entityType: { contains: search, mode: "insensitive" } },
+      { entityId: { contains: search, mode: "insensitive" } },
+      { actor: { email: { contains: search, mode: "insensitive" } } },
+      { actor: { name: { contains: search, mode: "insensitive" } } },
+    ];
+  } else {
+    if (query.entityType) {
+      where.entityType = {
+        contains: query.entityType,
+        mode: "insensitive",
+      };
+    }
 
-  if (query.entityId) {
-    where.entityId = query.entityId;
+    if (query.entityId) {
+      where.entityId = {
+        contains: query.entityId,
+        mode: "insensitive",
+      };
+    }
   }
 
   if (query.action) {

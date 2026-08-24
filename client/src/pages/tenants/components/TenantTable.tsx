@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { DataTable, type DataTableColumn } from "../../../components/ui/DataTable";
+import { DebouncedSearchInput } from "../../../components/ui/DebouncedSearchInput";
 import type { Tenant } from "../lib/tenantApi";
 import { TenantTableActions } from "./TenantTableActions";
 import { useTenants, type TenantSortBy } from "../hooks/useTenants";
@@ -97,18 +98,14 @@ export const TenantTable = () => {
       emptyMessage={emptyMessage}
       filters={
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex min-w-48 flex-1 max-w-md items-center">
-            <span className="sr-only">Search companies</span>
-            <input
-              type="search"
-              value={listState.search}
-              onChange={(event) =>
-                patchListState({ search: event.target.value, page: 1 })
-              }
-              placeholder="Search name, slug, admin…"
-              className={searchFieldClass}
-            />
-          </label>
+          <DebouncedSearchInput
+            value={listState.search}
+            onDebouncedChange={(search) => patchListState({ search, page: 1 })}
+            srOnlyLabel="Search companies"
+            wrapperClassName="flex min-w-48 flex-1 max-w-md items-center"
+            placeholder="Search name, slug, admin…"
+            className={searchFieldClass}
+          />
           {isActiveTab ? (
             <Link
               to="/tenants/new"

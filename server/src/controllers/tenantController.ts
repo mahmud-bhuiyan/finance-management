@@ -3,6 +3,7 @@ import {
   createCompanyAdmin,
   createTenant,
   deleteTenant,
+  getTenant,
   listTenants,
   updateTenant,
 } from "../services/tenantService.js";
@@ -10,14 +11,26 @@ import { sendSuccess } from "../utils/apiResponse.js";
 import {
   createCompanyAdminSchema,
   createTenantSchema,
+  listTenantsQuerySchema,
   tenantIdParamSchema,
   updateTenantSchema,
 } from "../validators/tenantValidators.js";
 
-export const list: RequestHandler = async (_req, res, next) => {
+export const list: RequestHandler = async (req, res, next) => {
   try {
-    const tenants = await listTenants();
-    sendSuccess(res, 200, { tenants });
+    const query = listTenantsQuerySchema.parse(req.query);
+    const result = await listTenants(query);
+    sendSuccess(res, 200, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const show: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = tenantIdParamSchema.parse(req.params);
+    const tenant = await getTenant(id);
+    sendSuccess(res, 200, { tenant });
   } catch (error) {
     next(error);
   }
