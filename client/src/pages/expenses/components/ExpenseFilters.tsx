@@ -1,4 +1,5 @@
 import type { ExpenseListFilters } from "../../../lib/expenses";
+import { DebouncedSearchInput } from "../../../components/ui/DebouncedSearchInput";
 import {
   PAYMENT_METHODS,
   PAYMENT_METHOD_LABELS,
@@ -53,16 +54,15 @@ export const ExpenseFilters = ({
       Filters
     </h2>
     <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      <label className="block space-y-2 text-sm text-slate-700 sm:col-span-2 lg:col-span-1">
-        <span className="font-medium text-slate-800">Search notes</span>
-        <input
-          type="search"
-          value={filters.q}
-          onChange={(event) => onChange({ q: event.target.value, page: 1 })}
-          placeholder="e.g. taxi"
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-teal-700/30 focus:ring-2"
-        />
-      </label>
+      <DebouncedSearchInput
+        value={filters.q}
+        onDebouncedChange={(q) => onChange({ q, page: 1 })}
+        label="Search notes"
+        wrapperClassName="block space-y-2 text-sm text-slate-700 sm:col-span-2 lg:col-span-1"
+        labelClassName="font-medium text-slate-800"
+        placeholder="e.g. taxi"
+        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-teal-700/30 focus:ring-2"
+      />
       <FilterSelect
         label="Category"
         value={filters.categoryId}

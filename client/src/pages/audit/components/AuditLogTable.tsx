@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { DataTable } from "../../../components/ui/DataTable";
+import { DataTable, type DataTableColumn } from "../../../components/ui/DataTable";
 import { useAudit, type AuditLogEntry } from "../hooks/useAudit";
 
 const truncateId = (value: string, length = 10) =>
@@ -17,12 +17,13 @@ const actionBadgeClass: Record<AuditLogEntry["action"], string> = {
 export const AuditLogTable = () => {
   const { logs, meta, patchFilters, openLog } = useAudit();
 
-  const columns = useMemo(
+  const columns = useMemo<DataTableColumn<AuditLogEntry>[]>(
     () => [
       {
         id: "when",
         header: "When",
-        width: "20%",
+        width: "25%",
+        align: "left",
         className: "truncate whitespace-nowrap",
         cell: (log: AuditLogEntry) =>
           new Date(log.createdAt).toLocaleString(),
@@ -30,7 +31,8 @@ export const AuditLogTable = () => {
       {
         id: "actor",
         header: "Actor",
-        width: "20%",
+        width: "30%",
+        align: "left",
         className: "truncate",
         cell: (log: AuditLogEntry) => (
           <span className="text-(--fms-muted)" title={log.actor.email}>
@@ -42,6 +44,7 @@ export const AuditLogTable = () => {
         id: "action",
         header: "Action",
         width: "10%",
+        align: "center",
         cell: (log: AuditLogEntry) => (
           <span
             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold uppercase ${actionBadgeClass[log.action]}`}
@@ -54,13 +57,15 @@ export const AuditLogTable = () => {
         id: "entity",
         header: "Entity",
         width: "10%",
+        align: "left",
         className: "truncate",
         cell: (log: AuditLogEntry) => log.entityType,
       },
       {
         id: "entityId",
         header: "Entity ID",
-        width: "20%",
+        width: "15%",
+        align: "left",
         className: "truncate font-mono text-xs text-(--fms-muted)",
         cell: (log: AuditLogEntry) => (
           <span title={log.entityId}>{truncateId(log.entityId)}</span>
@@ -70,6 +75,7 @@ export const AuditLogTable = () => {
         id: "view",
         header: "",
         width: "10%",
+        align: "right",
         className: "whitespace-nowrap",
         cell: (log: AuditLogEntry) => (
           <button

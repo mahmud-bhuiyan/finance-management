@@ -6,8 +6,9 @@ import { BrowserRouter } from "react-router-dom";
 import { ScrollToTop } from "./components/layout/ScrollToTop";
 import { AuthProvider } from "./hooks/useAuth";
 import { ThemeProvider } from "./hooks/useTheme";
-import App from "./App.tsx";
+import { AppToaster } from "./components/feedback/AppToaster";
 import { applyThemePreference, readStoredThemePreference } from "./lib/theme";
+import App from "./App.tsx";
 import "./index.css";
 
 applyThemePreference(readStoredThemePreference() ?? "LIGHT");
@@ -20,6 +21,7 @@ createRoot(document.getElementById("root")!).render(
         <AuthProvider>
           <ThemeProvider>
             <App />
+            <AppToaster />
           </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>

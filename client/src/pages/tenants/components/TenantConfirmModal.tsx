@@ -1,31 +1,58 @@
+import type { ReactNode } from "react";
 import { Button } from "../../../components/ui/Button";
 import { Modal } from "../../../components/ui/Modal";
 import { ApiError } from "../../../lib/api";
 import { useTenants } from "../hooks/useTenants";
 
+const boldCompanyName = (name: string) => (
+  <strong className="font-semibold text-(--fms-ink)">{name}</strong>
+);
+
 const confirmCopy = {
   deactivate: {
-    title: "Mark company inactive",
-    body: (name: string) =>
-      `Mark ${name} inactive? Company admins and users cannot sign in while the company is inactive.`,
-    confirmLabel: "Mark inactive",
+    title: (name: string) => `Deactivate ${name} company`,
+    description: (name: string) => (
+      <>
+        For {boldCompanyName(name)}, admins and users will lose access until you
+        reactivate this company. You can restore access anytime from the Inactive
+        tab.
+      </>
+    ),
+    confirmLabel: "Deactivate",
     variant: "danger" as const,
   },
   activate: {
-    title: "Reactivate company",
-    body: (name: string) =>
-      `Reactivate ${name}? Users will be able to sign in again.`,
+    title: (name: string) => `Reactivate ${name} company`,
+    description: (name: string) => (
+      <>
+        For {boldCompanyName(name)}, admins and users will be able to sign in
+        again once this company is active.
+      </>
+    ),
     confirmLabel: "Reactivate",
     variant: "primary" as const,
   },
   delete: {
-    title: "Delete company",
-    body: (name: string) =>
-      `Permanently delete ${name}? This removes the company and its admins. Companies with financial records cannot be deleted.`,
-    confirmLabel: "Delete company",
+    title: (name: string) => `Delete ${name} company`,
+    description: (name: string) => (
+      <>
+        For {boldCompanyName(name)}, this action is permanent and removes the
+        company along with its admin accounts. Companies with financial records
+        on file cannot be deleted.
+      </>
+    ),
+    confirmLabel: "Delete permanently",
     variant: "danger" as const,
   },
-};
+} satisfies Record<
+  string,
+  {
+    title: (name: string) => string;
+    description: (name: string) => ReactNode;
+    confirmLabel: string;
+    variant: "danger" | "primary";
+  }
+>;
 
 export const TenantConfirmModal = () => {
   const {
@@ -38,6 +65,7 @@ export const TenantConfirmModal = () => {
     setError,
   } = useTenants();
 
+  const companyName = confirmAction?.tenant.name ?? "";
   const copy = confirmAction ? confirmCopy[confirmAction.action] : null;
   const submitting =
     confirmAction?.action === "delete" ? isDeleting : isUpdating;
@@ -67,7 +95,7 @@ export const TenantConfirmModal = () => {
   return (
     <Modal
       open={!!confirmAction}
-      title={copy?.title ?? "Confirm action"}
+      title={copy ? copy.title(companyName) : "Confirm action"}
       onClose={closeConfirm}
       footer={
         <div className="flex flex-wrap justify-end gap-2 border-t border-(--fms-border) px-5 py-4">
@@ -86,8 +114,8 @@ export const TenantConfirmModal = () => {
       }
     >
       {confirmAction && copy && (
-        <p className="text-sm text-(--fms-ink)">
-          {copy.body(confirmAction.tenant.name)}
+        <p className="text-sm leading-relaxed text-(--fms-muted)">
+          {copy.description(companyName)}
         </p>
       )}
     </Modal>

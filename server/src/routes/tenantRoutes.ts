@@ -4,6 +4,7 @@ import {
   createAdmin,
   destroy,
   list,
+  show,
   update,
 } from "../controllers/tenantController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
@@ -15,6 +16,7 @@ tenantRouter.use(requireAuth, requireSuperAdmin);
 
 tenantRouter.get("/", list);
 tenantRouter.post("/", create);
+tenantRouter.get("/:id", show);
 tenantRouter.patch("/:id", update);
 tenantRouter.delete("/:id", destroy);
 tenantRouter.post("/:id/admins", createAdmin);

@@ -1,81 +1,57 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
-import { apiFetch } from "../../../lib/api";
-import {
-  DEFAULT_PAGE_SIZE,
-  type PaginationMeta,
-} from "../../../lib/pagination";
+import { DEFAULT_PAGE_SIZE, type PaginationMeta } from "../../../lib/pagination";
 import { toQueryErrorMessage } from "../../../lib/queryClient";
-
-export type TenantAdmin = {
-  id: string;
-  email: string;
-  name: string | null;
-  role: string;
-  tenantId: string | null;
-  createdAt: string;
-};
-
-export type Tenant = {
-  id: string;
-  name: string;
-  slug: string;
-  status: "ACTIVE" | "INACTIVE";
-  createdAt: string;
-  updatedAt: string;
-  admins: TenantAdmin[];
-};
-
-export type TenantConfirmAction = "deactivate" | "activate" | "delete";
+import {
+  type Tenant,
+  type TenantConfirmAction,
+  type TenantListFilters,
+  type TenantListMeta,
+  type TenantSortBy,
+  type TenantSortDir,
+  fetchTenantList,
+  tenantQueryKeys,
+} from "../lib/tenantApi";
+import { useTenantMutations } from "./useTenantMutations";
 
 export type TenantListState = {
   page: number;
   pageSize: number;
   search: string;
+  sortBy: TenantSortBy;
+  sortDir: TenantSortDir;
 };
 
 export const defaultTenantListState = (): TenantListState => ({
   page: 1,
   pageSize: DEFAULT_PAGE_SIZE,
   search: "",
+  sortBy: "name",
+  sortDir: "asc",
 });
 
-const matchesTenantSearch = (tenant: Tenant, query: string) => {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) {
-    return true;
-  }
-
-  return (
-    tenant.name.toLowerCase().includes(normalized) ||
-    tenant.slug.toLowerCase().includes(normalized) ||
-    tenant.status.toLowerCase().includes(normalized) ||
-    tenant.admins.some(
-      (admin) =>
-        admin.email.toLowerCase().includes(normalized) ||
-        (admin.name?.toLowerCase().includes(normalized) ?? false),
-    )
-  );
-};
-
-export const tenantQueryKeys = {
-  all: ["tenants"] as const,
-  list: () => [...tenantQueryKeys.all, "list"] as const,
-};
-
-const fetchTenants = () =>
-  apiFetch<{ tenants: Tenant[] }>("/tenants").then((data) => data.tenants);
+const defaultMeta = (
+  status: Tenant["status"],
+  listState: TenantListState,
+): TenantListMeta => ({
+  page: listState.page,
+  pageSize: listState.pageSize,
+  total: 0,
+  totalPages: 1,
+  sortBy: listState.sortBy,
+  sortDir: listState.sortDir,
+  status,
+});
 
 type TenantsContextValue = {
-  tenants: Tenant[];
+  status: Tenant["status"];
   pageRows: Tenant[];
   meta: PaginationMeta;
   listState: TenantListState;
@@ -83,28 +59,13 @@ type TenantsContextValue = {
   loading: boolean;
   error: string | null;
   setError: (message: string | null) => void;
-  createOpen: boolean;
-  openCreate: () => void;
-  closeCreate: () => void;
-  editTenant: Tenant | null;
-  openEdit: (tenant: Tenant) => void;
-  closeEdit: () => void;
   confirmAction: { action: TenantConfirmAction; tenant: Tenant } | null;
   openConfirm: (action: TenantConfirmAction, tenant: Tenant) => void;
   closeConfirm: () => void;
-  createTenant: (name: string) => Promise<Tenant>;
-  updateTenantName: (id: string, name: string) => Promise<Tenant>;
-  updateTenantSlug: (id: string, slug: string) => Promise<Tenant>;
   updateTenantStatus: (id: string, status: Tenant["status"]) => Promise<void>;
   deleteTenant: (id: string) => Promise<void>;
-  createAdmin: (
-    tenantId: string,
-    input: { email: string; password: string; name?: string },
-  ) => Promise<void>;
-  isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
-  isCreatingAdmin: boolean;
 };
 
 const TenantsContext = createContext<TenantsContextValue | null>(null);
@@ -112,133 +73,63 @@ const TenantsContext = createContext<TenantsContextValue | null>(null);
 type TenantsProviderProps = {
   children: ReactNode;
   enabled: boolean;
+  status: Tenant["status"];
 };
 
-export const TenantsProvider = ({ children, enabled }: TenantsProviderProps) => {
-  const queryClient = useQueryClient();
+export const TenantsProvider = ({
+  children,
+  enabled,
+  status,
+}: TenantsProviderProps) => {
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [listState, setListState] = useState(defaultTenantListState);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editTenant, setEditTenant] = useState<Tenant | null>(null);
   const [confirmAction, setConfirmAction] = useState<{
     action: TenantConfirmAction;
     tenant: Tenant;
   } | null>(null);
 
+  const {
+    updateTenantStatus,
+    deleteTenant,
+    isUpdating,
+    isDeleting,
+  } = useTenantMutations();
+
+  const listFilters = useMemo<TenantListFilters>(
+    () => ({
+      status,
+      search: listState.search,
+      page: listState.page,
+      pageSize: listState.pageSize,
+      sortBy: listState.sortBy,
+      sortDir: listState.sortDir,
+    }),
+    [status, listState],
+  );
+
   const listQuery = useQuery({
-    queryKey: tenantQueryKeys.list(),
-    queryFn: fetchTenants,
+    queryKey: tenantQueryKeys.list(listFilters),
+    queryFn: () => fetchTenantList(listFilters),
     enabled,
+    placeholderData: keepPreviousData,
   });
 
-  const invalidateList = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: tenantQueryKeys.list() }),
-    [queryClient],
-  );
+  const pageRows = listQuery.data?.tenants ?? [];
 
-  const createTenantMutation = useMutation({
-    mutationFn: (name: string) =>
-      apiFetch<{ tenant: Tenant }>("/tenants", {
-        method: "POST",
-        body: JSON.stringify({ name }),
-      }),
-    onSuccess: invalidateList,
-  });
-
-  const updateTenantMutation = useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string;
-      body: { name?: string; slug?: string; status?: Tenant["status"] };
-    }) =>
-      apiFetch<{ tenant: Tenant }>(`/tenants/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(body),
-      }),
-    onSuccess: invalidateList,
-  });
-
-  const deleteTenantMutation = useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<{ deleted: boolean }>(`/tenants/${id}`, {
-        method: "DELETE",
-      }),
-    onSuccess: invalidateList,
-  });
-
-  const createAdminMutation = useMutation({
-    mutationFn: ({
-      tenantId,
-      input,
-    }: {
-      tenantId: string;
-      input: { email: string; password: string; name?: string };
-    }) =>
-      apiFetch<{ admin: TenantAdmin }>(`/tenants/${tenantId}/admins`, {
-        method: "POST",
-        body: JSON.stringify(input),
-      }),
-    onSuccess: invalidateList,
-  });
-
-  const tenants = listQuery.data ?? [];
-
-  useEffect(() => {
-    if (!editTenant) {
-      return;
-    }
-
-    const fresh = tenants.find((tenant) => tenant.id === editTenant.id);
-    if (fresh) {
-      setEditTenant(fresh);
-    } else {
-      setEditTenant(null);
-    }
-  }, [tenants, editTenant?.id]);
-
-  const filteredTenants = useMemo(
-    () => tenants.filter((tenant) => matchesTenantSearch(tenant, listState.search)),
-    [tenants, listState.search],
-  );
-
-  const meta = useMemo(() => {
-    const total = filteredTenants.length;
-    const totalPages = Math.max(1, Math.ceil(total / listState.pageSize));
-    const page = Math.min(listState.page, totalPages);
+  const meta = useMemo<PaginationMeta>(() => {
+    const responseMeta =
+      listQuery.data?.meta ?? defaultMeta(status, listState);
 
     return {
-      page,
-      pageSize: listState.pageSize,
-      total,
-      totalPages,
+      page: responseMeta.page,
+      pageSize: responseMeta.pageSize,
+      total: responseMeta.total,
+      totalPages: responseMeta.totalPages,
     };
-  }, [filteredTenants.length, listState.page, listState.pageSize]);
-
-  const pageRows = useMemo(() => {
-    const start = (meta.page - 1) * meta.pageSize;
-    return filteredTenants.slice(start, start + meta.pageSize);
-  }, [filteredTenants, meta.page, meta.pageSize]);
+  }, [listQuery.data?.meta, listState, status]);
 
   const patchListState = useCallback((next: Partial<TenantListState>) => {
     setListState((current) => ({ ...current, ...next }));
-  }, []);
-
-  const openCreate = useCallback(() => {
-    setCreateOpen(true);
-  }, []);
-
-  const closeCreate = useCallback(() => {
-    setCreateOpen(false);
-  }, []);
-
-  const openEdit = useCallback((tenant: Tenant) => {
-    setEditTenant(tenant);
-  }, []);
-
-  const closeEdit = useCallback(() => {
-    setEditTenant(null);
   }, []);
 
   const openConfirm = useCallback(
@@ -252,42 +143,6 @@ export const TenantsProvider = ({ children, enabled }: TenantsProviderProps) => 
     setConfirmAction(null);
   }, []);
 
-  const createTenant = async (name: string) => {
-    const data = await createTenantMutation.mutateAsync(name);
-    return data.tenant;
-  };
-
-  const updateTenantName = async (id: string, name: string) => {
-    const data = await updateTenantMutation.mutateAsync({
-      id,
-      body: { name },
-    });
-    return data.tenant;
-  };
-
-  const updateTenantSlug = async (id: string, slug: string) => {
-    const data = await updateTenantMutation.mutateAsync({
-      id,
-      body: { slug },
-    });
-    return data.tenant;
-  };
-
-  const updateTenantStatus = async (id: string, status: Tenant["status"]) => {
-    await updateTenantMutation.mutateAsync({ id, body: { status } });
-  };
-
-  const deleteTenant = async (id: string) => {
-    await deleteTenantMutation.mutateAsync(id);
-  };
-
-  const createAdmin = async (
-    tenantId: string,
-    input: { email: string; password: string; name?: string },
-  ) => {
-    await createAdminMutation.mutateAsync({ tenantId, input });
-  };
-
   const queryError = listQuery.error
     ? toQueryErrorMessage(listQuery.error, "Failed to load companies")
     : null;
@@ -295,33 +150,21 @@ export const TenantsProvider = ({ children, enabled }: TenantsProviderProps) => 
   return (
     <TenantsContext.Provider
       value={{
-        tenants,
+        status,
         pageRows,
         meta,
         listState,
         patchListState,
-        loading: listQuery.isPending,
+        loading: listQuery.isPending && !listQuery.data,
         error: mutationError ?? queryError,
         setError: setMutationError,
-        createOpen,
-        openCreate,
-        closeCreate,
-        editTenant,
-        openEdit,
-        closeEdit,
         confirmAction,
         openConfirm,
         closeConfirm,
-        createTenant,
-        updateTenantName,
-        updateTenantSlug,
         updateTenantStatus,
         deleteTenant,
-        createAdmin,
-        isCreating: createTenantMutation.isPending,
-        isUpdating: updateTenantMutation.isPending,
-        isDeleting: deleteTenantMutation.isPending,
-        isCreatingAdmin: createAdminMutation.isPending,
+        isUpdating,
+        isDeleting,
       }}
     >
       {children}
@@ -336,3 +179,6 @@ export const useTenants = () => {
   }
   return ctx;
 };
+
+export type { TenantSortBy, TenantSortDir };
+export type { Tenant, TenantAdmin, TenantConfirmAction } from "../lib/tenantApi";

@@ -1,115 +1,82 @@
 import { useMemo } from "react";
-import { Button } from "../../../components/ui/Button";
-import { DataTable } from "../../../components/ui/DataTable";
-import { useTenants, type Tenant } from "../hooks/useTenants";
-
-const statusBadgeClass: Record<Tenant["status"], string> = {
-  ACTIVE:
-    "bg-[color-mix(in_srgb,var(--fms-accent)_18%,transparent)] text-(--fms-accent)",
-  INACTIVE:
-    "bg-[color-mix(in_srgb,var(--fms-muted)_18%,transparent)] text-(--fms-muted)",
-};
-
-const actionButtonClass =
-  "text-sm font-medium text-(--fms-accent) hover:underline disabled:cursor-not-allowed disabled:opacity-40";
+import { Link } from "react-router-dom";
+import { DataTable, type DataTableColumn } from "../../../components/ui/DataTable";
+import { DebouncedSearchInput } from "../../../components/ui/DebouncedSearchInput";
+import type { Tenant } from "../lib/tenantApi";
+import { TenantTableActions } from "./TenantTableActions";
+import { useTenants, type TenantSortBy } from "../hooks/useTenants";
 
 const searchFieldClass =
   "w-full min-w-48 max-w-md rounded-lg border border-(--fms-border-strong) bg-(--fms-surface-strong) px-3 py-2 text-(--fms-ink) outline-none ring-(--fms-ring) focus:ring-2";
 
 export const TenantTable = () => {
   const {
+    status,
     pageRows,
     meta,
     listState,
     patchListState,
-    openCreate,
-    openEdit,
     openConfirm,
     isUpdating,
     isDeleting,
   } = useTenants();
 
-  const columns = useMemo(
+  const isActiveTab = status === "ACTIVE";
+
+  const columns = useMemo<DataTableColumn<Tenant>[]>(
     () => [
       {
         id: "name",
         header: "Company",
-        width: "25%",
+        width: "30%",
+        align: "left",
+        sortable: true,
         className: "truncate font-medium",
         cell: (tenant: Tenant) => tenant.name,
       },
       {
         id: "slug",
         header: "Slug",
-        width: "20%",
+        width: "25%",
+        align: "left",
+        sortable: true,
         className: "truncate font-mono text-xs text-(--fms-muted)",
         cell: (tenant: Tenant) => tenant.slug,
       },
       {
-        id: "status",
-        header: "Status",
-        width: "10%",
-        cell: (tenant: Tenant) => (
-          <span
-            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold uppercase ${statusBadgeClass[tenant.status]}`}
-          >
-            {tenant.status}
-          </span>
-        ),
-      },
-      {
         id: "admins",
         header: "Admins",
-        width: "10%",
+        width: "15%",
+        align: "center",
+        sortable: true,
         cell: (tenant: Tenant) => tenant.admins.length,
       },
       {
         id: "actions",
         header: "Actions",
-        width: "35%",
+        width: "30%",
+        align: "center",
         className: "whitespace-nowrap",
         cell: (tenant: Tenant) => (
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              className={actionButtonClass}
-              onClick={() => openEdit(tenant)}
-            >
-              Edit
-            </button>
-            {tenant.status === "ACTIVE" ? (
-              <button
-                type="button"
-                disabled={isUpdating || isDeleting}
-                className={actionButtonClass}
-                onClick={() => openConfirm("deactivate", tenant)}
-              >
-                Mark inactive
-              </button>
-            ) : (
-              <button
-                type="button"
-                disabled={isUpdating || isDeleting}
-                className={actionButtonClass}
-                onClick={() => openConfirm("activate", tenant)}
-              >
-                Reactivate
-              </button>
-            )}
-            <button
-              type="button"
-              disabled={isUpdating || isDeleting}
-              className="text-sm font-medium text-(--fms-rose) hover:underline disabled:cursor-not-allowed disabled:opacity-40"
-              onClick={() => openConfirm("delete", tenant)}
-            >
-              Delete
-            </button>
-          </div>
+          <TenantTableActions
+            tenant={tenant}
+            isActiveTab={isActiveTab}
+            disabled={isUpdating || isDeleting}
+            onDeactivate={() => openConfirm("deactivate", tenant)}
+            onActivate={() => openConfirm("activate", tenant)}
+            onDelete={() => openConfirm("delete", tenant)}
+          />
         ),
       },
     ],
-    [isDeleting, isUpdating, openConfirm, openEdit],
+    [isActiveTab, isDeleting, isUpdating, openConfirm],
   );
+
+  const emptyMessage = listState.search.trim()
+    ? "No companies match your search."
+    : isActiveTab
+      ? "No active companies yet. Create one to get started."
+      : "No inactive companies.";
 
   return (
     <DataTable
@@ -117,30 +84,36 @@ export const TenantTable = () => {
       rows={pageRows}
       rowKey={(tenant) => tenant.id}
       meta={meta}
+      sortBy={listState.sortBy}
+      sortDir={listState.sortDir}
+      onSortChange={(sortBy, sortDir) =>
+        patchListState({
+          sortBy: sortBy as TenantSortBy,
+          sortDir,
+          page: 1,
+        })
+      }
       onPageChange={(page) => patchListState({ page })}
       onPageSizeChange={(pageSize) => patchListState({ pageSize, page: 1 })}
-      emptyMessage={
-        listState.search.trim()
-          ? "No companies match your search."
-          : "No companies yet. Create one to get started."
-      }
+      emptyMessage={emptyMessage}
       filters={
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex min-w-48 flex-1 max-w-md items-center">
-            <span className="sr-only">Search companies</span>
-            <input
-              type="search"
-              value={listState.search}
-              onChange={(event) =>
-                patchListState({ search: event.target.value, page: 1 })
-              }
-              placeholder="Search name, slug, status, admin…"
-              className={searchFieldClass}
-            />
-          </label>
-          <Button type="button" onClick={openCreate} className="ml-auto">
-            Create company
-          </Button>
+          <DebouncedSearchInput
+            value={listState.search}
+            onDebouncedChange={(search) => patchListState({ search, page: 1 })}
+            srOnlyLabel="Search companies"
+            wrapperClassName="flex min-w-48 flex-1 max-w-md items-center"
+            placeholder="Search name, slug, admin…"
+            className={searchFieldClass}
+          />
+          {isActiveTab ? (
+            <Link
+              to="/tenants/new"
+              className="ml-auto inline-flex items-center rounded-xl bg-[linear-gradient(180deg,var(--fms-accent-soft),var(--fms-accent))] px-4 py-2 text-sm font-semibold tracking-wide text-white shadow-[0_10px_24px_-12px_var(--fms-accent)] transition-[filter] hover:brightness-110 dark:text-[#04110f]"
+            >
+              Create company
+            </Link>
+          ) : null}
         </div>
       }
     />

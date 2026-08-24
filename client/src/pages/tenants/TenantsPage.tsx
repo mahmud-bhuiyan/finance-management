@@ -1,14 +1,23 @@
-import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
-import { useAuth } from "../../hooks/useAuth";
-import { CreateTenantModal } from "./components/CreateTenantModal";
-import { EditTenantModal } from "./components/EditTenantModal";
+import { Tabs } from "../../components/ui/Tabs";
 import { TenantConfirmModal } from "./components/TenantConfirmModal";
+import { TenantSuperAdminGate } from "./components/TenantSuperAdminGate";
 import { TenantTable } from "./components/TenantTable";
+import type { Tenant } from "./lib/tenantApi";
+import { TENANT_LIST_PATHS } from "./lib/tenantPaths";
 import { TenantsProvider, useTenants } from "./hooks/useTenants";
+
+const tenantStatusTabs = [
+  { to: TENANT_LIST_PATHS.active, label: "Active" },
+  { to: TENANT_LIST_PATHS.inactive, label: "Inactive" },
+];
+
+type TenantsPageProps = {
+  status: Tenant["status"];
+};
 
 const TenantsPageContent = () => {
   const { loading, error } = useTenants();
@@ -23,40 +32,31 @@ const TenantsPageContent = () => {
         <TenantTable />
       )}
 
-      <CreateTenantModal />
-      <EditTenantModal />
       <TenantConfirmModal />
     </>
   );
 };
 
-export const TenantsPage = () => {
-  const { user, loading: authLoading } = useAuth();
-  const isSuperAdmin = user?.role === "SUPER_ADMIN";
-
-  if (authLoading) {
-    return <LoadingState message="Loading session…" />;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!isSuperAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  return (
-    <TenantsProvider enabled>
+export const TenantsPage = ({ status }: TenantsPageProps) => (
+  <TenantSuperAdminGate>
+    <TenantsProvider enabled status={status}>
       <PageFrame>
-        <PageHeader
-          kicker="Super Admin"
-          title="Companies"
-          description="Create tenants and assign company admins. Inactive companies cannot sign in."
-        />
+        <div className="flex flex-col gap-4">
+          <PageHeader
+            kicker="Super Admin"
+            title="Companies"
+            description="Create tenants and assign company admins. Inactive companies cannot sign in."
+          >
+            <Tabs
+              items={tenantStatusTabs}
+              ariaLabel="Company status"
+              className="mt-3"
+            />
+          </PageHeader>
 
-        <TenantsPageContent />
+          <TenantsPageContent />
+        </div>
       </PageFrame>
     </TenantsProvider>
-  );
-};
+  </TenantSuperAdminGate>
+);

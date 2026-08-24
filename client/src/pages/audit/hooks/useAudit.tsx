@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
@@ -35,16 +35,14 @@ export type AuditListFilters = {
   page: number;
   pageSize: number;
   action: "" | "CREATE" | "UPDATE" | "DELETE";
-  entityType: string;
-  entityId: string;
+  search: string;
 };
 
 export const defaultAuditListFilters = (): AuditListFilters => ({
   page: 1,
   pageSize: DEFAULT_PAGE_SIZE,
   action: "",
-  entityType: "",
-  entityId: "",
+  search: "",
 });
 
 export const auditQueryKeys = {
@@ -62,11 +60,8 @@ const buildAuditLogsQuery = (filters: AuditListFilters) => {
   if (filters.action) {
     params.set("action", filters.action);
   }
-  if (filters.entityType.trim()) {
-    params.set("entityType", filters.entityType.trim());
-  }
-  if (filters.entityId.trim()) {
-    params.set("entityId", filters.entityId.trim());
+  if (filters.search.trim()) {
+    params.set("q", filters.search.trim());
   }
 
   return `/audit/logs?${params.toString()}`;
@@ -80,9 +75,12 @@ const fetchAuditLogs = (filters: AuditListFilters) =>
 type AuditContextValue = {
   filters: AuditListFilters;
   patchFilters: (next: Partial<AuditListFilters>) => void;
+  resetFilters: () => void;
+  filterResetKey: number;
   logs: AuditLogEntry[];
   meta: PaginationMeta;
   loading: boolean;
+  fetching: boolean;
   error: string | null;
   refresh: () => Promise<unknown>;
   selectedLog: AuditLogEntry | null;
@@ -99,16 +97,26 @@ type AuditProviderProps = {
 
 export const AuditProvider = ({ children, enabled }: AuditProviderProps) => {
   const [filters, setFilters] = useState(defaultAuditListFilters);
+  const [filterResetKey, setFilterResetKey] = useState(0);
   const [selectedLog, setSelectedLog] = useState<AuditLogEntry | null>(null);
 
   const logsQuery = useQuery({
     queryKey: auditQueryKeys.logs(filters),
     queryFn: () => fetchAuditLogs(filters),
     enabled,
+    placeholderData: keepPreviousData,
   });
 
   const patchFilters = useCallback((next: Partial<AuditListFilters>) => {
     setFilters((current) => ({ ...current, ...next }));
+  }, []);
+
+  const resetFilters = useCallback(() => {
+    setFilters((current) => ({
+      ...defaultAuditListFilters(),
+      pageSize: current.pageSize,
+    }));
+    setFilterResetKey((key) => key + 1);
   }, []);
 
   const openLog = useCallback((log: AuditLogEntry) => {
@@ -128,9 +136,12 @@ export const AuditProvider = ({ children, enabled }: AuditProviderProps) => {
       value={{
         filters,
         patchFilters,
+        resetFilters,
+        filterResetKey,
         logs: logsQuery.data?.logs ?? [],
         meta: logsQuery.data?.meta ?? emptyPaginationMeta(filters.pageSize),
-        loading: logsQuery.isPending,
+        loading: logsQuery.isPending && !logsQuery.data,
+        fetching: logsQuery.isFetching,
         error,
         refresh: logsQuery.refetch,
         selectedLog,

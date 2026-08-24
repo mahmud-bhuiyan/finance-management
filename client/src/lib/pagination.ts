@@ -19,3 +19,43 @@ export const emptyPaginationMeta = (
   total: 0,
   totalPages: 1,
 });
+
+export type PaginationItem =
+  | { type: "page"; page: number }
+  | { type: "ellipsis" };
+
+export const buildPaginationItems = (
+  currentPage: number,
+  totalPages: number,
+  siblingCount = 1,
+): PaginationItem[] => {
+  if (totalPages <= 1) {
+    return [];
+  }
+
+  const pages = new Set<number>([1, totalPages]);
+
+  for (
+    let page = currentPage - siblingCount;
+    page <= currentPage + siblingCount;
+    page += 1
+  ) {
+    if (page >= 1 && page <= totalPages) {
+      pages.add(page);
+    }
+  }
+
+  const sortedPages = [...pages].sort((left, right) => left - right);
+  const items: PaginationItem[] = [];
+  let previousPage = 0;
+
+  for (const page of sortedPages) {
+    if (previousPage > 0 && page - previousPage > 1) {
+      items.push({ type: "ellipsis" });
+    }
+    items.push({ type: "page", page });
+    previousPage = page;
+  }
+
+  return items;
+};
