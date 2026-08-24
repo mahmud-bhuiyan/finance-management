@@ -155,8 +155,8 @@ export const DataTable = <T,>({
               <tr>
                 {columns.map((column) => {
                   const isSortable = column.sortable && onSortChange;
-                  const activeSort =
-                    isSortable && sortBy === column.id ? sortDir : null;
+                  const activeSort: DataTableSortDir | null =
+                    isSortable && sortBy === column.id ? (sortDir ?? null) : null;
 
                   return (
                     <th

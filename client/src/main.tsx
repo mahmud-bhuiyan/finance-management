@@ -7,8 +7,8 @@ import { ScrollToTop } from "./components/layout/ScrollToTop";
 import { AuthProvider } from "./hooks/useAuth";
 import { ThemeProvider } from "./hooks/useTheme";
 import { AppToaster } from "./components/feedback/AppToaster";
-import App from "./App.tsx";
 import { applyThemePreference, readStoredThemePreference } from "./lib/theme";
+import App from "./App.tsx";
 import "./index.css";
 
 applyThemePreference(readStoredThemePreference() ?? "LIGHT");
