@@ -187,10 +187,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\",\n  \"rememberMe\": true\n}"
             },
             "url": "{{baseUrl}}/api/v1/auth/login",
-            "description": "Logs in as the demo user (`userEmail` / `userPassword`). Sets `fms_token` cookie."
+            "description": "Logs in as the demo user (`userEmail` / `userPassword`). Sets `fms_token` cookie. Optional `rememberMe` (boolean, default false): true = persistent cookie (`JWT_COOKIE_MAX_AGE_MS`); false/omitted = session cookie (cleared when browser closes)."
           },
           "response": []
         },
@@ -224,10 +224,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}"
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\",\n  \"rememberMe\": true\n}"
             },
             "url": "{{baseUrl}}/api/v1/auth/login",
-            "description": "Logs in as the bootstrap Super Admin. Required before Tenants requests. Defaults match `server/.env.local.example`."
+            "description": "Logs in as the bootstrap Super Admin. Required before Tenants requests. Defaults match `server/.env.local.example`. Optional `rememberMe` (boolean, default false): true = persistent cookie; false/omitted = session cookie."
           },
           "response": []
         },

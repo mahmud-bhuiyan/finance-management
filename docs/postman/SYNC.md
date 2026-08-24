@@ -24,4 +24,5 @@ Session is httpOnly cookie `fms_token`. Default `baseUrl` = `http://localhost:40
 
 ## Pending cloud sync
 
-- None — cloud collection UID `31395184-068c0ff7-f431-420e-98b5-c3283c32a9e2` matches git (`docs/postman/FMS-API.postman_collection.json`): 14 folders, 90 requests.
+- None — cloud collection UID `31395184-068c0ff7-f431-420e-98b5-c3283c32a9e2` matches git (`docs/postman/FMS-API.postman_collection.json`): 14 folders, 93 requests.
+- Last MCP sync: 2026-08-25 (Auth `rememberMe`, Tenants pagination/CRUD, Audit pagination + `q` filter).
