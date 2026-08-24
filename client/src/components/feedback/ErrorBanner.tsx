@@ -1,3 +1,10 @@
+import { useEffect } from "react";
+import { toastError } from "../../lib/toast";
+
 export const ErrorBanner = ({ message }: { message: string }) => {
-  return <p className="error-banner text-sm">{message}</p>;
+  useEffect(() => {
+    toastError(message);
+  }, [message]);
+
+  return null;
 };

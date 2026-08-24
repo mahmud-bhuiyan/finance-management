@@ -1,12 +1,9 @@
-import { Navigate } from "react-router-dom";
 import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
-import { useAuth } from "../../hooks/useAuth";
-import { CreateTenantModal } from "./components/CreateTenantModal";
-import { EditTenantModal } from "./components/EditTenantModal";
 import { TenantConfirmModal } from "./components/TenantConfirmModal";
+import { TenantSuperAdminGate } from "./components/TenantSuperAdminGate";
 import { TenantTable } from "./components/TenantTable";
 import { TenantsProvider, useTenants } from "./hooks/useTenants";
 
@@ -23,30 +20,13 @@ const TenantsPageContent = () => {
         <TenantTable />
       )}
 
-      <CreateTenantModal />
-      <EditTenantModal />
       <TenantConfirmModal />
     </>
   );
 };
 
-export const TenantsPage = () => {
-  const { user, loading: authLoading } = useAuth();
-  const isSuperAdmin = user?.role === "SUPER_ADMIN";
-
-  if (authLoading) {
-    return <LoadingState message="Loading session…" />;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!isSuperAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  return (
+export const TenantsPage = () => (
+  <TenantSuperAdminGate>
     <TenantsProvider enabled>
       <PageFrame>
         <PageHeader
@@ -58,5 +38,5 @@ export const TenantsPage = () => {
         <TenantsPageContent />
       </PageFrame>
     </TenantsProvider>
-  );
-};
+  </TenantSuperAdminGate>
+);

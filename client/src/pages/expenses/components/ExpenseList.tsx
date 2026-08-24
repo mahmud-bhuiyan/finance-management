@@ -1,4 +1,5 @@
 import { Button } from "../../../components/ui/Button";
+import { Pagination } from "../../../components/ui/Pagination";
 import type { Expense, ExpenseListMeta } from "../../../lib/expenses";
 import { formatExpenseAmount } from "../../../lib/expenses";
 import type { FieldDefinition } from "../../../lib/fields";
@@ -131,27 +132,12 @@ export const ExpenseList = ({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
-        <p>
-          Page {meta.page} of {meta.totalPages} · {meta.total} total
-        </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={meta.page <= 1}
-            onClick={() => onPageChange(meta.page - 1)}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 disabled:opacity-40"
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            disabled={meta.page >= meta.totalPages}
-            onClick={() => onPageChange(meta.page + 1)}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 disabled:opacity-40"
-          >
-            Next
-          </button>
-        </div>
+        <p>{meta.total} total</p>
+        <Pagination
+          page={meta.page}
+          totalPages={meta.totalPages}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

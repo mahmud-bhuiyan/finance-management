@@ -13,24 +13,20 @@ type TenantAdminFormProps = {
   onNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
-  onSubmit: (event: FormEvent) => void;
+  onSubmit?: (event: FormEvent) => void;
   submitting?: boolean;
   className?: string;
+  embedded?: boolean;
 };
 
-export const TenantAdminForm = ({
+export const TenantAdminFields = ({
   values,
   onNameChange,
   onEmailChange,
   onPasswordChange,
-  onSubmit,
   submitting = false,
-  className = "grid gap-4 sm:grid-cols-2",
-}: TenantAdminFormProps) => (
-  <form
-    onSubmit={(event) => void onSubmit(event)}
-    className={className}
-  >
+}: Omit<TenantAdminFormProps, "onSubmit" | "embedded" | "className">) => (
+  <>
     <Input
       label="Admin name (optional)"
       name="adminName"
@@ -51,24 +47,56 @@ export const TenantAdminForm = ({
       placeholder="admin@company.com"
       disabled={submitting}
     />
-    <div className="sm:col-span-2">
-      <Input
-        label="Temporary password"
-        type="password"
-        name="adminPassword"
-        value={values.password}
-        onChange={(event) => onPasswordChange(event.target.value)}
-        required
-        minLength={8}
-        autoComplete="new-password"
-        placeholder="At least 8 characters"
-        disabled={submitting}
-      />
-    </div>
-    <div className="flex justify-end sm:col-span-2">
-      <Button type="submit" variant="ghost" disabled={submitting}>
-        {submitting ? "Adding…" : "Add admin"}
-      </Button>
-    </div>
-  </form>
+    <Input
+      label="Temporary password"
+      type="password"
+      name="adminPassword"
+      value={values.password}
+      onChange={(event) => onPasswordChange(event.target.value)}
+      required
+      minLength={8}
+      autoComplete="new-password"
+      placeholder="At least 8 characters"
+      disabled={submitting}
+    />
+  </>
 );
+
+export const TenantAdminForm = ({
+  values,
+  onNameChange,
+  onEmailChange,
+  onPasswordChange,
+  onSubmit,
+  submitting = false,
+  className = "space-y-4",
+  embedded = false,
+}: TenantAdminFormProps) => {
+  const fields = (
+    <TenantAdminFields
+      values={values}
+      onNameChange={onNameChange}
+      onEmailChange={onEmailChange}
+      onPasswordChange={onPasswordChange}
+      submitting={submitting}
+    />
+  );
+
+  if (embedded) {
+    return <div className={className}>{fields}</div>;
+  }
+
+  return (
+    <form
+      onSubmit={(event) => void onSubmit?.(event)}
+      className={className}
+    >
+      {fields}
+      <div className="flex justify-end">
+        <Button type="submit" variant="ghost" disabled={submitting}>
+          {submitting ? "Adding…" : "Add admin"}
+        </Button>
+      </div>
+    </form>
+  );
+};

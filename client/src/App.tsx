@@ -14,6 +14,8 @@ import { NotFoundPage } from "./pages/not-found/NotFoundPage";
 import { ProfilePage } from "./pages/profile/ProfilePage";
 import { RegisterPage } from "./pages/register/RegisterPage";
 import { ReportsPage } from "./pages/reports/ReportsPage";
+import { CreateTenantPage } from "./pages/tenants/CreateTenantPage";
+import { EditTenantPage } from "./pages/tenants/EditTenantPage";
 import { TenantsPage } from "./pages/tenants/TenantsPage";
 import { UsersPage } from "./pages/users/UsersPage";
 
@@ -39,6 +41,8 @@ const App = () => (
       <Route path="/" element={<HomePage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/tenants" element={<TenantsPage />} />
+      <Route path="/tenants/new" element={<CreateTenantPage />} />
+      <Route path="/tenants/:tenantId/edit" element={<EditTenantPage />} />
       <Route path="/users" element={<UsersPage />} />
       <Route path="/access" element={<AccessPage />} />
       <Route path="/audit" element={<AuditPage />} />

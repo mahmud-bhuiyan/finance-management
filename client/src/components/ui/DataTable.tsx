@@ -4,6 +4,7 @@ import {
   PAGE_SIZE_OPTIONS,
   type PaginationMeta,
 } from "../../lib/pagination";
+import { Pagination } from "./Pagination";
 
 export type DataTableColumnAlign = "left" | "center" | "right";
 
@@ -17,14 +18,24 @@ export type DataTableColumn<T> = {
   align?: DataTableColumnAlign;
 };
 
-const alignClass = (align: DataTableColumnAlign = "center") => {
-  if (align === "left") {
-    return "text-left";
+const headerAlignClass = (align: DataTableColumnAlign = "left") => {
+  if (align === "center") {
+    return "text-center";
   }
   if (align === "right") {
     return "text-right";
   }
-  return "text-center";
+  return "text-left";
+};
+
+const cellAlignClass = (align: DataTableColumnAlign = "left") => {
+  if (align === "center") {
+    return "flex justify-center";
+  }
+  if (align === "right") {
+    return "flex justify-end";
+  }
+  return "flex justify-start";
 };
 
 type DataTableProps<T> = {
@@ -41,9 +52,6 @@ type DataTableProps<T> = {
 
 const pageSizeSelectClass =
   "rounded-lg border border-(--fms-border-strong) bg-(--fms-surface-strong) px-2 py-1.5 text-(--fms-ink) outline-none ring-(--fms-ring) focus:ring-2";
-
-const pagerButtonClass =
-  "rounded-lg border border-(--fms-border-strong) px-3 py-1.5 text-(--fms-ink) hover:bg-[color-mix(in_srgb,var(--fms-accent)_10%,transparent)] disabled:cursor-not-allowed disabled:opacity-40";
 
 export const DataTable = <T,>({
   columns,
@@ -77,7 +85,7 @@ export const DataTable = <T,>({
                   <th
                     key={column.id}
                     style={column.width ? { width: column.width } : undefined}
-                    className={`px-4 py-3 font-medium ${alignClass(column.align)} ${column.headerClassName ?? ""}`}
+                    className={`px-4 py-3 align-middle font-medium ${headerAlignClass(column.align)} ${column.headerClassName ?? ""}`}
                   >
                     {column.header}
                   </th>
@@ -94,9 +102,13 @@ export const DataTable = <T,>({
                     <td
                       key={column.id}
                       style={column.width ? { width: column.width } : undefined}
-                      className={`px-4 py-3 text-(--fms-ink) ${alignClass(column.align)} ${column.className ?? ""}`}
+                      className="px-4 py-3 align-middle text-(--fms-ink)"
                     >
-                      {column.cell(row)}
+                      <div
+                        className={`min-w-0 ${cellAlignClass(column.align)} ${column.className ?? ""}`}
+                      >
+                        {column.cell(row)}
+                      </div>
                     </td>
                   ))}
                 </tr>
@@ -131,29 +143,11 @@ export const DataTable = <T,>({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <p>
-            Page {meta.page} of {meta.totalPages}
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={meta.page <= 1}
-              onClick={() => onPageChange(meta.page - 1)}
-              className={pagerButtonClass}
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              disabled={meta.page >= meta.totalPages}
-              onClick={() => onPageChange(meta.page + 1)}
-              className={pagerButtonClass}
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        <Pagination
+          page={meta.page}
+          totalPages={meta.totalPages}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

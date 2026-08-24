@@ -4,10 +4,30 @@
 
 :root {
   color-scheme: light;
+  --fms-toast-ink: #12211c;
+  --fms-toast-surface: #fffaf2;
+  --fms-toast-rose: #c45c5c;
+  --fms-toast-accent: #0b6d5e;
+  --fms-toast-shadow: 0 18px 40px -24px rgba(18, 33, 28, 0.35);
+  --fms-toast-error-bg: #fce4e4;
+  --fms-toast-error-border: #d97878;
+  --fms-toast-error-text: #8f2f2f;
+  --fms-toast-error-close-bg: rgba(143, 47, 47, 0.12);
+  --fms-toast-error-close-text: #8f2f2f;
 }
 
 .dark {
   color-scheme: dark;
+  --fms-toast-ink: #e8f5f0;
+  --fms-toast-surface: rgba(12, 38, 34, 0.88);
+  --fms-toast-rose: #f08a8a;
+  --fms-toast-accent: #3ee0c0;
+  --fms-toast-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.45);
+  --fms-toast-error-bg: rgba(72, 20, 20, 0.82);
+  --fms-toast-error-border: rgba(240, 138, 138, 0.42);
+  --fms-toast-error-text: #ffc2c2;
+  --fms-toast-error-close-bg: rgba(255, 194, 194, 0.12);
+  --fms-toast-error-close-text: #ffc2c2;
 }
 
 html,
@@ -394,6 +414,84 @@ html {
   border-radius: 1rem;
   padding: 0.8rem 1rem;
   font-weight: 600;
+}
+
+[data-sonner-toaster] {
+  --width: 22rem;
+  --toast-close-button-transform: none;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+[data-sonner-toast].fms-toast {
+  width: var(--width);
+  padding: 0.8rem 2.4rem 0.8rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--fms-toast-ink);
+  box-shadow: var(--fms-toast-shadow);
+}
+
+[data-sonner-toast].fms-toast-error,
+[data-sonner-toaster] [data-sonner-toast].fms-toast-error {
+  border: 1px solid var(--fms-toast-error-border);
+  background: var(--fms-toast-error-bg);
+  color: var(--fms-toast-error-text);
+}
+
+[data-sonner-toast].fms-toast-error .fms-toast-close,
+[data-sonner-toast].fms-toast-error [data-close-button].fms-toast-close,
+[data-sonner-toaster] [data-sonner-toast].fms-toast-error [data-close-button].fms-toast-close {
+  background: var(--fms-toast-error-close-bg);
+  color: var(--fms-toast-error-close-text);
+  border-color: transparent;
+}
+
+[data-sonner-toast].fms-toast-success {
+  border: 1px solid color-mix(in srgb, var(--fms-toast-accent) 38%, transparent);
+  background: color-mix(in srgb, var(--fms-toast-accent) 12%, var(--fms-toast-surface));
+}
+
+[data-sonner-toast].fms-toast-info {
+  border: 1px solid color-mix(in srgb, var(--fms-toast-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--fms-toast-accent) 8%, var(--fms-toast-surface));
+}
+
+[data-sonner-toast] .fms-toast-close,
+[data-sonner-toast] [data-close-button].fms-toast-close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fms-toast-ink) 8%, transparent);
+  color: var(--fms-toast-ink);
+  line-height: 0;
+  opacity: 0.72;
+  transform: none;
+  transition: opacity 150ms ease;
+  cursor: pointer;
+}
+
+[data-sonner-toast] .fms-toast-close svg,
+[data-sonner-toast] [data-close-button].fms-toast-close svg {
+  display: block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin: 0;
+}
+
+[data-sonner-toast] .fms-toast-close:hover,
+[data-sonner-toast] [data-close-button].fms-toast-close:hover {
+  opacity: 1;
 }
 
 .spinner {

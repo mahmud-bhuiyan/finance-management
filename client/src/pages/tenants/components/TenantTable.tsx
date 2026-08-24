@@ -1,14 +1,9 @@
 import { useMemo } from "react";
-import { Button } from "../../../components/ui/Button";
-import { DataTable } from "../../../components/ui/DataTable";
-import { useTenants, type Tenant } from "../hooks/useTenants";
-
-const statusBadgeClass: Record<Tenant["status"], string> = {
-  ACTIVE:
-    "bg-[color-mix(in_srgb,var(--fms-accent)_18%,transparent)] text-(--fms-accent)",
-  INACTIVE:
-    "bg-[color-mix(in_srgb,var(--fms-muted)_18%,transparent)] text-(--fms-muted)",
-};
+import { Link } from "react-router-dom";
+import { DataTable, type DataTableColumn } from "../../../components/ui/DataTable";
+import type { Tenant } from "../lib/tenantApi";
+import { statusBadgeClass } from "../lib/tenantDisplay";
+import { useTenants } from "../hooks/useTenants";
 
 const actionButtonClass =
   "text-sm font-medium text-(--fms-accent) hover:underline disabled:cursor-not-allowed disabled:opacity-40";
@@ -22,19 +17,18 @@ export const TenantTable = () => {
     meta,
     listState,
     patchListState,
-    openCreate,
-    openEdit,
     openConfirm,
     isUpdating,
     isDeleting,
   } = useTenants();
 
-  const columns = useMemo(
+  const columns = useMemo<DataTableColumn<Tenant>[]>(
     () => [
       {
         id: "name",
         header: "Company",
         width: "25%",
+        align: "left",
         className: "truncate font-medium",
         cell: (tenant: Tenant) => tenant.name,
       },
@@ -42,6 +36,7 @@ export const TenantTable = () => {
         id: "slug",
         header: "Slug",
         width: "20%",
+        align: "left",
         className: "truncate font-mono text-xs text-(--fms-muted)",
         cell: (tenant: Tenant) => tenant.slug,
       },
@@ -49,6 +44,7 @@ export const TenantTable = () => {
         id: "status",
         header: "Status",
         width: "10%",
+        align: "center",
         cell: (tenant: Tenant) => (
           <span
             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold uppercase ${statusBadgeClass[tenant.status]}`}
@@ -61,22 +57,23 @@ export const TenantTable = () => {
         id: "admins",
         header: "Admins",
         width: "10%",
+        align: "center",
         cell: (tenant: Tenant) => tenant.admins.length,
       },
       {
         id: "actions",
         header: "Actions",
         width: "35%",
+        align: "center",
         className: "whitespace-nowrap",
         cell: (tenant: Tenant) => (
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to={`/tenants/${tenant.id}/edit`}
               className={actionButtonClass}
-              onClick={() => openEdit(tenant)}
             >
               Edit
-            </button>
+            </Link>
             {tenant.status === "ACTIVE" ? (
               <button
                 type="button"
@@ -108,7 +105,7 @@ export const TenantTable = () => {
         ),
       },
     ],
-    [isDeleting, isUpdating, openConfirm, openEdit],
+    [isDeleting, isUpdating, openConfirm],
   );
 
   return (
@@ -138,9 +135,12 @@ export const TenantTable = () => {
               className={searchFieldClass}
             />
           </label>
-          <Button type="button" onClick={openCreate} className="ml-auto">
+          <Link
+            to="/tenants/new"
+            className="ml-auto inline-flex items-center rounded-xl bg-[linear-gradient(180deg,var(--fms-accent-soft),var(--fms-accent))] px-4 py-2 text-sm font-semibold tracking-wide text-white shadow-[0_10px_24px_-12px_var(--fms-accent)] transition-[filter] hover:brightness-110 dark:text-[#04110f]"
+          >
             Create company
-          </Button>
+          </Link>
         </div>
       }
     />
