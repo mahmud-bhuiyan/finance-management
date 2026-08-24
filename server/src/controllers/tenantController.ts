@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import {
   createCompanyAdmin,
   createTenant,
+  deleteTenant,
   listTenants,
   updateTenant,
 } from "../services/tenantService.js";
@@ -49,6 +50,16 @@ export const createAdmin: RequestHandler = async (req, res, next) => {
     const body = createCompanyAdminSchema.parse(req.body);
     const admin = await createCompanyAdmin(id, body, req.user!.id);
     sendSuccess(res, 201, { admin });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const destroy: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = tenantIdParamSchema.parse(req.params);
+    await deleteTenant(id, req.user!.id);
+    sendSuccess(res, 200, { deleted: true });
   } catch (error) {
     next(error);
   }

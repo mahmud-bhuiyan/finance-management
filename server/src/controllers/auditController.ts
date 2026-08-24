@@ -16,8 +16,8 @@ export const list: RequestHandler = async (req, res, next) => {
       throw new AppError("Permission denied", 403, "FORBIDDEN");
     }
 
-    const logs = await listAuditLogs(req.user, query);
-    sendSuccess(res, 200, { logs });
+    const { logs, meta } = await listAuditLogs(req.user, query);
+    sendSuccess(res, 200, { logs, meta });
   } catch (error) {
     next(error);
   }

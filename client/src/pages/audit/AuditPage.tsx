@@ -5,13 +5,35 @@ import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
-import { AuditLogList } from "./components/AuditLogList";
-import { useAuditLogs } from "./hooks/useAuditLogs";
+import { AuditLogDetailModal } from "./components/AuditLogDetailModal";
+import { AuditLogFilters } from "./components/AuditLogFilters";
+import { AuditLogTable } from "./components/AuditLogTable";
+import { AuditProvider, useAudit } from "./hooks/useAudit";
+
+const AuditPageContent = () => {
+  const { loading, error } = useAudit();
+
+  return (
+    <>
+      {error && <ErrorBanner message={error} />}
+
+      {loading ? (
+        <LoadingState message="Loading audit logs…" />
+      ) : (
+        <div className="space-y-3">
+          <AuditLogFilters />
+          <AuditLogTable />
+        </div>
+      )}
+
+      <AuditLogDetailModal />
+    </>
+  );
+};
 
 export const AuditPage = () => {
   const { user, loading: authLoading } = useAuth();
   const canReadAudit = !!user && roleCan(user.role, PERMISSIONS.AUDIT_READ);
-  const audit = useAuditLogs(!authLoading && canReadAudit);
 
   if (authLoading) {
     return <LoadingState message="Loading session…" />;
@@ -26,20 +48,16 @@ export const AuditPage = () => {
   }
 
   return (
-    <PageFrame>
-      <PageHeader
-        kicker="Account"
-        title="Audit trail"
-        description="Create, update, and delete actions with actor, entity, and before/after snapshots. Company admins see their company only; Super Admin sees platform-wide entries."
-      />
+    <AuditProvider enabled>
+      <PageFrame>
+        <PageHeader
+          kicker="Account"
+          title="Audit trail"
+          description="Create, update, and delete actions with actor, entity, and before/after snapshots. Company admins see their company only; Super Admin sees platform-wide entries."
+        />
 
-        {audit.error && <ErrorBanner message={audit.error} />}
-
-        {audit.loading ? (
-          <LoadingState message="Loading audit logs…" />
-        ) : (
-          <AuditLogList logs={audit.logs} />
-        )}
-    </PageFrame>
+        <AuditPageContent />
+      </PageFrame>
+    </AuditProvider>
   );
 };

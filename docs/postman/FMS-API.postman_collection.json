@@ -538,6 +538,70 @@
           "response": []
         },
         {
+          "name": "Update tenant (change slug)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Slug updated', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.tenant.slug).to.eql('acme-renamed');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"acme-renamed\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tenants/{{tenantId}}",
+            "description": "Updates the company URL slug. Slug must be lowercase letters, numbers, and hyphens; returns 409 SLUG_TAKEN if already in use."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete tenant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns deleted flag', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.deleted).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/tenants/{{tenantId}}",
+            "description": "Permanently deletes a company with no financial records. Removes company admins first. Returns 400 `TENANT_HAS_DATA` when expenses/income exist."
+          },
+          "response": []
+        },
+        {
           "name": "List tenants (unauthenticated — expect 401)",
           "event": [
             {
@@ -999,6 +1063,8 @@
                   "pm.test('Returns logs array', function () {",
                   "  pm.expect(json.success).to.eql(true);",
                   "  pm.expect(json.data.logs).to.be.an('array');",
+                  "  pm.expect(json.data.meta).to.be.an('object');",
+                  "  pm.expect(json.data.meta.pageSize).to.eql(25);",
                   "});"
                 ]
               }
@@ -1007,8 +1073,8 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/audit/logs?limit=50",
-            "description": "Lists audit entries visible to the signed-in admin. Super Admin sees platform-wide logs; company admin sees tenant-scoped logs only."
+            "url": "{{baseUrl}}/api/v1/audit/logs?page=1&pageSize=25",
+            "description": "Lists audit entries visible to the signed-in admin with pagination (`page`, `pageSize` default 25, max 100). Optional filters: `action` (CREATE|UPDATE|DELETE), `entityType`, `entityId`, `tenantId` (Super Admin only). Response includes `logs` and `meta` (page, pageSize, total, totalPages)."
           },
           "response": []
         },

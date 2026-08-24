@@ -31,7 +31,7 @@ export const DashboardFiltersPanel = ({
   <section className="surface p-4">
     <h2 className="text-sm font-semibold text-slate-900">Filters</h2>
     <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-2 text-sm text-slate-700">
         Period
         <select
           className="rounded-lg border border-slate-300 px-3 py-2"
@@ -50,7 +50,7 @@ export const DashboardFiltersPanel = ({
 
       {filters.preset === "custom" && (
         <>
-          <label className="flex flex-col gap-1 text-sm text-slate-700">
+          <label className="flex flex-col gap-2 text-sm text-slate-700">
             From
             <input
               type="date"
@@ -59,7 +59,7 @@ export const DashboardFiltersPanel = ({
               onChange={(event) => onChange({ from: event.target.value })}
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm text-slate-700">
+          <label className="flex flex-col gap-2 text-sm text-slate-700">
             To
             <input
               type="date"
@@ -71,7 +71,7 @@ export const DashboardFiltersPanel = ({
         </>
       )}
 
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-2 text-sm text-slate-700">
         Category
         <select
           className="rounded-lg border border-slate-300 px-3 py-2"
@@ -87,7 +87,7 @@ export const DashboardFiltersPanel = ({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-2 text-sm text-slate-700">
         Department
         <select
           className="rounded-lg border border-slate-300 px-3 py-2"
@@ -103,7 +103,7 @@ export const DashboardFiltersPanel = ({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-2 text-sm text-slate-700">
         Vendor
         <select
           className="rounded-lg border border-slate-300 px-3 py-2"
@@ -119,7 +119,7 @@ export const DashboardFiltersPanel = ({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-2 text-sm text-slate-700">
         Payment method
         <select
           className="rounded-lg border border-slate-300 px-3 py-2"

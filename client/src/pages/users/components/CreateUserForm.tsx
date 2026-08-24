@@ -70,7 +70,7 @@ export const CreateUserForm = ({
           maxLength={120}
           disabled={submitting}
         />
-        <label className="block space-y-1.5 text-sm text-slate-700">
+        <label className="block space-y-2 text-sm text-slate-700">
           <span className="font-medium text-slate-800">Role</span>
           <select
             value={role}

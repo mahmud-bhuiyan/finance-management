@@ -35,7 +35,7 @@ export const DynamicFieldInput = ({
   switch (field.fieldType) {
     case "LONG_TEXT":
       return (
-        <label className="block space-y-1.5 text-sm text-slate-700">
+        <label className="block space-y-2 text-sm text-slate-700">
           {label}
           <textarea
             value={toStringValue(value)}
@@ -93,7 +93,7 @@ export const DynamicFieldInput = ({
 
     case "DROPDOWN":
       return (
-        <label className="block space-y-1.5 text-sm text-slate-700">
+        <label className="block space-y-2 text-sm text-slate-700">
           {label}
           <select
             value={toStringValue(value)}
@@ -113,7 +113,7 @@ export const DynamicFieldInput = ({
 
     case "FILE":
       return (
-        <label className="block space-y-1.5 text-sm text-slate-700">
+        <label className="block space-y-2 text-sm text-slate-700">
           {label}
           <input
             type="file"

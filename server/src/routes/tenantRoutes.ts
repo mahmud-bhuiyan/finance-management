@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   create,
   createAdmin,
+  destroy,
   list,
   update,
 } from "../controllers/tenantController.js";
@@ -15,4 +16,5 @@ tenantRouter.use(requireAuth, requireSuperAdmin);
 tenantRouter.get("/", list);
 tenantRouter.post("/", create);
 tenantRouter.patch("/:id", update);
+tenantRouter.delete("/:id", destroy);
 tenantRouter.post("/:id/admins", createAdmin);

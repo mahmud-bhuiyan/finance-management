@@ -41,7 +41,7 @@ const SupportSelect = ({
   disabled: boolean;
   onChange: (value: string) => void;
 }) => (
-  <label className="block space-y-1.5 text-sm text-slate-700">
+  <label className="block space-y-2 text-sm text-slate-700">
     <span className="font-medium text-slate-800">{label}</span>
     <select
       value={value}
@@ -174,7 +174,7 @@ export const IncomeForm = ({
           disabled={submitting}
           onChange={setVendorId}
         />
-        <label className="block space-y-1.5 text-sm text-slate-700">
+        <label className="block space-y-2 text-sm text-slate-700">
           <span className="font-medium text-slate-800">
             Payment method (optional)
           </span>
@@ -193,7 +193,7 @@ export const IncomeForm = ({
           </select>
         </label>
       </div>
-      <label className="mt-4 block space-y-1.5 text-sm text-slate-700">
+      <label className="mt-4 block space-y-2 text-sm text-slate-700">
         <span className="font-medium text-slate-800">Notes (optional)</span>
         <textarea
           value={notes}
