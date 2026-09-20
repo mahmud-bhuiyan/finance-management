@@ -1,4 +1,8 @@
-import { Button } from "../../../components/ui/Button";
+import {
+  DeleteIcon,
+  EditIcon,
+  IconActionButton,
+} from "../../../components/ui/ActionIcons";
 import { Pagination } from "../../../components/ui/Pagination";
 import type { Expense, ExpenseListMeta } from "../../../lib/expenses";
 import { formatExpenseAmount } from "../../../lib/expenses";
@@ -12,7 +16,7 @@ type ExpenseListProps = {
   canWrite: boolean;
   busyId: string | null;
   onEdit: (expense: Expense) => void;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
   onPageChange: (page: number) => void;
 };
 
@@ -105,23 +109,22 @@ export const ExpenseList = ({
                 ))}
                 {canWrite && (
                   <td className="whitespace-nowrap px-4 py-3">
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
+                    <div className="flex items-center gap-1">
+                      <IconActionButton
+                        label="Edit expense"
                         disabled={busyId === expense.id}
                         onClick={() => onEdit(expense)}
-                        className="text-sm font-medium text-teal-800 hover:underline disabled:opacity-50"
                       >
-                        Edit
-                      </button>
-                      <Button
-                        variant="danger"
+                        <EditIcon />
+                      </IconActionButton>
+                      <IconActionButton
+                        label="Delete expense"
+                        tone="rose"
                         disabled={busyId === expense.id}
-                        onClick={() => void onDelete(expense.id)}
-                        className="px-3 py-1"
+                        onClick={() => onDelete(expense.id)}
                       >
-                        {busyId === expense.id ? "…" : "Delete"}
-                      </Button>
+                        <DeleteIcon />
+                      </IconActionButton>
                     </div>
                   </td>
                 )}

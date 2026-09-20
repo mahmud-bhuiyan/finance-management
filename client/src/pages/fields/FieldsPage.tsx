@@ -4,7 +4,9 @@ import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 import { useAuth } from "../../hooks/useAuth";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import { ApiError } from "../../lib/api";
 import type { CreateFieldPayload, FieldTarget } from "../../lib/fields";
 import { FIELD_TARGETS, targetLabel } from "../../lib/fields";
@@ -21,6 +23,7 @@ export const FieldsPage = () => {
   const [target, setTarget] = useState<FieldTarget>("EXPENSE");
   const [creating, setCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const confirm = useConfirmAction();
   const fieldsApi = useFieldDefinitions(!authLoading && canManageFields, target);
 
   if (authLoading) {
@@ -35,6 +38,9 @@ export const FieldsPage = () => {
     return <Navigate to="/" replace />;
   }
 
+  const fieldLabel = (id: string) =>
+    fieldsApi.fields.find((field) => field.id === id)?.label ?? "field";
+
   const runAction = async (id: string, action: () => Promise<unknown>) => {
     setBusyId(id);
     fieldsApi.setError(null);
@@ -44,6 +50,7 @@ export const FieldsPage = () => {
       fieldsApi.setError(
         error instanceof ApiError ? error.message : "Field action failed",
       );
+      throw error;
     } finally {
       setBusyId(null);
     }
@@ -108,15 +115,42 @@ export const FieldsPage = () => {
               <FieldDefinitionList
                 fields={fieldsApi.fields}
                 busyId={busyId}
-                onToggleEnabled={(id, enabled) =>
-                  runAction(id, () => fieldsApi.updateField(id, { enabled }))
-                }
+                onToggleEnabled={(id, enabled) => {
+                  if (enabled) {
+                    void runAction(id, () =>
+                      fieldsApi.updateField(id, { enabled: true }),
+                    );
+                    return;
+                  }
+
+                  const label = fieldLabel(id);
+                  confirm.requestConfirm({
+                    title: `Disable ${label}?`,
+                    description:
+                      "The field will be hidden from forms and reports but stored values remain on existing records.",
+                    confirmLabel: "Disable",
+                    variant: "danger",
+                    onConfirm: () =>
+                      runAction(id, () =>
+                        fieldsApi.updateField(id, { enabled: false }),
+                      ),
+                  });
+                }}
                 onMove={(id, direction) =>
                   runAction(id, () => fieldsApi.moveField(id, direction))
                 }
-                onDelete={(id) =>
-                  runAction(id, () => fieldsApi.deleteField(id))
-                }
+                onDelete={(id) => {
+                  const label = fieldLabel(id);
+                  confirm.requestConfirm({
+                    title: `Delete ${label}?`,
+                    description:
+                      "This removes the custom field definition. Existing records keep stored values but the field will no longer appear in forms.",
+                    confirmLabel: "Delete",
+                    variant: "danger",
+                    onConfirm: () =>
+                      runAction(id, () => fieldsApi.deleteField(id)),
+                  });
+                }}
                 onUpdateLabel={(id, label) =>
                   runAction(id, () => fieldsApi.updateField(id, { label }))
                 }
@@ -126,6 +160,18 @@ export const FieldsPage = () => {
             <FieldPreviewPanel fields={fieldsApi.fields} />
           </>
         )}
+
+      <ConfirmModal
+        open={!!confirm.pending}
+        title={confirm.pending?.title ?? ""}
+        description={confirm.pending?.description}
+        confirmLabel={confirm.pending?.confirmLabel}
+        cancelLabel={confirm.pending?.cancelLabel}
+        variant={confirm.pending?.variant}
+        submitting={confirm.submitting}
+        onClose={confirm.closeConfirm}
+        onConfirm={confirm.confirm}
+      />
     </PageFrame>
   );
 };

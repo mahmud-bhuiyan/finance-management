@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import { Button } from "../../../components/ui/Button";
-import { Modal } from "../../../components/ui/Modal";
+import { ConfirmModal } from "../../../components/ui/ConfirmModal";
 import { ApiError } from "../../../lib/api";
 import { useTenants } from "../hooks/useTenants";
 
@@ -89,35 +88,22 @@ export const TenantConfirmModal = () => {
       setError(
         error instanceof ApiError ? error.message : "Action could not be completed",
       );
+      throw error;
     }
   };
 
   return (
-    <Modal
+    <ConfirmModal
       open={!!confirmAction}
       title={copy ? copy.title(companyName) : "Confirm action"}
-      onClose={closeConfirm}
-      footer={
-        <div className="flex flex-wrap justify-end gap-2 border-t border-(--fms-border) px-5 py-4">
-          <Button type="button" variant="ghost" onClick={closeConfirm}>
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            variant={copy?.variant ?? "primary"}
-            disabled={submitting}
-            onClick={() => void handleConfirm()}
-          >
-            {submitting ? "Working…" : copy?.confirmLabel ?? "Confirm"}
-          </Button>
-        </div>
+      description={
+        confirmAction && copy ? copy.description(companyName) : undefined
       }
-    >
-      {confirmAction && copy && (
-        <p className="text-sm leading-relaxed text-(--fms-muted)">
-          {copy.description(companyName)}
-        </p>
-      )}
-    </Modal>
+      confirmLabel={copy?.confirmLabel}
+      variant={copy?.variant}
+      submitting={submitting}
+      onClose={closeConfirm}
+      onConfirm={handleConfirm}
+    />
   );
 };

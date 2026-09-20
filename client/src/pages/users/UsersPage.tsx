@@ -4,7 +4,9 @@ import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 import { useAuth } from "../../hooks/useAuth";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import { ApiError } from "../../lib/api";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
 import type {
@@ -25,6 +27,7 @@ export const UsersPage = () => {
   const usersApi = useTenantUsers(!authLoading && canManage);
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const confirm = useConfirmAction();
 
   if (authLoading) {
     return <LoadingState message="Loading session…" />;
@@ -65,6 +68,7 @@ export const UsersPage = () => {
       usersApi.setError(
         error instanceof ApiError ? error.message : "Update failed",
       );
+      throw error;
     } finally {
       setBusyId(null);
     }
@@ -74,8 +78,32 @@ export const UsersPage = () => {
     void runUpdate(id, () => usersApi.updateUser(id, { role }));
   };
 
+  const userLabel = (id: string) =>
+    usersApi.users.find((item) => item.id === id)?.email ?? "user";
+
   const handleChangeStatus = (id: string, status: TenantUserStatus) => {
-    void runUpdate(id, () => usersApi.updateUser(id, { status }));
+    const email = userLabel(id);
+
+    if (status === "ACTIVE") {
+      confirm.requestConfirm({
+        title: `Reactivate ${email}?`,
+        description: "They will be able to sign in again once reactivated.",
+        confirmLabel: "Reactivate",
+        variant: "primary",
+        onConfirm: () =>
+          runUpdate(id, () => usersApi.updateUser(id, { status: "ACTIVE" })),
+      });
+      return;
+    }
+
+    confirm.requestConfirm({
+      title: `Deactivate ${email}?`,
+      description: "They will lose access until you reactivate their account.",
+      confirmLabel: "Deactivate",
+      variant: "danger",
+      onConfirm: () =>
+        runUpdate(id, () => usersApi.updateUser(id, { status: "INACTIVE" })),
+    });
   };
 
   return (
@@ -101,6 +129,18 @@ export const UsersPage = () => {
             onChangeStatus={handleChangeStatus}
           />
         )}
+
+      <ConfirmModal
+        open={!!confirm.pending}
+        title={confirm.pending?.title ?? ""}
+        description={confirm.pending?.description}
+        confirmLabel={confirm.pending?.confirmLabel}
+        cancelLabel={confirm.pending?.cancelLabel}
+        variant={confirm.pending?.variant}
+        submitting={confirm.submitting}
+        onClose={confirm.closeConfirm}
+        onConfirm={confirm.confirm}
+      />
     </PageFrame>
   );
 };

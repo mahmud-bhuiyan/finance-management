@@ -4,8 +4,10 @@ import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 import { useActiveSupportPickers } from "../../hooks/useActiveSupportPickers";
 import { useAuth } from "../../hooks/useAuth";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import { ApiError } from "../../lib/api";
 import type {
   CreateIncomePayload,
@@ -47,6 +49,7 @@ export const IncomesPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Income | null>(null);
+  const confirm = useConfirmAction();
   const incomesApi = useIncomes(!authLoading && canRead, filters);
   const supportPickers = useActiveSupportPickers(!authLoading && canRead);
   const categories = supportPickers.categories;
@@ -120,24 +123,30 @@ export const IncomesPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Soft-delete this income? It will leave the list.")) {
-      return;
-    }
-    setBusyId(id);
-    incomesApi.setError(null);
-    try {
-      await incomesApi.deleteIncome(id);
-      if (editing?.id === id) {
-        setEditing(null);
-      }
-    } catch (error) {
-      incomesApi.setError(
-        error instanceof ApiError ? error.message : "Could not delete income",
-      );
-    } finally {
-      setBusyId(null);
-    }
+  const handleDelete = (id: string) => {
+    confirm.requestConfirm({
+      title: "Soft-delete this income?",
+      description: "It will leave the list but history stays intact.",
+      confirmLabel: "Delete",
+      variant: "danger",
+      onConfirm: async () => {
+        setBusyId(id);
+        incomesApi.setError(null);
+        try {
+          await incomesApi.deleteIncome(id);
+          if (editing?.id === id) {
+            setEditing(null);
+          }
+        } catch (error) {
+          incomesApi.setError(
+            error instanceof ApiError ? error.message : "Could not delete income",
+          );
+          throw error;
+        } finally {
+          setBusyId(null);
+        }
+      },
+    });
   };
 
   return (
@@ -203,6 +212,18 @@ export const IncomesPage = () => {
             onPageChange={(page) => patchFilters({ page })}
           />
         )}
+
+      <ConfirmModal
+        open={!!confirm.pending}
+        title={confirm.pending?.title ?? ""}
+        description={confirm.pending?.description}
+        confirmLabel={confirm.pending?.confirmLabel}
+        cancelLabel={confirm.pending?.cancelLabel}
+        variant={confirm.pending?.variant}
+        submitting={confirm.submitting}
+        onClose={confirm.closeConfirm}
+        onConfirm={confirm.confirm}
+      />
     </PageFrame>
   );
 };

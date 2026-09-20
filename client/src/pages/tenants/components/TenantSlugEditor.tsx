@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui/Button";
+import { ConfirmModal } from "../../../components/ui/ConfirmModal";
 import { Input } from "../../../components/ui/Input";
-import { Modal } from "../../../components/ui/Modal";
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -117,36 +117,23 @@ export const TenantSlugEditor = ({
         )}
       </div>
 
-      <Modal
+      <ConfirmModal
         open={confirmOpen}
         title="Change company slug?"
-        onClose={() => setConfirmOpen(false)}
-        footer={
-          <div className="flex flex-wrap justify-end gap-2 border-t border-(--fms-border) px-5 py-4">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setConfirmOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              disabled={submitting}
-              onClick={() => void handleConfirmChange()}
-            >
-              {submitting ? "Updating…" : "Change slug"}
-            </Button>
-          </div>
+        description={
+          <>
+            Change the URL slug from{" "}
+            <span className="font-mono text-(--fms-accent)">{currentSlug}</span>{" "}
+            to{" "}
+            <span className="font-mono text-(--fms-accent)">{normalizedDraft}</span>
+            ? Any links or integrations using the old slug will stop working.
+          </>
         }
-      >
-        <p className="text-sm text-(--fms-ink)">
-          Change the URL slug from{" "}
-          <span className="font-mono text-(--fms-accent)">{currentSlug}</span> to{" "}
-          <span className="font-mono text-(--fms-accent)">{normalizedDraft}</span>
-          ? Any links or integrations using the old slug will stop working.
-        </p>
-      </Modal>
+        confirmLabel="Change slug"
+        submitting={submitting}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmChange}
+      />
     </>
   );
 };

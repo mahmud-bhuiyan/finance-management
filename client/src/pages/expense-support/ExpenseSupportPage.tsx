@@ -4,7 +4,10 @@ import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { Button } from "../../components/ui/Button";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 import { useAuth } from "../../hooks/useAuth";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import { ApiError } from "../../lib/api";
 import { PERMISSIONS, roleCan } from "../../lib/permissions";
 import {
@@ -15,8 +18,8 @@ import {
   type SupportItem,
   type SupportKind,
 } from "../../lib/supportData";
-import { SupportItemForm } from "./components/SupportItemForm";
 import { SupportItemList } from "./components/SupportItemList";
+import { SupportItemModal } from "./components/SupportItemModal";
 import { useSupportData } from "./hooks/useSupportData";
 
 export const ExpenseSupportPage = () => {
@@ -27,6 +30,8 @@ export const ExpenseSupportPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editing, setEditing] = useState<SupportItem | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const confirm = useConfirmAction();
   const supportApi = useSupportData(!authLoading && canWrite, kind);
 
   if (authLoading) {
@@ -41,15 +46,21 @@ export const ExpenseSupportPage = () => {
     return <Navigate to="/" replace />;
   }
 
+  const closeFormModal = () => {
+    setEditing(null);
+    setAddOpen(false);
+  };
+
   const handleSubmit = async (payload: CreateSupportPayload) => {
     setSubmitting(true);
     supportApi.setError(null);
     try {
       if (editing) {
         await supportApi.updateItem(editing.id, payload);
-        setEditing(null);
+        closeFormModal();
       } else {
         await supportApi.createItem(payload);
+        closeFormModal();
       }
     } catch (error) {
       supportApi.setError(
@@ -67,16 +78,23 @@ export const ExpenseSupportPage = () => {
     try {
       await action();
       if (editing?.id === id) {
-        setEditing(null);
+        closeFormModal();
       }
     } catch (error) {
       supportApi.setError(
         error instanceof ApiError ? error.message : "Action failed",
       );
+      throw error;
     } finally {
       setBusyId(null);
     }
   };
+
+  const itemLabel = (id: string) =>
+    supportApi.items.find((item) => item.id === id)?.name ??
+    supportKindSingular(kind).toLowerCase();
+
+  const formModalOpen = addOpen || editing !== null;
 
   return (
     <PageFrame>
@@ -93,7 +111,7 @@ export const ExpenseSupportPage = () => {
               type="button"
               onClick={() => {
                 setKind(item);
-                setEditing(null);
+                closeFormModal();
               }}
               className={`rounded-lg px-4 py-2 text-sm font-medium ${
                 kind === item
@@ -108,42 +126,83 @@ export const ExpenseSupportPage = () => {
 
         {supportApi.error && <ErrorBanner message={supportApi.error} />}
 
-        <SupportItemForm
-          kind={kind}
-          submitting={submitting}
-          editing={editing}
-          onSubmit={handleSubmit}
-          onCancelEdit={() => setEditing(null)}
-        />
-
         {supportApi.loading ? (
           <LoadingState message={`Loading ${supportKindLabel(kind).toLowerCase()}…`} />
         ) : (
           <section className="space-y-3">
-            <h2 className="text-lg font-medium text-slate-900">
-              {supportKindLabel(kind)}
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-medium text-slate-900">
+                {supportKindLabel(kind)}
+              </h2>
+              <Button
+                type="button"
+                onClick={() => {
+                  setEditing(null);
+                  setAddOpen(true);
+                }}
+              >
+                Add {supportKindSingular(kind).toLowerCase()}
+              </Button>
+            </div>
             <SupportItemList
               items={supportApi.items}
+              kind={kind}
               busyId={busyId}
-              emptyLabel={`No ${supportKindLabel(kind).toLowerCase()} yet. Add one above.`}
-              onEdit={setEditing}
-              onToggleActive={(id, active) =>
-                runAction(id, () => supportApi.updateItem(id, { active }))
-              }
+              emptyLabel={`No ${supportKindLabel(kind).toLowerCase()} yet.`}
+              onEdit={(item) => {
+                setAddOpen(false);
+                setEditing(item);
+              }}
+              onToggleActive={(id, active) => {
+                const name = itemLabel(id);
+                confirm.requestConfirm({
+                  title: active
+                    ? `Activate ${name}?`
+                    : `Deactivate ${name}?`,
+                  description: active
+                    ? "This item will appear in expense and income pickers again."
+                    : "This item will be hidden from pickers but existing records keep their link.",
+                  confirmLabel: active ? "Activate" : "Deactivate",
+                  variant: active ? "primary" : "danger",
+                  onConfirm: () =>
+                    runAction(id, () => supportApi.updateItem(id, { active })),
+                });
+              }}
               onDelete={(id) => {
-                if (
-                  !window.confirm(
-                    `Soft-delete this ${supportKindSingular(kind).toLowerCase()}? It will leave the list.`,
-                  )
-                ) {
-                  return Promise.resolve();
-                }
-                return runAction(id, () => supportApi.removeItem(id));
+                const name = itemLabel(id);
+                confirm.requestConfirm({
+                  title: `Soft-delete ${name}?`,
+                  description: `This ${supportKindSingular(kind).toLowerCase()} will leave the list but history stays intact.`,
+                  confirmLabel: "Delete",
+                  variant: "danger",
+                  onConfirm: () =>
+                    runAction(id, () => supportApi.removeItem(id)),
+                });
               }}
             />
           </section>
         )}
+
+      <SupportItemModal
+        open={formModalOpen}
+        kind={kind}
+        submitting={submitting}
+        editing={editing}
+        onSubmit={handleSubmit}
+        onClose={closeFormModal}
+      />
+
+      <ConfirmModal
+        open={!!confirm.pending}
+        title={confirm.pending?.title ?? ""}
+        description={confirm.pending?.description}
+        confirmLabel={confirm.pending?.confirmLabel}
+        cancelLabel={confirm.pending?.cancelLabel}
+        variant={confirm.pending?.variant}
+        submitting={confirm.submitting}
+        onClose={confirm.closeConfirm}
+        onConfirm={confirm.confirm}
+      />
     </PageFrame>
   );
 };

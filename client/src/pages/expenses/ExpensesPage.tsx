@@ -4,8 +4,10 @@ import { ErrorBanner } from "../../components/feedback/ErrorBanner";
 import { LoadingState } from "../../components/feedback/LoadingState";
 import { PageFrame } from "../../components/layout/PageFrame";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 import { useActiveSupportPickers } from "../../hooks/useActiveSupportPickers";
 import { useAuth } from "../../hooks/useAuth";
+import { useConfirmAction } from "../../hooks/useConfirmAction";
 import { ApiError } from "../../lib/api";
 import type {
   CreateExpensePayload,
@@ -47,6 +49,7 @@ export const ExpensesPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Expense | null>(null);
+  const confirm = useConfirmAction();
   const expensesApi = useExpenses(!authLoading && canRead, filters);
   const supportPickers = useActiveSupportPickers(!authLoading && canRead);
   const categories = supportPickers.categories;
@@ -120,24 +123,30 @@ export const ExpensesPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Soft-delete this expense? It will leave the list.")) {
-      return;
-    }
-    setBusyId(id);
-    expensesApi.setError(null);
-    try {
-      await expensesApi.deleteExpense(id);
-      if (editing?.id === id) {
-        setEditing(null);
-      }
-    } catch (error) {
-      expensesApi.setError(
-        error instanceof ApiError ? error.message : "Could not delete expense",
-      );
-    } finally {
-      setBusyId(null);
-    }
+  const handleDelete = (id: string) => {
+    confirm.requestConfirm({
+      title: "Soft-delete this expense?",
+      description: "It will leave the list but history stays intact.",
+      confirmLabel: "Delete",
+      variant: "danger",
+      onConfirm: async () => {
+        setBusyId(id);
+        expensesApi.setError(null);
+        try {
+          await expensesApi.deleteExpense(id);
+          if (editing?.id === id) {
+            setEditing(null);
+          }
+        } catch (error) {
+          expensesApi.setError(
+            error instanceof ApiError ? error.message : "Could not delete expense",
+          );
+          throw error;
+        } finally {
+          setBusyId(null);
+        }
+      },
+    });
   };
 
   return (
@@ -203,6 +212,18 @@ export const ExpensesPage = () => {
             onPageChange={(page) => patchFilters({ page })}
           />
         )}
+
+      <ConfirmModal
+        open={!!confirm.pending}
+        title={confirm.pending?.title ?? ""}
+        description={confirm.pending?.description}
+        confirmLabel={confirm.pending?.confirmLabel}
+        cancelLabel={confirm.pending?.cancelLabel}
+        variant={confirm.pending?.variant}
+        submitting={confirm.submitting}
+        onClose={confirm.closeConfirm}
+        onConfirm={confirm.confirm}
+      />
     </PageFrame>
   );
 };
