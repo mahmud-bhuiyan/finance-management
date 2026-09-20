@@ -55,8 +55,8 @@ const cellAlignClass = (align: DataTableColumnAlign = "left") => {
   return "flex justify-start";
 };
 
-const resolveColumnAlign = (
-  column: DataTableColumn<unknown>,
+const resolveColumnAlign = <T,>(
+  column: DataTableColumn<T>,
   target: "header" | "cell",
 ): DataTableColumnAlign => {
   if (target === "header") {
