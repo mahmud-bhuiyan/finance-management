@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentMethod } from "@prisma/client";
+import { PaymentMethod } from "#prisma/client";
 
 const dateOnlySchema = z
   .string()

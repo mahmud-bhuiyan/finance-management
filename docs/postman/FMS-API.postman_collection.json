@@ -232,6 +232,72 @@
           "response": []
         },
         {
+          "name": "List demo users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Returns users array', function () {",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.users).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auth/demo-users",
+            "description": "Public list of one-click demo accounts for the login page. Returns an empty array when `DEMO_MODE` is disabled on the server."
+          },
+          "response": []
+        },
+        {
+          "name": "Login (demo account)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or demo disabled', function () {",
+                  "  pm.expect([200, 403]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.test('Returns user', function () {",
+                  "    pm.expect(json.data.user.email).to.be.a('string');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"demoLogin\": true,\n  \"rememberMe\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "description": "Passwordless demo login for allowlisted emails when `DEMO_MODE=true`. The server applies `DEMO_PASSWORD` internally — never send a password from the client for demo accounts."
+          },
+          "response": []
+        },
+        {
           "name": "Me",
           "event": [
             {
@@ -293,6 +359,43 @@
             },
             "url": "{{baseUrl}}/api/v1/auth/me/theme",
             "description": "Updates the authenticated user's theme preference (`LIGHT` or `DARK`). Requires session cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Update sidebar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns updated sidebar preference', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  pm.expect(json.data.user.sidebarCollapsed).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sidebarCollapsed\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/me/sidebar",
+            "description": "Updates the authenticated user's sidebar collapsed preference. Requires session cookie."
           },
           "response": []
         },

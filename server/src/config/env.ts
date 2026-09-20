@@ -18,6 +18,19 @@ const envSchema = z.object({
   SUPER_ADMIN_EMAIL: z.string().optional(),
   SUPER_ADMIN_PASSWORD: z.string().optional(),
   SUPER_ADMIN_NAME: z.string().optional(),
+  DEMO_MODE: z
+    .union([z.boolean(), z.enum(["true", "false", "1", "0"])])
+    .optional()
+    .transform((value) => {
+      if (value === undefined) {
+        return false;
+      }
+      if (typeof value === "boolean") {
+        return value;
+      }
+      return value === "true" || value === "1";
+    }),
+  DEMO_PASSWORD: z.string().optional(),
   UPLOAD_DIR: z.string().default("./uploads"),
   UPLOAD_MAX_BYTES: z.coerce.number().int().positive().default(5 * 1024 * 1024),
   UPLOAD_MAX_PER_EXPENSE: z.coerce.number().int().positive().max(20).default(5),

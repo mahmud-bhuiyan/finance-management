@@ -7,6 +7,7 @@ import { API_PREFIX } from "./config/api.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { ensureSuperAdmin } from "./services/bootstrapService.js";
+import { ensureDemoAccounts } from "./services/demoBootstrapService.js";
 
 export const createApp = () => {
   const app = express();
@@ -42,9 +43,11 @@ const app = createApp();
 
 // Seed the default Super Admin once at startup; tests bootstrap their own data.
 if (env.NODE_ENV !== "test") {
-  void ensureSuperAdmin().catch((error) => {
-    console.error("Super Admin bootstrap failed:", error);
-  });
+  void ensureSuperAdmin()
+    .then(() => ensureDemoAccounts())
+    .catch((error) => {
+      console.error("Account bootstrap failed:", error);
+    });
 }
 
 export default app;

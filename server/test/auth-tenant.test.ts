@@ -91,6 +91,47 @@ describe("FMS-10 auth, tenant isolation, permission denial", () => {
     expect(meAgain.body.data.user.themePreference).toBe("DARK");
   });
 
+  it("updates and persists the current user sidebar preference", async () => {
+    const email = `${unique("sidebar")}@test.local`;
+    const password = "password123";
+
+    await request(app).post(api("/auth/register")).send({
+      email,
+      password,
+      name: "Sidebar User",
+    });
+
+    const agent = await login(email, password);
+
+    const me = await agent.get(api("/auth/me"));
+    expect(me.status).toBe(200);
+    expect(me.body.data.user.sidebarCollapsed).toBe(false);
+
+    const updated = await agent
+      .patch(api("/auth/me/sidebar"))
+      .send({ sidebarCollapsed: true });
+    expect(updated.status).toBe(200);
+    expect(updated.body.data.user.sidebarCollapsed).toBe(true);
+
+    const meAgain = await agent.get(api("/auth/me"));
+    expect(meAgain.status).toBe(200);
+    expect(meAgain.body.data.user.sidebarCollapsed).toBe(true);
+  });
+
+  it("lists demo users and rejects demo login when demo mode is disabled", async () => {
+    const demoUsers = await request(app).get(api("/auth/demo-users"));
+    expect(demoUsers.status).toBe(200);
+    expect(demoUsers.body.success).toBe(true);
+    expect(demoUsers.body.data.users).toEqual([]);
+
+    const demoLogin = await request(app).post(api("/auth/login")).send({
+      email: "superadmin@fms.test",
+      demoLogin: true,
+    });
+    expect(demoLogin.status).toBe(403);
+    expect(demoLogin.body.error.code).toBe("DEMO_DISABLED");
+  });
+
   it("rejects invalid credentials and missing sessions", async () => {
     const email = `${unique("bad")}@test.local`;
     await request(app).post(api("/auth/register")).send({

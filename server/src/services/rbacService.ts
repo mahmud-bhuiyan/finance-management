@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "#prisma/client";
 import { getPermissionsForRole } from "../config/permissions.js";
 
 type RbacUser = {

@@ -1,11 +1,10 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 /// Placeholder model for Step 01 connectivity check.
@@ -102,8 +101,9 @@ model User {
   name         String?
   role         UserRole   @default(NORMAL_USER)
   status           UserStatus @default(ACTIVE)
-  themePreference  UserTheme  @default(LIGHT) @map("theme_preference")
-  tenantId         String?    @map("tenant_id")
+  themePreference   UserTheme @default(LIGHT) @map("theme_preference")
+  sidebarCollapsed  Boolean   @default(false) @map("sidebar_collapsed")
+  tenantId          String?   @map("tenant_id")
   tenant       Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")

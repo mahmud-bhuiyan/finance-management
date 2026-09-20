@@ -1,4 +1,4 @@
-import type { AuditAction, Prisma, UserRole } from "@prisma/client";
+import type { AuditAction, Prisma, UserRole } from "#prisma/client";
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
 import type { ListAuditLogsInput } from "../validators/auditValidators.js";

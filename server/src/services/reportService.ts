@@ -4,7 +4,7 @@ import {
   TransactionType,
   type FieldDefinition,
   type UserRole,
-} from "@prisma/client";
+} from "#prisma/client";
 import ExcelJS from "exceljs";
 import PDFDocument from "pdfkit";
 import { prisma } from "../config/prisma.js";

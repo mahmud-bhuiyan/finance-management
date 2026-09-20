@@ -14,6 +14,7 @@ export type AuthUser = {
   role: string;
   status?: string;
   themePreference: "LIGHT" | "DARK";
+  sidebarCollapsed: boolean;
   tenantId: string | null;
   tenant: {
     id: string;
@@ -28,7 +29,12 @@ export type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+    demoLogin?: boolean,
+  ) => Promise<void>;
   register: (input: {
     email: string;
     password: string;
@@ -72,14 +78,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email,
       password,
       rememberMe,
+      demoLogin,
     }: {
       email: string;
       password: string;
       rememberMe: boolean;
+      demoLogin: boolean;
     }) =>
       apiFetch<{ user: AuthUser }>("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password, rememberMe }),
+        body: JSON.stringify({ email, password, rememberMe, demoLogin }),
       }),
     onSuccess: (data) => {
       queryClient.setQueryData(authQueryKeys.me(), data.user);
@@ -112,8 +120,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string,
     password: string,
     rememberMe = false,
+    demoLogin = false,
   ) => {
-    await loginMutation.mutateAsync({ email, password, rememberMe });
+    await loginMutation.mutateAsync({ email, password, rememberMe, demoLogin });
   };
 
   const register = async (input: {

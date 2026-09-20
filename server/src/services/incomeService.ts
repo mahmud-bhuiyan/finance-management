@@ -5,8 +5,8 @@ import type {
   FinancialTransaction,
   UserRole,
   Vendor,
-} from "@prisma/client";
-import { Prisma } from "@prisma/client";
+} from "#prisma/client";
+import { Prisma } from "#prisma/client";
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
 import { writeAuditLog } from "./auditService.js";

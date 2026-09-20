@@ -1,4 +1,4 @@
-import { Prisma, TransactionType } from "@prisma/client";
+import { Prisma, TransactionType } from "#prisma/client";
 import { prisma } from "../config/prisma.js";
 import { paymentMethodLabel } from "../constants/paymentMethods.js";
 import type { DashboardSummaryQuery } from "../validators/dashboardValidators.js";
