@@ -1,118 +1,187 @@
-# Finance Management System (PERN)
+# Finance Management System
 
-Multi-tenant configurable finance platform.  
-See plan: [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md)
+A multi-tenant finance platform for managing income, expenses, and reporting. Organizations configure their own data model through a dynamic field engine—adding custom fields without schema changes or redeployments.
 
-## Stack (Step 01)
+Built as a full-stack **PERN** application (PostgreSQL, Express, React, Node.js) with tenant isolation, role-based access control, audit logging, and exportable reports.
 
-- **PostgreSQL** + **Prisma**
-- **Express** (TypeScript) in `server/` — `routes` / `controllers` / `services` / `middleware`
-- **React** + **Vite** + **Tailwind CSS** + **TanStack React Query** in `client/`
-- HTTP API prefix: `/api/v1/`
+---
 
-## Quick start
+## Features
+
+- **Multi-tenant architecture** — isolated data per organization with Super Admin oversight
+- **Role-based access control** — Super Admin, Company Admin, and read-only user roles
+- **Dynamic field engine** — define custom fields per tenant; render in forms and tables automatically
+- **Expense & income management** — shared transaction model with categories, vendors, attachments, and filters
+- **Dashboard & reporting** — KPIs, charts, and exports to CSV, Excel, and PDF
+- **Audit trail** — immutable log of create, update, and delete actions
+- **User & tenant administration** — company lifecycle, user management, and access controls
+- **Theme support** — light and dark mode per user preference
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Server | Node.js, Express, TypeScript |
+| Client | React, Vite, Tailwind CSS |
+| Data fetching | TanStack React Query |
+| Validation | Zod |
+| Authentication | JWT (httpOnly cookie) |
+| Charts | Recharts |
+
+All HTTP routes are versioned under **`/api/v1/`**.
+
+---
+
+## Prerequisites
+
+- **Node.js** 20 or later
+- **PostgreSQL** 14 or later
+- **npm**
+
+---
+
+## Getting Started
 
 ### 1. Database
 
-Create a Postgres database named `fms_dev` (or update `server/.env.local`).
+Create a PostgreSQL database (default name: `fms_dev`):
+
+```bash
+psql -U postgres -c "CREATE DATABASE fms_dev;"
+```
 
 ### 2. Server
 
 ```bash
 cd server
-cp .env.local.example .env.local   # if needed; edit DATABASE_URL
+cp .env.local.example .env.local   # edit DATABASE_URL and secrets
 npm install
 npx prisma generate
 npm run prisma:migrate
 npm run dev
 ```
 
-API: http://localhost:4000  
-Health: http://localhost:4000/health
+The API listens at **http://localhost:4000**.  
+Health check: **http://localhost:4000/health**
 
 ### 3. Client
 
 ```bash
 cd client
-cp .env.example .env   # leave VITE_API_URL empty locally
+cp .env.example .env   # leave VITE_API_URL empty for local development
 npm install
 npm run dev
 ```
 
-App: http://localhost:5173
+The application is available at **http://localhost:5173**.
 
-Locally the client calls `/api/v1` and Vite proxies to the server. In production (cross-origin), set `client/.env` `VITE_API_URL` to the API origin (no trailing slash) and set `server/.env.local` `CLIENT_URL` to the deployed SPA origin.
+Locally, the client calls `/api/v1` and Vite proxies requests to the server. For production (cross-origin deployment), set `VITE_API_URL` in `client/.env` to the API origin (no trailing slash) and `CLIENT_URL` in `server/.env.local` to the deployed SPA origin.
 
-Env files: **`server/.env.local`** (secrets) and **`client/.env`** (public `VITE_*` only).
+---
 
-## Manual tests
+## Configuration
 
-- Step 01: [`docs/manual-test-guides/step-01-project-scaffold.md`](docs/manual-test-guides/step-01-project-scaffold.md) · [PDF](docs/manual-test-guides/step-01-project-scaffold.pdf)
-- Step 02: [`docs/manual-test-guides/step-02-auth.md`](docs/manual-test-guides/step-02-auth.md) · [PDF](docs/manual-test-guides/step-02-auth.pdf)
-- Step 03: [`docs/manual-test-guides/step-03-tenants.md`](docs/manual-test-guides/step-03-tenants.md) · [PDF](docs/manual-test-guides/step-03-tenants.pdf)
-- Step 04: [`docs/manual-test-guides/step-04-rbac.md`](docs/manual-test-guides/step-04-rbac.md) · [PDF](docs/manual-test-guides/step-04-rbac.pdf)
-- Step 05: [`docs/manual-test-guides/step-05-audit.md`](docs/manual-test-guides/step-05-audit.md) · [PDF](docs/manual-test-guides/step-05-audit.pdf)
-- Step 06: [`docs/manual-test-guides/step-06-dynamic-fields-api.md`](docs/manual-test-guides/step-06-dynamic-fields-api.md) · [PDF](docs/manual-test-guides/step-06-dynamic-fields-api.pdf)
-- Step 07: [`docs/manual-test-guides/step-07-dynamic-fields-ui.md`](docs/manual-test-guides/step-07-dynamic-fields-ui.md) · [PDF](docs/manual-test-guides/step-07-dynamic-fields-ui.pdf)
-- Step 08: [`docs/manual-test-guides/step-08-expense-core.md`](docs/manual-test-guides/step-08-expense-core.md) · [PDF](docs/manual-test-guides/step-08-expense-core.pdf)
-- Step 09: [`docs/manual-test-guides/step-09-expense-support-data.md`](docs/manual-test-guides/step-09-expense-support-data.md) · [PDF](docs/manual-test-guides/step-09-expense-support-data.pdf)
-- Step 10: [`docs/manual-test-guides/step-10-attachments-list-ux.md`](docs/manual-test-guides/step-10-attachments-list-ux.md) · [PDF](docs/manual-test-guides/step-10-attachments-list-ux.pdf)
-- Step 11: [`docs/manual-test-guides/step-11-thin-dashboard.md`](docs/manual-test-guides/step-11-thin-dashboard.md) · [PDF](docs/manual-test-guides/step-11-thin-dashboard.pdf)
-- Step 12: [`docs/manual-test-guides/step-12-full-dashboard.md`](docs/manual-test-guides/step-12-full-dashboard.md) · [PDF](docs/manual-test-guides/step-12-full-dashboard.pdf)
-- Step 13: [`docs/manual-test-guides/step-13-reporting.md`](docs/manual-test-guides/step-13-reporting.md) · [PDF](docs/manual-test-guides/step-13-reporting.pdf)
-- Step 14: [`docs/manual-test-guides/step-14-income-module.md`](docs/manual-test-guides/step-14-income-module.md) · [PDF](docs/manual-test-guides/step-14-income-module.pdf)
-- Step 15: [`docs/manual-test-guides/step-15-report-excel-pdf.md`](docs/manual-test-guides/step-15-report-excel-pdf.md) · [PDF](docs/manual-test-guides/step-15-report-excel-pdf.pdf)
-- Step 16: [`docs/manual-test-guides/step-16-tenant-users.md`](docs/manual-test-guides/step-16-tenant-users.md) · [PDF](docs/manual-test-guides/step-16-tenant-users.pdf)
-- Step 17: [`docs/manual-test-guides/step-17-admin-shell.md`](docs/manual-test-guides/step-17-admin-shell.md) · [PDF](docs/manual-test-guides/step-17-admin-shell.pdf)
-- Step 18: [`docs/manual-test-guides/step-18-automated-tests.md`](docs/manual-test-guides/step-18-automated-tests.md) · [PDF](docs/manual-test-guides/step-18-automated-tests.pdf)
-- Step 19: [`docs/manual-test-guides/step-19-user-theme.md`](docs/manual-test-guides/step-19-user-theme.md) · [PDF](docs/manual-test-guides/step-19-user-theme.pdf)
+Environment files:
 
-## Postman (API)
+| File | Purpose |
+|------|---------|
+| `server/.env.local` | Server secrets and configuration (not committed) |
+| `client/.env` | Public client variables (`VITE_*` only) |
 
-- Cloud: **FMS API (v1)** in Postman (IDs in [`docs/postman/SYNC.md`](docs/postman/SYNC.md))
-- Git: [`docs/postman/FMS-API.postman_collection.json`](docs/postman/FMS-API.postman_collection.json) (import if needed)
-- How-to: [`docs/postman/README.md`](docs/postman/README.md)
+Copy from the provided `.example` files and adjust values for your environment.
 
-Start the server first (`cd server && npm run dev`). When APIs change, update the JSON **and** the cloud collection (if Postman MCP is connected), and leave a short collection comment.
+### Server (`server/.env.local`)
 
-## Auth env (Step 02)
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `PORT` | API port (default: `4000`) |
+| `CLIENT_URL` | SPA origin for CORS (default: `http://localhost:5173`) |
+| `JWT_SECRET` | Signing key for auth tokens (minimum 32 characters) |
+| `JWT_EXPIRES_IN` | Token lifetime (default: `7d`) |
+| `SUPER_ADMIN_EMAIL` | Bootstrap Super Admin account email |
+| `SUPER_ADMIN_PASSWORD` | Bootstrap Super Admin password |
+| `SUPER_ADMIN_NAME` | Display name for the Super Admin (optional) |
+| `UPLOAD_DIR` | Local directory for file attachments |
+| `UPLOAD_MAX_BYTES` | Maximum upload size per file |
+| `DEMO_MODE` | Enable demo login shortcuts on the login page |
 
-In `server/.env.local` set `JWT_SECRET` (min 32 characters). Copy keys from `server/.env.local.example` if needed.
+On first startup, the server creates the Super Admin account if the configured email does not already exist.
 
-## Super Admin env (Step 03)
+### Client (`client/.env`)
 
-In `server/.env.local` set:
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | API origin for production; leave empty locally to use the Vite proxy |
 
-- `SUPER_ADMIN_EMAIL`
-- `SUPER_ADMIN_PASSWORD` (min 8 characters)
-- `SUPER_ADMIN_NAME` (optional)
+---
 
-On `npm run dev`, the API creates that Super Admin if the email does not exist yet. Default examples in `.env.local.example`: `superadmin@fms.local` / `password123`.
-
-## Automated tests (Step 18)
-
-From `server/`:
-
-```bash
-npm test
-```
-
-Runs Vitest against database `fms_test` (created automatically). If local Postgres is down, an embedded cluster is started for the run. Dev data in `fms_dev` is not truncated.
-
-## Project layout
+## Project Structure
 
 ```text
 finance-management/
-  server/src/{routes,controllers,services,middleware,validators,config,utils}
-  client/src/
-    pages/<page>/{Page.tsx,components/,hooks/}   # page-owned UI + hooks
-    components/{ui,feedback,layout,forms}/       # shared, sorted by role
-    hooks/                                       # shared hooks only
-    lib/                                         # api client, queryClient, helpers
-  docs/manual-test-guides/                       # MD + PDF per step
-  docs/postman/                                  # Importable Postman collection
+├── server/
+│   ├── src/
+│   │   ├── routes/          # HTTP route definitions
+│   │   ├── controllers/     # Request/response handling
+│   │   ├── services/        # Business logic
+│   │   ├── middleware/      # Auth, RBAC, error handling
+│   │   ├── validators/      # Zod schemas
+│   │   └── config/          # App configuration
+│   └── prisma/              # Schema and migrations
+├── client/
+│   └── src/
+│       ├── pages/           # Route-level views (components + hooks per page)
+│       ├── components/      # Shared UI (ui, feedback, layout, forms)
+│       ├── hooks/           # Shared React hooks
+│       └── lib/             # API client, query client, utilities
+└── docs/                    # Implementation plan and API collection
 ```
 
-See coding rules in [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md) §3–4 and `.cursor/rules/` (`project-conventions`, `server-structure`, `client-structure`).
+The codebase uses **`server/`** and **`client/`** as top-level application folders. HTTP APIs are served exclusively under **`/api/v1/`**.
 
-Folders are **`server/`** and **`client/`**. HTTP APIs live under **`/api/v1/`**.
+---
+
+## API Reference
+
+A Postman collection documents all `/api/v1` endpoints:
+
+- **Git:** [`docs/postman/FMS-API.postman_collection.json`](docs/postman/FMS-API.postman_collection.json)
+- **Setup guide:** [`docs/postman/README.md`](docs/postman/README.md)
+
+Authentication uses an httpOnly session cookie (`fms_token`). Log in through the API or the web application before calling protected endpoints.
+
+Default base URL: `http://localhost:4000/api/v1`
+
+---
+
+## Development Scripts
+
+### Server (`server/`)
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the API with hot reload |
+| `npm run build` | Compile TypeScript |
+| `npm start` | Run the compiled server |
+| `npm run prisma:migrate` | Apply database migrations |
+| `npm run prisma:studio` | Open Prisma Studio |
+
+### Client (`client/`)
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Run the linter |
+
+---
+
+## Documentation
+
+For architecture decisions, coding conventions, and the full implementation roadmap, see [`docs/FMS-IMPLEMENTATION-PLAN.md`](docs/FMS-IMPLEMENTATION-PLAN.md).
