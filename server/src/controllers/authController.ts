@@ -1,9 +1,11 @@
 import type { CookieOptions, RequestHandler } from "express";
 import { env } from "../config/env.js";
+import { listDemoUsers } from "../config/demoUsers.js";
 import {
   getUserById,
   loginUser,
   registerUser,
+  updateUserSidebar,
   updateUserTheme,
 } from "../services/authService.js";
 import { AppError } from "../utils/AppError.js";
@@ -11,6 +13,7 @@ import { sendSuccess } from "../utils/apiResponse.js";
 import {
   loginSchema,
   registerSchema,
+  updateSidebarSchema,
   updateThemeSchema,
 } from "../validators/authValidators.js";
 
@@ -29,6 +32,10 @@ const cookieOptions = (rememberMe = true): CookieOptions => ({
   ...baseCookieOptions(),
   ...(rememberMe ? { maxAge: env.JWT_COOKIE_MAX_AGE_MS } : {}),
 });
+
+export const listDemoAccounts: RequestHandler = (_req, res) => {
+  sendSuccess(res, 200, { users: listDemoUsers() }, "Demo accounts loaded");
+};
 
 export const register: RequestHandler = async (req, res, next) => {
   try {
@@ -86,6 +93,20 @@ export const updateTheme: RequestHandler = async (req, res, next) => {
     const body = updateThemeSchema.parse(req.body);
     const user = await updateUserTheme(req.user.id, body.themePreference);
     sendSuccess(res, 200, { user }, "Theme preference updated");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateSidebar: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401, "UNAUTHORIZED");
+    }
+
+    const body = updateSidebarSchema.parse(req.body);
+    const user = await updateUserSidebar(req.user.id, body.sidebarCollapsed);
+    sendSuccess(res, 200, { user }, "Sidebar preference updated");
   } catch (error) {
     next(error);
   }

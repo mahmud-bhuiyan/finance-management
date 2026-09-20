@@ -1,5 +1,11 @@
 import type { ChangeEvent } from "react";
-import { Button } from "../../../components/ui/Button";
+import {
+  DeleteIcon,
+  DownloadIcon,
+  IconActionButton,
+} from "../../../components/ui/ActionIcons";
+import { ConfirmModal } from "../../../components/ui/ConfirmModal";
+import { useConfirmAction } from "../../../hooks/useConfirmAction";
 import { useIncomeAttachments } from "../hooks/useIncomeAttachments";
 
 type IncomeAttachmentsProps = {
@@ -23,6 +29,7 @@ export const IncomeAttachments = ({
 }: IncomeAttachmentsProps) => {
   const { attachments, loading, busy, error, upload, remove, download } =
     useIncomeAttachments(incomeId);
+  const confirm = useConfirmAction();
 
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -38,16 +45,21 @@ export const IncomeAttachments = ({
     }
   };
 
-  const handleDelete = async (attachmentId: string) => {
-    if (!window.confirm("Remove this attachment?")) {
-      return;
-    }
-
-    try {
-      await remove(attachmentId);
-    } catch {
-      // Error message is shown from hook state.
-    }
+  const handleDeleteRequest = (attachmentId: string, fileName: string) => {
+    confirm.requestConfirm({
+      title: "Remove this attachment?",
+      description: (
+        <>
+          <strong className="font-medium text-(--fms-ink)">{fileName}</strong>{" "}
+          will be permanently removed from this income.
+        </>
+      ),
+      confirmLabel: "Remove",
+      variant: "danger",
+      onConfirm: async () => {
+        await remove(attachmentId);
+      },
+    });
   };
 
   return (
@@ -92,29 +104,45 @@ export const IncomeAttachments = ({
                   {attachment.mimeType} · {formatBytes(attachment.sizeBytes)}
                 </p>
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
+              <div className="flex items-center gap-1">
+                <IconActionButton
+                  label="Download attachment"
                   onClick={() => void download(attachment)}
-                  className="font-medium text-teal-800 hover:underline"
                 >
-                  Download
-                </button>
+                  <DownloadIcon />
+                </IconActionButton>
                 {canWrite && (
-                  <Button
-                    variant="danger"
+                  <IconActionButton
+                    label="Remove attachment"
+                    tone="rose"
                     disabled={busy}
-                    onClick={() => void handleDelete(attachment.id)}
-                    className="px-3 py-1"
+                    onClick={() =>
+                      handleDeleteRequest(
+                        attachment.id,
+                        attachment.originalName,
+                      )
+                    }
                   >
-                    Remove
-                  </Button>
+                    <DeleteIcon />
+                  </IconActionButton>
                 )}
               </div>
             </li>
           ))}
         </ul>
       )}
+
+      <ConfirmModal
+        open={!!confirm.pending}
+        title={confirm.pending?.title ?? ""}
+        description={confirm.pending?.description}
+        confirmLabel={confirm.pending?.confirmLabel}
+        cancelLabel={confirm.pending?.cancelLabel}
+        variant={confirm.pending?.variant}
+        submitting={confirm.submitting}
+        onClose={confirm.closeConfirm}
+        onConfirm={confirm.confirm}
+      />
     </div>
   );
 };

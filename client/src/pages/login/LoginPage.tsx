@@ -26,11 +26,15 @@ export const LoginPage = () => {
         email={form.email}
         password={form.password}
         rememberMe={form.rememberMe}
+        demoAccounts={form.demoAccounts}
+        isDemoLogin={form.isDemoLogin}
+        selectedDemoEmail={form.selectedDemoEmail}
         error={form.error}
         submitting={form.submitting}
         onEmailChange={form.setEmail}
         onPasswordChange={form.setPassword}
         onRememberMeChange={form.setRememberMe}
+        onDemoAccountSelect={form.selectDemoAccount}
         onSubmit={form.onSubmit}
       />
     </AuthScreen>

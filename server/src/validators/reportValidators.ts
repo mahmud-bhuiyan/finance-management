@@ -1,4 +1,4 @@
-import { PaymentMethod } from "@prisma/client";
+import { PaymentMethod } from "#prisma/client";
 import { z } from "zod";
 import { dashboardPresetSchema } from "./dashboardValidators.js";
 

@@ -1,4 +1,4 @@
-import type { User, UserRole, UserStatus } from "@prisma/client";
+import type { User, UserRole, UserStatus } from "#prisma/client";
 import { prisma } from "../config/prisma.js";
 import { writeAuditLog } from "./auditService.js";
 import { AppError } from "../utils/AppError.js";

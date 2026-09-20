@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui/Button";
+import { ConfirmModal } from "../../../components/ui/ConfirmModal";
 import { Input } from "../../../components/ui/Input";
-import { Modal } from "../../../components/ui/Modal";
 
 type TenantNameEditorProps = {
   currentName: string;
@@ -96,35 +96,23 @@ export const TenantNameEditor = ({
         )}
       </div>
 
-      <Modal
+      <ConfirmModal
         open={confirmOpen}
         title="Change company name?"
-        onClose={() => setConfirmOpen(false)}
-        footer={
-          <div className="flex flex-wrap justify-end gap-2 border-t border-(--fms-border) px-5 py-4">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setConfirmOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              disabled={submitting}
-              onClick={() => void handleConfirmChange()}
-            >
-              {submitting ? "Updating…" : "Change name"}
-            </Button>
-          </div>
+        description={
+          <>
+            Change the company name from{" "}
+            <span className="font-medium text-(--fms-accent)">{currentName}</span>{" "}
+            to{" "}
+            <span className="font-medium text-(--fms-accent)">{trimmedDraft}</span>
+            ?
+          </>
         }
-      >
-        <p className="text-sm text-(--fms-ink)">
-          Change the company name from{" "}
-          <span className="font-medium text-(--fms-accent)">{currentName}</span> to{" "}
-          <span className="font-medium text-(--fms-accent)">{trimmedDraft}</span>?
-        </p>
-      </Modal>
+        confirmLabel="Change name"
+        submitting={submitting}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmChange}
+      />
     </>
   );
 };

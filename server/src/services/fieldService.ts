@@ -1,5 +1,5 @@
-import type { FieldDefinition } from "@prisma/client";
-import { Prisma } from "@prisma/client";
+import type { FieldDefinition } from "#prisma/client";
+import { Prisma } from "#prisma/client";
 import { prisma } from "../config/prisma.js";
 import { writeAuditLog } from "./auditService.js";
 import { AppError } from "../utils/AppError.js";

@@ -4,9 +4,9 @@ import { FieldDefinitionCard } from "./FieldDefinitionCard";
 type FieldDefinitionListProps = {
   fields: FieldDefinition[];
   busyId: string | null;
-  onToggleEnabled: (id: string, enabled: boolean) => Promise<void>;
+  onToggleEnabled: (id: string, enabled: boolean) => void;
   onMove: (id: string, direction: "up" | "down") => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
   onUpdateLabel: (id: string, label: string) => Promise<void>;
 };
 

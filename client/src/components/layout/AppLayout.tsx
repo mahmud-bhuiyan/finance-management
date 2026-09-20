@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useSidebar } from "../../hooks/useSidebar";
 import { LoadingState } from "../feedback/LoadingState";
 import { AppAtmosphere } from "./AppAtmosphere";
 import { AppTopbar } from "./AppTopbar";
@@ -8,6 +9,7 @@ import { Sidebar } from "./Sidebar";
 
 export const AppLayout = () => {
   const { user, loading, logout } = useAuth();
+  const { sidebarCollapsed } = useSidebar();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   if (loading) {
@@ -43,11 +45,16 @@ export const AppLayout = () => {
           </div>
         ) : null}
 
-        <aside className="surface fixed inset-y-2 left-2 z-20 hidden w-64 overflow-hidden lg:block">
-          <Sidebar user={user} />
+        <aside
+          className={[
+            "surface fixed inset-y-2 left-2 z-20 hidden overflow-hidden transition-[width] duration-200 ease-out lg:block",
+            sidebarCollapsed ? "w-16" : "w-64",
+          ].join(" ")}
+        >
+          <Sidebar user={user} collapsed={sidebarCollapsed} />
         </aside>
 
-        <div className="lg:pl-68">
+        <div className={sidebarCollapsed ? "lg:pl-20" : "lg:pl-68"}>
           <AppTopbar
             user={user}
             onLogout={() => void logout()}

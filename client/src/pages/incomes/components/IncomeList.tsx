@@ -1,4 +1,8 @@
-import { Button } from "../../../components/ui/Button";
+import {
+  DeleteIcon,
+  EditIcon,
+  IconActionButton,
+} from "../../../components/ui/ActionIcons";
 import { Pagination } from "../../../components/ui/Pagination";
 import type { Income, IncomeListMeta } from "../../../lib/incomes";
 import { formatIncomeAmount } from "../../../lib/incomes";
@@ -12,7 +16,7 @@ type IncomeListProps = {
   canWrite: boolean;
   busyId: string | null;
   onEdit: (income: Income) => void;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
   onPageChange: (page: number) => void;
 };
 
@@ -105,23 +109,22 @@ export const IncomeList = ({
                 ))}
                 {canWrite && (
                   <td className="whitespace-nowrap px-4 py-3">
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
+                    <div className="flex items-center gap-1">
+                      <IconActionButton
+                        label="Edit income"
                         disabled={busyId === income.id}
                         onClick={() => onEdit(income)}
-                        className="text-sm font-medium text-teal-800 hover:underline disabled:opacity-50"
                       >
-                        Edit
-                      </button>
-                      <Button
+                        <EditIcon />
+                      </IconActionButton>
+                      <IconActionButton
+                        label="Delete income"
+                        tone="rose"
                         disabled={busyId === income.id}
-                        onClick={() => void onDelete(income.id)}
-                        variant="danger"
-                        className="px-3 py-1"
+                        onClick={() => onDelete(income.id)}
                       >
-                        {busyId === income.id ? "…" : "Delete"}
-                      </Button>
+                        <DeleteIcon />
+                      </IconActionButton>
                     </div>
                   </td>
                 )}

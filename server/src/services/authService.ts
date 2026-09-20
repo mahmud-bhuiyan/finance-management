@@ -1,9 +1,14 @@
-import type { Tenant, User, UserTheme } from "@prisma/client";
+import type { Tenant, User, UserTheme } from "#prisma/client";
 import { prisma } from "../config/prisma.js";
 import { writeAuditLog } from "./auditService.js";
 import { AppError } from "../utils/AppError.js";
 import { signAccessToken } from "../utils/jwt.js";
 import { hashPassword, verifyPassword } from "../utils/password.js";
+import {
+  getDemoPassword,
+  isDemoEmail,
+  isDemoModeEnabled,
+} from "../config/demoUsers.js";
 import type { LoginInput, RegisterInput } from "../validators/authValidators.js";
 
 type UserWithTenant = User & { tenant: Tenant | null };
@@ -25,6 +30,7 @@ export const toPublicUser = (user: UserWithTenant) => ({
   role: user.role,
   status: user.status,
   themePreference: user.themePreference,
+  sidebarCollapsed: user.sidebarCollapsed,
   tenantId: user.tenantId,
   tenant: toPublicTenant(user.tenant),
   createdAt: user.createdAt.toISOString(),
@@ -79,6 +85,22 @@ export const registerUser = async (input: RegisterInput) => {
 
 export const loginUser = async (input: LoginInput) => {
   const email = input.email.toLowerCase();
+  let password = input.password ?? "";
+
+  if (input.demoLogin) {
+    if (!isDemoModeEnabled()) {
+      throw new AppError("Demo login is not available", 403, "DEMO_DISABLED");
+    }
+    if (!isDemoEmail(email)) {
+      throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
+    }
+    const demoPassword = getDemoPassword();
+    if (!demoPassword) {
+      throw new AppError("Demo login is not available", 403, "DEMO_DISABLED");
+    }
+    password = demoPassword;
+  }
+
   const user = await prisma.user.findUnique({
     where: { email },
     include: { tenant: true },
@@ -88,7 +110,7 @@ export const loginUser = async (input: LoginInput) => {
     throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
   }
 
-  const valid = await verifyPassword(input.password, user.passwordHash);
+  const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) {
     throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
   }
@@ -147,6 +169,38 @@ export const updateUserTheme = async (userId: string, themePreference: UserTheme
     tenantId: user.tenantId,
     oldValues: { themePreference: existing.themePreference },
     newValues: { themePreference: user.themePreference },
+  });
+
+  return toPublicUser(user);
+};
+
+export const updateUserSidebar = async (userId: string, sidebarCollapsed: boolean) => {
+  const existing = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { tenant: true },
+  });
+  if (!existing) {
+    throw new AppError("User not found", 404, "USER_NOT_FOUND");
+  }
+
+  if (existing.status === "INACTIVE") {
+    throw new AppError("This account is inactive", 403, "USER_INACTIVE");
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { sidebarCollapsed },
+    include: { tenant: true },
+  });
+
+  await writeAuditLog({
+    actor: { id: user.id, tenantId: user.tenantId },
+    action: "UPDATE",
+    entityType: "User",
+    entityId: user.id,
+    tenantId: user.tenantId,
+    oldValues: { sidebarCollapsed: existing.sidebarCollapsed },
+    newValues: { sidebarCollapsed: user.sidebarCollapsed },
   });
 
   return toPublicUser(user);

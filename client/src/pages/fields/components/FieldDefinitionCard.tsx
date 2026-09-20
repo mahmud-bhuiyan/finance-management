@@ -1,5 +1,14 @@
 import { useState } from "react";
 import { Button } from "../../../components/ui/Button";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  DeleteIcon,
+  DisableIcon,
+  EditIcon,
+  EnableIcon,
+  IconActionButton,
+} from "../../../components/ui/ActionIcons";
 import type { FieldDefinition } from "../../../lib/fields";
 import { fieldTypeLabel } from "../../../lib/fields";
 
@@ -8,9 +17,9 @@ type FieldDefinitionCardProps = {
   index: number;
   total: number;
   busy: boolean;
-  onToggleEnabled: (id: string, enabled: boolean) => Promise<void>;
+  onToggleEnabled: (id: string, enabled: boolean) => void;
   onMove: (id: string, direction: "up" | "down") => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
   onUpdateLabel: (id: string, label: string) => Promise<void>;
 };
 
@@ -103,47 +112,45 @@ export const FieldDefinitionCard = ({
           ) : null}
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="ghost"
+        <div className="flex items-center gap-1">
+          <IconActionButton
+            label="Rename field"
             disabled={busy}
             onClick={() => setEditing(true)}
           >
-            Rename
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
+            <EditIcon />
+          </IconActionButton>
+          <IconActionButton
+            label={field.enabled ? "Disable field" : "Enable field"}
             disabled={busy}
-            onClick={() => void onToggleEnabled(field.id, !field.enabled)}
+            onClick={() => onToggleEnabled(field.id, !field.enabled)}
           >
-            {field.enabled ? "Disable" : "Enable"}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
+            {field.enabled ? <DisableIcon /> : <EnableIcon />}
+          </IconActionButton>
+          <IconActionButton
+            label="Move field up"
+            tone="muted"
             disabled={busy || index === 0}
             onClick={() => void onMove(field.id, "up")}
           >
-            ↑
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
+            <ChevronUpIcon />
+          </IconActionButton>
+          <IconActionButton
+            label="Move field down"
+            tone="muted"
             disabled={busy || index === total - 1}
             onClick={() => void onMove(field.id, "down")}
           >
-            ↓
-          </Button>
-          <Button
-            type="button"
-            variant="danger"
+            <ChevronDownIcon />
+          </IconActionButton>
+          <IconActionButton
+            label="Delete field"
+            tone="rose"
             disabled={busy}
-            onClick={() => void onDelete(field.id)}
+            onClick={() => onDelete(field.id)}
           >
-            Delete
-          </Button>
+            <DeleteIcon />
+          </IconActionButton>
         </div>
       </div>
     </article>

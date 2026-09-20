@@ -2,6 +2,8 @@ export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
 
+export const MIN_PAGE_SIZE = PAGE_SIZE_OPTIONS[0];
+
 export const DEFAULT_PAGE_SIZE: PageSizeOption = 25;
 
 export type PaginationMeta = {

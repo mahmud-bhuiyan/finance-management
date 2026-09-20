@@ -1,4 +1,8 @@
-import { Button } from "../../../components/ui/Button";
+import {
+  IconActionButton,
+  PauseIcon,
+  ReactivateIcon,
+} from "../../../components/ui/ActionIcons";
 import {
   tenantUserRoleLabel,
   type TenantUser,
@@ -96,23 +100,23 @@ export const UserList = ({
                 <td className="px-4 py-3">
                   {isSelf ? (
                     <span className="text-xs text-slate-500">—</span>
-                  ) : (
-                    <Button
-                      type="button"
+                  ) : isActive ? (
+                    <IconActionButton
+                      label="Deactivate user"
+                      tone="rose"
                       disabled={busy}
-                      onClick={() =>
-                        onChangeStatus(
-                          user.id,
-                          isActive ? "INACTIVE" : "ACTIVE",
-                        )
-                      }
+                      onClick={() => onChangeStatus(user.id, "INACTIVE")}
                     >
-                      {busy
-                        ? "…"
-                        : isActive
-                          ? "Deactivate"
-                          : "Reactivate"}
-                    </Button>
+                      <PauseIcon />
+                    </IconActionButton>
+                  ) : (
+                    <IconActionButton
+                      label="Reactivate user"
+                      disabled={busy}
+                      onClick={() => onChangeStatus(user.id, "ACTIVE")}
+                    >
+                      <ReactivateIcon />
+                    </IconActionButton>
                   )}
                 </td>
               </tr>
